@@ -100,3 +100,5 @@ select.fitness-input {
 /* Table styling for performance logs */
 .custom-table tr:last-child td:first-child { border-bottom-left-radius: 24px; }
 .custom-table tr:last-child td:last-child { border-bottom-right-radius: 24px; }
+
+
