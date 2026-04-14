@@ -100,7 +100,7 @@ export default function Home() {
         <div style={styles.brandIcon}>P</div>
 
         <h1 style={styles.title} className="main-title">
-          PATHFit <span style={{ color: '#039be5' }}>Pro</span>
+          PATHFit <span style={{ color: '#039be5' }}>Access System</span>
         </h1>
 
         <p style={styles.description}>
