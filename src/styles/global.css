@@ -1,0 +1,88 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    /* Firebase Background Gray */
+    @apply bg-[#f4f7f9] text-[#202124] font-['Inter',_sans-serif] antialiased;
+  }
+}
+
+@layer components {
+  /* --- LAYOUT COMPONENTS --- */
+  
+  /* Firebase Navy Sidebar */
+  .sidebar-container {
+    @apply bg-[#051e34] text-[#eceff1] w-64 min-h-screen flex flex-col shadow-xl;
+  }
+
+  .sidebar-item {
+    @apply flex items-center gap-3 px-4 py-3 transition-colors duration-200 cursor-pointer text-sm font-medium border-l-4 border-transparent hover:bg-[#ffffff0d];
+  }
+
+  .sidebar-item-active {
+    @apply bg-[#ffffff1a] border-l-4 border-amber-400 text-white;
+  }
+
+  /* --- UI COMPONENTS --- */
+
+  /* Firebase-style White Card */
+  .fb-card {
+    @apply bg-white border border-gray-200 rounded-sm shadow-sm overflow-hidden;
+  }
+
+  .fb-card-header {
+    @apply px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center;
+  }
+
+  /* Firebase Primary Blue Button */
+  .btn-primary {
+    @apply bg-[#039be5] hover:bg-[#0288d1] disabled:bg-gray-400 text-white px-4 py-2 rounded-sm text-sm font-semibold transition-all shadow-sm active:shadow-inner uppercase tracking-wider mt-2;
+  }
+
+  /* Firebase Grey Outline Button */
+  .btn-secondary {
+    @apply bg-transparent border border-gray-300 text-gray-600 hover:bg-gray-50 px-4 py-2 rounded-sm text-sm font-medium transition-all;
+  }
+
+  /* Standard Input Field */
+  .fb-input {
+    @apply border border-gray-300 bg-white rounded-sm p-2 text-sm outline-none transition-all focus:border-[#039be5] focus:ring-1 focus:ring-[#039be5] placeholder:text-gray-400 w-full;
+  }
+
+  /* --- DATA COMPONENTS --- */
+
+  /* Instructor Table */
+  .fb-table-header {
+    @apply bg-gray-50 border-b border-gray-200 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-6 py-3;
+  }
+
+  .fb-table-row {
+    @apply border-b border-gray-100 hover:bg-blue-50/30 transition-colors;
+  }
+
+  /* Status Badges */
+  .badge {
+    @apply px-2 py-1 rounded-full text-[10px] font-bold uppercase;
+  }
+  
+  .badge-excellent { @apply bg-green-100 text-green-700; }
+  .badge-fair { @apply bg-amber-100 text-amber-700; }
+  .badge-poor { @apply bg-red-100 text-red-700; }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 rounded-full hover:bg-gray-400;
+}
