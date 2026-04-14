@@ -8,8 +8,7 @@ export default function Home() {
         Welcome to your Fitness Tracker. Please complete your profile to begin your 
         Phase 1 Pre-Test and weekly training logs.
       </p>
-      
-      <Link href="/profile">
+      <Link href="/login">
         <button className="btn-primary">
           Get Started: Set Up Profile
         </button>
