@@ -1,10 +1,8 @@
 import { useState } from 'react';
 import { EXERCISES } from '../../constants/exercises';
-import ExerciseCard from '../../components/dashboard/ExerciseCard';
-import Layout from '../../components/ui/Layout'; 
+import Layout from '../../components/ui/Layout';
 import { supabase } from '../../lib/supabaseClient';
-// Fixed CloudSync to RefreshCw to resolve the build error
-import { CheckCircle2, RefreshCw, Target } from 'lucide-react';
+import { CheckCircle2, RefreshCw, Target, Activity, Dumbbell, ClipboardCheck } from 'lucide-react';
 
 export default function PreTest() {
   const [results, setResults] = useState({});
@@ -41,103 +39,126 @@ export default function PreTest() {
     if (error) {
       alert("Error saving: " + error.message);
     } else {
-      alert("Phase 1 Pre-Test Saved Successfully!");
+      alert("✅ Baseline Assessment Synced Successfully!");
     }
     setIsSubmitting(false);
   };
 
   return (
     <Layout title="Phase 1: Pre-Test Diagnostic">
-      {/* BRANDED HEADER SECTION */}
+      {/* 1. BRANDED NAVY HEADER */}
       <div style={{ 
         background: 'linear-gradient(135deg, #051e34 0%, #0a2e4d 100%)',
-        margin: '-24px -24px 30px -24px', 
-        padding: '40px 24px',
+        margin: '-24px -24px 0 -24px',
+        padding: '40px 24px 60px 24px',
         borderBottom: '4px solid #039be5',
-        position: 'relative',
-        overflow: 'hidden'
       }}>
-        {/* Subtle Wave Effect */}
-        <div style={{
-          position: 'absolute',
-          top: 0, right: 0,
-          width: '200px', height: '200px',
-          background: 'radial-gradient(circle, #039be5 0%, transparent 70%)',
-          opacity: 0.2,
-          filter: 'blur(40px)'
-        }}></div>
+        <div className="flex items-center gap-3 mb-2">
+           <div className="bg-[#039be5] text-white p-2 rounded-lg font-black italic text-sm">P</div>
+           <span className="text-[10px] font-black text-[#039be5] tracking-[0.3em] uppercase">Phase 1 Diagnostic</span>
+        </div>
+        <h1 className="text-3xl font-black text-white italic tracking-tighter">Baseline Assessment</h1>
+      </div>
 
-        <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-2">
-             <div className="bg-[#039be5] text-white p-2 rounded-lg font-black italic text-sm">P</div>
-             <span className="text-[10px] font-black text-[#039be5] tracking-[0.3em] uppercase">Phase 1 Diagnostic</span>
+      {/* 2. INTERACTIVE PERFORMANCE TABLE */}
+      <div style={{ marginTop: '-30px', position: 'relative', zIndex: 10 }}>
+        <div className="bg-white rounded-[2rem] shadow-2xl overflow-hidden border border-gray-100">
+          
+          {/* Table Header */}
+          <div className="bg-gray-50 p-6 border-b border-gray-100 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <ClipboardCheck className="text-[#039be5]" size={20} />
+              <span className="font-black text-[#051e34] uppercase text-xs tracking-widest">Exercise List</span>
+            </div>
+            <span className="text-[10px] font-bold text-gray-400 bg-white px-3 py-1 rounded-full border border-gray-200">
+              3 SETS REQUIRED
+            </span>
           </div>
-          <h1 className="text-3xl font-black text-white italic tracking-tighter">Baseline Assessment</h1>
-          <p className="text-white/50 text-xs font-medium mt-2 max-w-xs uppercase tracking-widest leading-relaxed">
-            Establish your institutional baseline scores for the current semester.
-          </p>
-        </div>
-      </div>
 
-      {/* INFORMATIONAL HINT - PRO STYLE */}
-      <div className="mb-8 p-5 bg-white border-l-4 border-[#039be5] rounded-r-2xl shadow-sm flex items-start gap-4">
-        <div className="bg-[#039be5]/10 p-2 rounded-xl">
-          <Target className="text-[#039be5]" size={20} />
-        </div>
-        <div>
-          <p className="text-xs font-black text-[#051e34] uppercase tracking-tighter">Instructor's Note</p>
-          <p className="text-sm text-gray-500 font-medium">Perform each exercise with maximum effort to ensure accurate progress tracking.</p>
-        </div>
-      </div>
+          {/* Custom Interactive Grid */}
+          <div className="divide-y divide-gray-50">
+            {EXERCISES.map((ex) => (
+              <div key={ex.id} className="p-6 hover:bg-blue-50/30 transition-colors">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  
+                  {/* Exercise Label */}
+                  <div className="flex items-center gap-4">
+                    <div className="bg-gray-100 p-3 rounded-2xl text-[#051e34]">
+                      <Dumbbell size={20} />
+                    </div>
+                    <div>
+                      <h3 className="font-black text-[#051e34] leading-none mb-1 uppercase text-sm">{ex.name}</h3>
+                      <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">{ex.category || 'Strength'}</p>
+                    </div>
+                  </div>
 
-      {/* EXERCISE LIST */}
-      <div className="space-y-6 pb-40">
-        {EXERCISES.map(ex => (
-          <div key={ex.id} className="animate-in">
-            <ExerciseCard exercise={ex} onUpdate={handleUpdate} />
+                  {/* Set Inputs (The Interactive Part) */}
+                  <div className="flex items-center gap-2">
+                    {[1, 2, 3].map((setNum) => (
+                      <div key={setNum} className="flex-1 md:flex-none">
+                        <label className="block text-[9px] font-black text-gray-400 text-center mb-1 uppercase">Set {setNum}</label>
+                        <input 
+                          type="number"
+                          placeholder="0"
+                          className="w-full md:w-20 p-3 bg-gray-50 border-2 border-gray-100 rounded-xl text-center font-black text-[#039be5] focus:border-[#039be5] focus:ring-0 outline-none transition-all"
+                          onChange={(e) => handleUpdate(ex.id, setNum, e.target.value)}
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
       </div>
 
-      {/* FLOATING ACTION BUTTON */}
+      {/* 3. FLOATING ACTION FOOTER */}
       <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-[#f4f7f9] via-[#f4f7f9]/90 to-transparent z-50">
         <div className="max-w-4xl mx-auto">
           <button 
             onClick={savePreTest}
             disabled={isSubmitting}
-            className="w-full bg-[#039be5] text-white py-5 rounded-[1.5rem] font-black uppercase tracking-widest text-xs hover:bg-[#0288d1] active:scale-[0.98] transition-all shadow-2xl shadow-[#039be5]/40 border-b-4 border-[#01579b] flex items-center justify-center gap-3"
+            style={{
+               background: '#039be5',
+               color: 'white',
+               width: '100%',
+               padding: '20px',
+               borderRadius: '1.5rem',
+               fontWeight: '900',
+               textTransform: 'uppercase',
+               letterSpacing: '2px',
+               fontSize: '12px',
+               border: 'none',
+               borderBottom: '5px solid #01579b',
+               boxShadow: '0 20px 40px rgba(3, 155, 229, 0.3)',
+               display: 'flex',
+               alignItems: 'center',
+               justifyContent: 'center',
+               gap: '12px'
+            }}
           >
             {isSubmitting ? (
               <>
-                <RefreshCw className="animate-spin" size={18} />
-                <span>Syncing to Cloud...</span>
+                <RefreshCw className="animate-spin" size={20} />
+                <span>Syncing Results...</span>
               </>
             ) : (
               <>
-                <CheckCircle2 size={18} />
-                <span>Complete Pre-Test Diagnostic</span>
+                <CheckCircle2 size={20} />
+                <span>Finalize Baseline Assessment</span>
               </>
             )}
           </button>
         </div>
       </div>
 
-      {/* Internal CSS */}
       <style jsx global>{`
-        body {
-          background-color: #f4f7f9 !important;
-          margin: 0;
-        }
-        .animate-in {
-          animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-        @keyframes slideUp {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
+        body { background-color: #f4f7f9 !important; }
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
       `}</style>
     </Layout>
   );
 }
-
-
