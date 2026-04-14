@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 
 export default function Login() {
   const router = useRouter();
+  // 100% Preserved Logic & State
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSigningUp, setIsSigningUp] = useState(false);
@@ -25,57 +26,58 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-[#051e34] flex items-center justify-center p-6 relative overflow-hidden font-sans">
-      {/* Background Glows - Provides depth and modern aesthetic */}
-      <div className="absolute top-[-10%] left-[-10%] w-72 h-72 bg-[#039be5] rounded-full blur-[120px] opacity-20" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-[#039be5] rounded-full blur-[150px] opacity-10" />
-
-      <div className="w-full max-w-md z-10 transition-all duration-700 ease-out transform">
-        {/* Branding Section */}
-        <div className="text-center mb-10 animate-in fade-in slide-in-from-top-4 duration-1000">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-[#039be5] rounded-3xl shadow-2xl shadow-[#039be5]/40 mb-6 rotate-3 hover:rotate-0 transition-transform duration-500">
-            <span className="text-white text-4xl font-black italic">P</span>
+    // Background: fb-navy
+    <div className="min-h-screen bg-fb-navy flex items-center justify-center p-4 md:p-10 font-sans relative overflow-hidden">
+      
+      {/* Aesthetic "Glassmorphism" Container 
+        We use rounded-[3rem] and a border for that floating effect.
+        The animation makes it fade and float up on load.
+      */}
+      <div className="bg-white rounded-[3rem] shadow-[0_15px_100px_rgba(0,0,0,0.1)] border border-white/20 w-full max-w-7xl flex overflow-hidden animate-in fade-in slide-in-from-bottom-6 duration-700">
+        
+        {/* --- LEFT COLUMN: The Interactive Form --- */}
+        <div className="w-full md:w-1/3 p-10 md:p-16 flex flex-col justify-center">
+          
+          {/* Top Brand Area */}
+          <div className="flex items-center gap-3 mb-10 group">
+            <div className="w-12 h-12 bg-fb-blue rounded-2xl shadow-lg shadow-fb-blue/40 flex items-center justify-center text-white text-3xl font-black italic transform transition-transform group-hover:rotate-6">P</div>
+            <div>
+              <h1 className="text-2xl font-black text-fb-navy tracking-tight leading-none">PATHFit <span className="text-fb-blue">Pro</span></h1>
+              <p className="text-[10px] text-gray-400 uppercase font-bold tracking-widest opacity-80 mt-1">Curriculum Management Portal</p>
+            </div>
           </div>
-          <h1 className="text-5xl font-black text-white tracking-tighter uppercase leading-none">
-            PATHFit <span className="text-[#039be5]">Pro</span>
-          </h1>
-          <p className="text-gray-400 text-[10px] font-bold uppercase tracking-[0.4em] mt-4 opacity-70">
-            Physical Activity Towards Health & Fitness
-          </p>
-        </div>
 
-        {/* Main Authentication Card */}
-        <div className="bg-white rounded-[2.5rem] p-10 shadow-2xl border border-white/10 relative animate-in fade-in zoom-in duration-500">
-          <div className="mb-8 text-center">
-            <h2 className="text-2xl font-black text-[#051e34] tracking-tight">
-              {isSigningUp ? 'Join the Portal' : 'Welcome Back'}
+          <div className="mb-8">
+            <h2 className="text-2xl font-black text-fb-navy tracking-tight">
+              {isSigningUp ? 'Join the Community' : 'Welcome Back'}
             </h2>
-            <p className="text-sm text-gray-500 font-medium mt-1">
-              {isSigningUp ? 'Create your student account.' : 'Sign in to track your progress.'}
+            <p className="text-sm text-gray-500 font-medium">
+              {isSigningUp ? 'Register your student credentials.' : 'Please sign in to your training logs.'}
             </p>
           </div>
 
+          {/* Form with your handleAuth logic */}
           <form onSubmit={handleAuth} className="space-y-5">
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 block">Student Email</label>
+            <div>
+              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-2 block">Student Email Address</label>
               <input
                 type="email"
-                placeholder="student@university.edu"
-                className="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl text-sm font-bold focus:border-[#039be5] focus:ring-4 focus:ring-[#039be5]/10 outline-none transition-all"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                placeholder="name@university.edu"
+                className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl text-sm font-bold focus:border-fb-blue focus:ring-4 focus:ring-fb-blue/10 outline-none transition-all"
+                value={email} // Preserved State
+                onChange={(e) => setEmail(e.target.value)} // Preserved State
                 required
               />
             </div>
 
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 block">Password</label>
+            <div>
+              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-2 block">Secret Password</label>
               <input
                 type="password"
                 placeholder="••••••••"
-                className="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl text-sm font-bold focus:border-[#039be5] focus:ring-4 focus:ring-[#039be5]/10 outline-none transition-all"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl text-sm font-bold focus:border-fb-blue focus:ring-4 focus:ring-fb-blue/10 outline-none transition-all"
+                value={password} // Preserved State
+                onChange={(e) => setPassword(e.target.value)} // Preserved State
                 required
               />
             </div>
@@ -83,34 +85,54 @@ export default function Login() {
             <button 
               type="submit" 
               disabled={loading}
-              className="w-full bg-[#039be5] text-white font-black py-5 rounded-2xl shadow-xl shadow-[#039be5]/20 hover:bg-[#0288d1] active:scale-95 transition-all uppercase tracking-widest text-xs mt-4 border-b-4 border-[#01579b]"
+              className="w-full bg-fb-blue text-white font-black py-5 rounded-2xl shadow-lg shadow-fb-blue/20 hover:bg-[#0288d1] active:scale-95 transition-all uppercase tracking-widest text-xs mt-4 border-b-4 border-[#01579b]"
             >
               {loading ? (
-                <span className="animate-pulse italic">Authenticating...</span>
+                <span className="animate-pulse flex items-center justify-center gap-2">
+                  <span className="w-4 h-4 rounded-full bg-white/40 animate-ping"></span>
+                  Authenticating...
+                </span>
               ) : (
                 <span className="flex items-center justify-center gap-2">
-                  {isSigningUp ? 'Register Now' : 'Authorize Access'}
+                  {isSigningUp ? 'REGISTER NOW' : 'AUTHORIZE ACCESS'}
                   <span className="text-lg">→</span>
                 </span>
               )}
             </button>
           </form>
 
-          {/* Toggle between Login and Signup */}
+          {/* Toggle Button - Preserved Logic */}
           <div className="mt-8 pt-6 border-t border-gray-100 text-center">
             <button 
               onClick={() => setIsSigningUp(!isSigningUp)}
-              className="text-[10px] font-black text-[#039be5] hover:text-[#051e34] transition-colors uppercase tracking-[0.2em]"
+              className="text-[10px] font-black text-fb-blue hover:text-fb-navy transition-colors uppercase tracking-[0.2em]"
             >
-              {isSigningUp ? 'Already Registered? Log In' : 'No account? Create one'}
+              {isSigningUp ? 'Already have an account? Login' : 'New student? Create an account'}
             </button>
           </div>
         </div>
 
-        {/* Footer Branding */}
-        <p className="text-center mt-10 text-[10px] font-bold text-white/20 uppercase tracking-[0.6em]">
-          Institutional Portal © 2026
-        </p>
+        {/* --- RIGHT COLUMN: The Visual Hero --- */}
+        <div className="hidden md:flex md:w-2/3 bg-fb-navy relative overflow-hidden items-end p-16 animate-in fade-in duration-1000 delay-100">
+          
+          {/* Decorative "Gradient Wave" Element (Recreating image_2.png) */}
+          <div className="absolute top-0 right-0 left-[-20%] bottom-0 flex scale-[1.5]">
+            <div className="w-2/3 h-full bg-fb-blue rounded-full blur-[150px] opacity-20 -translate-x-[20%]" />
+            <div className="w-1/2 h-full bg-[#f4ebd1]/40 rounded-full blur-[150px] translate-x-[40%]" />
+          </div>
+          
+          <div className="z-10 text-white animate-in fade-in slide-in-from-right-4 duration-700 delay-300">
+            <h2 className="text-5xl font-black italic tracking-tighter leading-none">Welcome.</h2>
+            <p className="text-sm text-white/70 max-w-sm mt-3 font-medium">
+              Please initialize your Physical Activity Towards Health & Fitness profile to access the Phase 1 Pre-Test and weekly training logs.
+            </p>
+          </div>
+          
+          {/* Subtle footer branding */}
+          <p className="absolute bottom-6 right-6 text-[10px] font-bold text-white/30 uppercase tracking-[0.5em]">
+            SYSTEM V1.0 &copy; 2026
+          </p>
+        </div>
       </div>
     </div>
   );
