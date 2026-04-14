@@ -1,37 +1,62 @@
 import React from 'react';
 
+/**
+ * PATHFit Pro: ExerciseCard
+ * Optimized for tablet use in gym environments.
+ * Dynamically renders 2 or 3 sets based on the curriculum constants.
+ */
 export default function ExerciseCard({ exercise, onUpdate }) {
-  // Generates 2 or 3 inputs based on the exercise definition
+  // Logic to generate the correct number of input fields (Sets)
   const setArray = Array.from({ length: exercise.sets }, (_, i) => i + 1);
 
   return (
-    <div className="fb-card mb-4">
-      <div className="bg-[#051e34] p-3">
-        <h3 className="text-white font-medium flex justify-between">
-          {exercise.name}
-          <span className="text-[#039be5] text-sm uppercase">{exercise.category}</span>
-        </h3>
+    <div className="fb-card mb-6 border-l-4 border-[#039be5] transition-all hover:shadow-md">
+      {/* Header Section */}
+      <div className="bg-[#051e34] p-4 flex justify-between items-center">
+        <div>
+          <h3 className="text-white font-bold text-lg tracking-tight">
+            {exercise.name}
+          </h3>
+          <span className="text-[#039be5] text-[10px] font-black uppercase tracking-[0.2em]">
+            {exercise.category}
+          </span>
+        </div>
+        <div className="text-right">
+          <span className="block text-[10px] text-gray-400 uppercase font-bold">Goal</span>
+          <span className="text-white font-mono text-sm">
+            {exercise.target} {exercise.unit}
+          </span>
+        </div>
       </div>
       
-      <div className="p-4">
-        <div className="grid grid-cols-3 gap-3">
+      {/* Input Section */}
+      <div className="p-5 bg-white">
+        <div className={`grid gap-4 ${exercise.sets === 3 ? 'grid-cols-3' : 'grid-cols-2'}`}>
           {setArray.map((setNum) => (
-            <div key={setNum}>
-              <label className="text-xs text-gray-500 uppercase block mb-1">
+            <div key={setNum} className="flex flex-col">
+              <label className="text-[10px] font-bold text-gray-400 uppercase mb-2 text-center tracking-widest">
                 Set {setNum}
               </label>
               <input
                 type="number"
-                placeholder={exercise.unit}
-                className="fitness-input text-center"
+                inputMode="decimal"
+                placeholder={exercise.unit === 'reps' ? '0' : 'Sec'}
+                className="fitness-input"
                 onChange={(e) => onUpdate(exercise.id, setNum, e.target.value)}
               />
             </div>
           ))}
         </div>
-        <p className="mt-3 text-xs text-gray-400 italic">
-          Target: {exercise.target} {exercise.unit} per set
-        </p>
+        
+        {/* Unit Helper Footer */}
+        <div className="mt-4 pt-3 border-t border-gray-50 flex items-center justify-between text-[10px]">
+          <span className="text-gray-400 uppercase font-bold italic">
+            Unit: {exercise.unit === 'reps' ? 'Repetitions' : 'Seconds (Time)'}
+          </span>
+          <span className="text-[#039be5] font-bold">
+            Practicum Entry
+          </span>
+        </div>
       </div>
     </div>
   );
