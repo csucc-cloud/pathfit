@@ -9,31 +9,33 @@
 }
 
 body {
-  background-color: var(--fb-gray);
-  color: var(--fb-navy);
-  font-family: 'Inter', sans-serif;
+  @apply bg-[#f4f7f9] text-[#051e34] antialiased;
+  font-family: 'Inter', system-ui, sans-serif;
 }
 
 @layer components {
-  /* The Firebase-style card */
+  /* Premium Card with Firebase Accent */
   .fb-card {
-    @apply bg-white rounded-md border border-[#e0e0e0] shadow-sm overflow-hidden;
-    transition: box-shadow 0.2s ease-in-out;
+    @apply bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden 
+           transition-all duration-200 hover:shadow-md;
   }
 
-  .fb-card:hover {
-    @apply shadow-md;
-  }
-
-  /* The Signature Blue Button */
-  .btn-primary {
-    @apply bg-[#039be5] text-white font-bold py-2 px-6 rounded shadow-sm 
-           hover:bg-[#0288d1] active:scale-95 transition-all disabled:opacity-50;
-  }
-
-  /* Input styling for gym use (larger tap targets for tablets) */
+  /* Large Tap Targets for Gym Use */
   .fitness-input {
-    @apply w-full p-3 border border-gray-300 rounded focus:ring-2 
-           focus:ring-[#039be5] focus:border-transparent outline-none text-lg;
+    @apply w-full bg-gray-50 border border-gray-300 rounded-lg p-4 text-lg
+           focus:ring-4 focus:ring-[#039be5]/20 focus:border-[#039be5] 
+           outline-none transition-all text-center font-bold;
+  }
+
+  /* High-Contrast Primary Button */
+  .btn-primary {
+    @apply bg-[#039be5] text-white font-bold py-4 px-8 rounded-lg shadow-lg
+           hover:bg-[#0288d1] active:scale-[0.98] transition-all 
+           disabled:bg-gray-400 disabled:cursor-not-allowed uppercase tracking-wider text-sm;
+  }
+
+  /* Section Headers */
+  .section-title {
+    @apply text-xs font-black uppercase tracking-[0.2em] text-[#039be5] mb-2 block;
   }
 }
