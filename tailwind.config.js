@@ -1,16 +1,17 @@
-
+/** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/pages/**/*.{js,ts,jsx,tsx}",
+    "./src/components/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
     extend: {
       colors: {
-        'fb-blue': '#039be5',
-        'fb-navy': '#051e34',
+        // These match the design system from your target image
+        'fb-blue': '#039be5', // The vibrant blue
+        'fb-navy': '#051e34', // The deep background blue
       },
     },
   },
   plugins: [],
-};
+}
