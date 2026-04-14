@@ -7,10 +7,10 @@ import {
   CheckCircle2, 
   RefreshCw, 
   Dumbbell, 
-  ClipboardCheck, 
   Lock, 
   Clock, 
-  AlertCircle 
+  AlertCircle,
+  Calculator
 } from 'lucide-react';
 
 export default function PreTest() {
@@ -32,7 +32,6 @@ export default function PreTest() {
       return;
     }
 
-    // 1. Check if Phase 1 is already completed
     const { data: existingLogs } = await supabase
       .from('performance_logs')
       .select('created_at')
@@ -42,12 +41,10 @@ export default function PreTest() {
     if (existingLogs && existingLogs.length > 0) {
       setHasCompleted(true);
       setLoadingStatus(false);
-      // Auto-transition to Phase 2
       setTimeout(() => router.push('/phase/2-weekly-logs'), 2000);
       return;
     }
 
-    // 2. Deadline Logic: Account Age vs (1 Week + 3 Days = 10 Days)
     const accountCreated = new Date(user.created_at);
     const now = new Date();
     const diffTime = Math.abs(now - accountCreated);
@@ -66,6 +63,15 @@ export default function PreTest() {
       ...prev,
       [`${id}_set${setNum}`]: value
     }));
+  };
+
+  // Helper to calculate mean (average) for the table
+  const calculateMean = (id) => {
+    const s1 = parseFloat(results[`${id}_set1`]) || 0;
+    const s2 = parseFloat(results[`${id}_set2`]) || 0;
+    const s3 = parseFloat(results[`${id}_set3`]) || 0;
+    const values = [s1, s2, s3].filter(v => v > 0);
+    return values.length > 0 ? (values.reduce((a, b) => a + b, 0) / values.length).toFixed(1) : "0.0";
   };
 
   const savePreTest = async () => {
@@ -102,7 +108,6 @@ export default function PreTest() {
 
   if (loadingStatus) return <Layout title="Loading..."><div className="p-20 text-center font-black animate-pulse">VERIFYING STATUS...</div></Layout>;
 
-  // --- UI FOR EXPIRED DEADLINE ---
   if (isLockedOut && !hasCompleted) {
     return (
       <Layout title="Phase 1: Expired">
@@ -111,12 +116,7 @@ export default function PreTest() {
             <Clock size={40} color="#dc2626" />
           </div>
           <h1 style={{ color: '#051e34', fontWeight: '900', fontSize: '24px', textTransform: 'uppercase' }}>Submission Window Closed</h1>
-          <p style={{ color: '#6b7280', marginTop: '16px', maxWidth: '300px', margin: '16px auto', fontWeight: '500' }}>
-            The deadline (1 week and 3 days) has passed. You failed to complete the pre-test on time.
-          </p>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: '#f3f4f6', padding: '12px 20px', borderRadius: '12px', color: '#374151', fontSize: '12px', fontWeight: 'bold' }}>
-            <AlertCircle size={16} /> NO ACCESS TO PHASE 1
-          </div>
+          <p style={{ color: '#6b7280', marginTop: '16px', maxWidth: '300px', margin: '16px auto', fontWeight: '500' }}>The deadline has passed. You failed to complete the pre-test on time.</p>
         </div>
       </Layout>
     );
@@ -124,7 +124,7 @@ export default function PreTest() {
 
   return (
     <Layout title="Phase 1: Pre-Test Diagnostic">
-      {/* 1. BRANDED NAVY HEADER */}
+      {/* HEADER */}
       <div style={{ 
         background: hasCompleted ? '#10b981' : 'linear-gradient(135deg, #051e34 0%, #0a2e4d 100%)',
         margin: '-24px -24px 0 -24px',
@@ -143,92 +143,90 @@ export default function PreTest() {
         </h1>
       </div>
 
-      {/* 2. INTERACTIVE PERFORMANCE TABLE */}
-      <div style={{ marginTop: '-30px', position: 'relative', zIndex: 10, opacity: hasCompleted ? 0.7 : 1 }}>
+      {/* INTERACTIVE TABLE */}
+      <div style={{ marginTop: '-30px', position: 'relative', zIndex: 10 }}>
         <div className="bg-white rounded-[2rem] shadow-2xl overflow-hidden border border-gray-100">
-          
-          <div className="bg-gray-50 p-6 border-b border-gray-100 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <ClipboardCheck className="text-[#039be5]" size={20} />
-              <span className="font-black text-[#051e34] uppercase text-xs tracking-widest">Exercise List</span>
-            </div>
-            {hasCompleted && <div className="flex items-center gap-1 text-green-600 font-black text-[10px]"><Lock size={12}/> READ ONLY</div>}
-          </div>
-
-          <div className="divide-y divide-gray-50">
-            {EXERCISES.map((ex) => (
-              <div key={ex.id} className="p-6 hover:bg-blue-50/30 transition-colors">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  
-                  <div className="flex items-center gap-4">
-                    <div className="bg-gray-100 p-3 rounded-2xl text-[#051e34]">
-                      <Dumbbell size={20} />
-                    </div>
-                    <div>
-                      <h3 className="font-black text-[#051e34] leading-none mb-1 uppercase text-sm">{ex.name}</h3>
-                      <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">{ex.category || 'Strength'}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    {[1, 2, 3].map((setNum) => (
-                      <div key={setNum} className="flex-1 md:flex-none">
-                        <label className="block text-[9px] font-black text-gray-400 text-center mb-1 uppercase">Set {setNum}</label>
-                        <input 
-                          type="number"
-                          placeholder="0"
-                          disabled={hasCompleted}
-                          className={`w-full md:w-20 p-3 rounded-xl text-center font-black outline-none transition-all ${hasCompleted ? 'bg-gray-100 border-gray-200 text-gray-400' : 'bg-gray-50 border-2 border-gray-100 text-[#039be5] focus:border-[#039be5]'}`}
-                          onChange={(e) => handleUpdate(ex.id, setNum, e.target.value)}
-                        />
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-gray-50 text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                  <th className="p-4 border-b">Exercises</th>
+                  <th colSpan="3" className="p-4 border-b border-l text-center bg-gray-100/50 text-[#039be5]">Performance Sets</th>
+                  <th className="p-4 border-b border-l text-center">Type</th>
+                  <th className="p-4 border-b border-l text-center">Mean</th>
+                  <th className="p-4 border-b border-l text-center">Status</th>
+                </tr>
+                <tr className="bg-gray-50/50 text-[9px] font-bold text-gray-500 text-center uppercase">
+                  <th className="border-b"></th>
+                  <th className="p-2 border-b border-l w-20">Set 1</th>
+                  <th className="p-2 border-b w-20">Set 2</th>
+                  <th className="p-2 border-b w-20">Set 3</th>
+                  <th className="p-2 border-b border-l">Metric</th>
+                  <th className="p-2 border-b border-l">Avg</th>
+                  <th className="p-2 border-b border-l">Auth</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {EXERCISES.map((ex) => (
+                  <tr key={ex.id} className="hover:bg-blue-50/20 transition-colors">
+                    <td className="p-4">
+                      <div className="flex items-center gap-3">
+                        <Dumbbell size={14} className="text-[#039be5]" />
+                        <span className="font-black text-[#051e34] text-xs uppercase">{ex.name}</span>
                       </div>
+                    </td>
+                    {[1, 2, 3].map((s) => (
+                      <td key={s} className="p-2 border-l text-center">
+                        <input 
+                          type="number" 
+                          disabled={hasCompleted || (ex.sets < s)}
+                          placeholder={ex.sets < s ? "-" : "0"}
+                          className={`w-full bg-transparent text-center font-bold text-sm outline-none ${ex.sets < s ? 'text-gray-200' : 'text-[#039be5]'}`}
+                          onChange={(e) => handleUpdate(ex.id, s, e.target.value)}
+                        />
+                      </td>
                     ))}
-                  </div>
-
-                </div>
-              </div>
-            ))}
+                    <td className="p-4 border-l text-center">
+                      <span className="text-[9px] font-black px-2 py-1 bg-gray-100 rounded text-gray-500 uppercase">
+                        {ex.unit || (ex.type === 'time' ? 'Time' : 'Reps')}
+                      </span>
+                    </td>
+                    <td className="p-4 border-l text-center font-black text-xs text-[#051e34]">
+                      {calculateMean(ex.id)}
+                    </td>
+                    <td className="p-4 border-l text-center">
+                      <div className="flex justify-center">
+                        {results[`${ex.id}_set1`] ? (
+                          <CheckCircle2 size={16} className="text-green-500" />
+                        ) : (
+                          <Clock size={16} className={hasCompleted ? "text-gray-200" : "text-gray-300"} />
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
 
-      {/* 3. FLOATING ACTION FOOTER */}
+      {/* FOOTER ACTION */}
       {!hasCompleted && (
-        <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-[#f4f7f9] via-[#f4f7f9]/90 to-transparent z-50">
+        <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-[#f4f7f9] to-transparent z-50">
           <div className="max-w-4xl mx-auto">
             <button 
               onClick={savePreTest}
               disabled={isSubmitting}
               style={{
-                 background: '#039be5',
-                 color: 'white',
-                 width: '100%',
-                 padding: '20px',
-                 borderRadius: '1.5rem',
-                 fontWeight: '900',
-                 textTransform: 'uppercase',
-                 letterSpacing: '2px',
-                 fontSize: '12px',
-                 border: 'none',
-                 borderBottom: '5px solid #01579b',
-                 boxShadow: '0 20px 40px rgba(3, 155, 229, 0.3)',
-                 display: 'flex',
-                 alignItems: 'center',
-                 justifyContent: 'center',
-                 gap: '12px'
+                 background: '#039be5', color: 'white', width: '100%', padding: '20px', borderRadius: '1.5rem',
+                 fontWeight: '900', textTransform: 'uppercase', letterSpacing: '2px', fontSize: '12px',
+                 border: 'none', borderBottom: '5px solid #01579b', boxShadow: '0 20px 40px rgba(3, 155, 229, 0.3)',
+                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px'
               }}
             >
-              {isSubmitting ? (
-                <>
-                  <RefreshCw className="animate-spin" size={20} />
-                  <span>Syncing and Locking...</span>
-                </>
-              ) : (
-                <>
-                  <CheckCircle2 size={20} />
-                  <span>Finalize Baseline (No Redo)</span>
-                </>
-              )}
+              {isSubmitting ? <RefreshCw className="animate-spin" size={20} /> : <CheckCircle2 size={20} />}
+              <span>Sync Baseline and Lock</span>
             </button>
           </div>
         </div>
@@ -236,8 +234,7 @@ export default function PreTest() {
 
       <style jsx global>{`
         body { background-color: #f4f7f9 !important; }
-        input::-webkit-outer-spin-button,
-        input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
       `}</style>
     </Layout>
   );
