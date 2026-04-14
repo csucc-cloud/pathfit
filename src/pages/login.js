@@ -48,10 +48,29 @@ export default function Login() {
         
         {/* LEFT: FORM SIDE */}
         <div style={{ flex: '1', padding: '3rem', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          
+          {/* Logo & Title Header - Now Centered Together */}
           <div style={{ marginBottom: '2.5rem' }}>
-            <div style={{ display: 'inline-block', padding: '0.5rem 1rem', backgroundColor: '#039be5', color: 'white', borderRadius: '12px', fontWeight: '900', fontSize: '1.5rem', marginBottom: '1rem' }}>P</div>
-            <h2 style={{ fontSize: '2rem', fontWeight: '900', color: '#051e34', margin: '0', letterSpacing: '-1px' }}>PATHFit Pro</h2>
-            <p style={{ fontSize: '10px', fontWeight: 'bold', color: '#9ca3af', letterSpacing: '2px', marginTop: '0.5rem' }}>STUDENT PORTAL</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                padding: '0.5rem 1rem', 
+                backgroundColor: '#039be5', 
+                color: 'white', 
+                borderRadius: '12px', 
+                fontWeight: '900', 
+                fontSize: '1.5rem',
+                fontStyle: 'italic'
+              }}>P</div>
+              <h2 style={{ fontSize: '2rem', fontWeight: '900', color: '#051e34', margin: '0', letterSpacing: '-1px' }}>
+                PATHFit Pro
+              </h2>
+            </div>
+            <p style={{ fontSize: '10px', fontWeight: 'bold', color: '#9ca3af', letterSpacing: '2px', marginLeft: '0.2rem' }}>
+              STUDENT PORTAL
+            </p>
           </div>
 
           <form onSubmit={handleAuth} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -120,5 +139,3 @@ export default function Login() {
     </div>
   );
 }
-
-
