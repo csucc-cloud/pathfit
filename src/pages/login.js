@@ -30,7 +30,7 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center p-4 bg-[#f4f7f9]">
       <div className="fb-card w-full max-w-md p-8 bg-white shadow-lg border-t-4 border-[#039be5]">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-[#051e34]">PATHFit Pro</h1>
+          <h1 className="text-3xl font-bold text-[#051e34]">PATHFit Application</h1>
           <p className="text-[#039be5] font-medium uppercase tracking-widest text-sm">Student Portal</p>
         </div>
 
