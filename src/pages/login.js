@@ -25,68 +25,62 @@ export default function Login() {
   };
 
   return (
-    <div style={{ backgroundColor: '#051e34' }} className="min-h-screen flex items-center justify-center p-4 md:p-12">
-      {/* Main Container */}
-      <div className="flex w-full max-w-6xl min-h-[600px] bg-white rounded-[2rem] overflow-hidden shadow-2xl flex-col md:flex-row">
+    <div style={{ backgroundColor: '#051e34', minHeight: '100vh' }} className="flex items-center justify-center p-4 md:p-12">
+      <div className="flex w-full max-w-6xl min-h-[600px] bg-white rounded-[2.5rem] overflow-hidden shadow-2xl flex-col md:flex-row border border-white/10">
         
-        {/* Left Side: Login Form */}
-        <div className="w-full md:w-2/5 p-8 md:p-12 flex flex-col justify-center">
-          <div className="mb-8">
-            <h1 className="text-3xl font-black text-[#051e34] italic">P</h1>
-            <h2 className="text-2xl font-black text-[#051e34] mt-4 tracking-tighter uppercase">PATHFit Pro</h2>
-            <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Curriculum Management</p>
+        {/* Left Form */}
+        <div className="w-full md:w-2/5 p-10 flex flex-col justify-center">
+          <div className="mb-10 text-center md:text-left">
+            <div className="inline-block px-4 py-2 bg-[#039be5] text-white rounded-xl font-black italic text-2xl mb-4">P</div>
+            <h2 className="text-3xl font-black text-[#051e34] tracking-tighter uppercase leading-none">PATHFit Pro</h2>
+            <p className="text-[10px] text-gray-400 font-bold tracking-[0.3em] mt-2">INSTITUTIONAL PORTAL</p>
           </div>
 
-          <form onSubmit={handleAuth} className="space-y-4">
+          <form onSubmit={handleAuth} className="space-y-6">
             <div>
-              <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest block mb-2">Email Address</label>
+              <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest block mb-2 ml-1">Student Email</label>
               <input 
                 type="email" 
-                className="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-xl focus:border-[#039be5] outline-none font-bold"
+                className="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-[#039be5] outline-none font-bold transition-all text-sm"
+                placeholder="name@university.edu"
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
             </div>
             <div>
-              <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest block mb-2">Password</label>
+              <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest block mb-2 ml-1">Password</label>
               <input 
                 type="password" 
-                className="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-xl focus:border-[#039be5] outline-none font-bold"
+                className="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-[#039be5] outline-none font-bold transition-all text-sm"
+                placeholder="••••••••"
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
             </div>
             <button 
               type="submit" 
-              className="w-full bg-[#039be5] text-white py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-[#0288d1] transition-all shadow-lg"
+              className="w-full bg-[#039be5] text-white py-5 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-[#0288d1] transition-all shadow-xl shadow-[#039be5]/20 border-b-4 border-[#01579b]"
             >
-              {loading ? 'Processing...' : (isSigningUp ? 'Sign Up' : 'Login')}
+              {loading ? 'Authenticating...' : (isSigningUp ? 'Register' : 'Authorize Access')}
             </button>
           </form>
 
-          <button 
-            onClick={() => setIsSigningUp(!isSigningUp)}
-            className="mt-6 text-[10px] font-black text-[#039be5] uppercase tracking-widest hover:text-[#051e34]"
-          >
-            {isSigningUp ? 'Back to Login' : 'Create an Account'}
+          <button onClick={() => setIsSigningUp(!isSigningUp)} className="mt-8 text-[10px] font-black text-[#039be5] uppercase tracking-widest">
+            {isSigningUp ? 'Return to Login' : 'Create New Account'}
           </button>
         </div>
 
-        {/* Right Side: The Visual Wave */}
-        <div className="hidden md:flex flex-1 relative bg-[#051e34] items-center p-16 overflow-hidden">
-          {/* Wave Decorative Background */}
-          <div className="absolute inset-0 opacity-40" style={{
-            background: 'radial-gradient(circle at 0% 0%, #039be5 0%, transparent 50%), radial-gradient(circle at 100% 100%, #f4ebd1 0%, transparent 50%)'
+        {/* Right Hero (The Design part) */}
+        <div className="hidden md:flex flex-1 relative bg-[#051e34] items-end p-16">
+          <div className="absolute inset-0 opacity-50" style={{
+            background: 'radial-gradient(circle at 0% 0%, #039be5 0%, transparent 70%), radial-gradient(circle at 100% 100%, #f4ebd1 0%, transparent 70%)'
           }}></div>
           
-          <div className="relative z-10">
-            <h2 className="text-6xl font-black text-white italic leading-none">Welcome.</h2>
-            <p className="text-white/60 mt-4 max-w-xs font-medium leading-relaxed">
-              Initialize your Physical Activity profile to begin your Phase 1 training.
+          <div className="relative z-10 text-white">
+            <h2 className="text-7xl font-black italic leading-none mb-4">Welcome.</h2>
+            <p className="text-white/60 max-w-xs font-medium text-sm leading-relaxed uppercase tracking-wider">
+              Physical Activity Towards Health and Fitness Curriculum Management System.
             </p>
-          </div>
-          <div className="absolute bottom-8 right-8 text-[10px] font-bold text-white/20 tracking-[0.5em] uppercase">
-            PATHFit © 2026
           </div>
         </div>
       </div>
