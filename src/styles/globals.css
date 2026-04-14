@@ -9,33 +9,26 @@
 }
 
 body {
-  @apply bg-[#f4f7f9] text-[#051e34] antialiased;
-  font-family: 'Inter', system-ui, sans-serif;
+  background-color: var(--fb-gray);
+  color: var(--fb-navy);
+  font-family: 'Inter', -apple-system, sans-serif;
 }
 
 @layer components {
-  /* Premium Card with Firebase Accent */
+  /* High-end Card with blue accent */
   .fb-card {
-    @apply bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden 
-           transition-all duration-200 hover:shadow-md;
+    @apply bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden transition-all hover:shadow-md;
   }
 
-  /* Large Tap Targets for Gym Use */
+  /* Gym-optimized inputs */
   .fitness-input {
-    @apply w-full bg-gray-50 border border-gray-300 rounded-lg p-4 text-lg
-           focus:ring-4 focus:ring-[#039be5]/20 focus:border-[#039be5] 
-           outline-none transition-all text-center font-bold;
+    @apply w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-lg text-center text-xl font-bold 
+           focus:border-[#039be5] focus:ring-4 focus:ring-[#039be5]/10 outline-none transition-all;
   }
 
-  /* High-Contrast Primary Button */
+  /* Professional Action Button */
   .btn-primary {
-    @apply bg-[#039be5] text-white font-bold py-4 px-8 rounded-lg shadow-lg
-           hover:bg-[#0288d1] active:scale-[0.98] transition-all 
-           disabled:bg-gray-400 disabled:cursor-not-allowed uppercase tracking-wider text-sm;
-  }
-
-  /* Section Headers */
-  .section-title {
-    @apply text-xs font-black uppercase tracking-[0.2em] text-[#039be5] mb-2 block;
+    @apply bg-[#039be5] text-white font-black py-4 px-8 rounded-xl shadow-lg shadow-[#039be5]/20
+           hover:bg-[#0288d1] active:scale-95 transition-all uppercase tracking-widest text-sm;
   }
 }
