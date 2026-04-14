@@ -3,7 +3,8 @@ import { EXERCISES } from '../../constants/exercises';
 import ExerciseCard from '../../components/dashboard/ExerciseCard';
 import Layout from '../../components/ui/Layout'; 
 import { supabase } from '../../lib/supabaseClient';
-import { CheckCircle2, CloudSync, Target } from 'lucide-react';
+// Fixed CloudSync to RefreshCw to resolve the build error
+import { CheckCircle2, RefreshCw, Target } from 'lucide-react';
 
 export default function PreTest() {
   const [results, setResults] = useState({});
@@ -50,7 +51,7 @@ export default function PreTest() {
       {/* BRANDED HEADER SECTION */}
       <div style={{ 
         background: 'linear-gradient(135deg, #051e34 0%, #0a2e4d 100%)',
-        margin: '-24px -24px 30px -24px', // Counteracting Layout padding
+        margin: '-24px -24px 30px -24px', 
         padding: '40px 24px',
         borderBottom: '4px solid #039be5',
         position: 'relative',
@@ -98,8 +99,8 @@ export default function PreTest() {
         ))}
       </div>
 
-      {/* FLOATING ACTION BUTTON - THE LOGIN PAGE STYLE */}
-      <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-[#f4f7f9] via-[#f4f7f9]/90 to-transparent">
+      {/* FLOATING ACTION BUTTON */}
+      <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-[#f4f7f9] via-[#f4f7f9]/90 to-transparent z-50">
         <div className="max-w-4xl mx-auto">
           <button 
             onClick={savePreTest}
@@ -108,7 +109,7 @@ export default function PreTest() {
           >
             {isSubmitting ? (
               <>
-                <CloudSync className="animate-spin" size={18} />
+                <RefreshCw className="animate-spin" size={18} />
                 <span>Syncing to Cloud...</span>
               </>
             ) : (
@@ -121,8 +122,12 @@ export default function PreTest() {
         </div>
       </div>
 
-      {/* Internal CSS for the Brand Animation */}
-      <style jsx>{`
+      {/* Internal CSS */}
+      <style jsx global>{`
+        body {
+          background-color: #f4f7f9 !important;
+          margin: 0;
+        }
         .animate-in {
           animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
