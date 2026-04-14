@@ -25,61 +25,94 @@ export default function Login() {
   };
 
   return (
-    <div style={{ backgroundColor: '#051e34', minHeight: '100vh' }} className="flex items-center justify-center p-4 md:p-12">
-      <div className="flex w-full max-w-6xl min-h-[600px] bg-white rounded-[2.5rem] overflow-hidden shadow-2xl flex-col md:flex-row border border-white/10">
+    <div style={{ 
+      backgroundColor: '#051e34', 
+      minHeight: '100vh', 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center', 
+      padding: '2rem',
+      fontFamily: 'sans-serif' 
+    }}>
+      {/* Container Card */}
+      <div style={{ 
+        display: 'flex', 
+        width: '100%', 
+        maxWidth: '1100px', 
+        minHeight: '600px', 
+        backgroundColor: 'white', 
+        borderRadius: '2.5rem', 
+        overflow: 'hidden',
+        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+      }}>
         
-        {/* Left Form */}
-        <div className="w-full md:w-2/5 p-10 flex flex-col justify-center">
-          <div className="mb-10 text-center md:text-left">
-            <div className="inline-block px-4 py-2 bg-[#039be5] text-white rounded-xl font-black italic text-2xl mb-4">P</div>
-            <h2 className="text-3xl font-black text-[#051e34] tracking-tighter uppercase leading-none">PATHFit Pro</h2>
-            <p className="text-[10px] text-gray-400 font-bold tracking-[0.3em] mt-2">INSTITUTIONAL PORTAL</p>
+        {/* LEFT: FORM SIDE */}
+        <div style={{ flex: '1', padding: '3rem', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <div style={{ marginBottom: '2.5rem' }}>
+            <div style={{ display: 'inline-block', padding: '0.5rem 1rem', backgroundColor: '#039be5', color: 'white', borderRadius: '12px', fontWeight: '900', fontSize: '1.5rem', marginBottom: '1rem' }}>P</div>
+            <h2 style={{ fontSize: '2rem', fontWeight: '900', color: '#051e34', margin: '0', letterSpacing: '-1px' }}>PATHFit Pro</h2>
+            <p style={{ fontSize: '10px', fontWeight: 'bold', color: '#9ca3af', letterSpacing: '2px', marginTop: '0.5rem' }}>STUDENT PORTAL</p>
           </div>
 
-          <form onSubmit={handleAuth} className="space-y-6">
+          <form onSubmit={handleAuth} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             <div>
-              <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest block mb-2 ml-1">Student Email</label>
+              <label style={{ fontSize: '10px', fontWeight: '900', color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '1px', display: 'block', marginBottom: '0.5rem' }}>Email</label>
               <input 
                 type="email" 
-                className="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-[#039be5] outline-none font-bold transition-all text-sm"
                 placeholder="name@university.edu"
+                style={{ width: '100%', padding: '1rem', backgroundColor: '#f9fafb', border: '2px solid #f3f4f6', borderRadius: '1rem', fontWeight: 'bold', outline: 'none' }}
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
             </div>
             <div>
-              <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest block mb-2 ml-1">Password</label>
+              <label style={{ fontSize: '10px', fontWeight: '900', color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '1px', display: 'block', marginBottom: '0.5rem' }}>Password</label>
               <input 
                 type="password" 
-                className="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-[#039be5] outline-none font-bold transition-all text-sm"
                 placeholder="••••••••"
+                style={{ width: '100%', padding: '1rem', backgroundColor: '#f9fafb', border: '2px solid #f3f4f6', borderRadius: '1rem', fontWeight: 'bold', outline: 'none' }}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
             </div>
             <button 
               type="submit" 
-              className="w-full bg-[#039be5] text-white py-5 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-[#0288d1] transition-all shadow-xl shadow-[#039be5]/20 border-b-4 border-[#01579b]"
+              style={{ width: '100%', padding: '1.25rem', backgroundColor: '#039be5', color: 'white', border: 'none', borderRadius: '1rem', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '2px', cursor: 'pointer', boxShadow: '0 10px 15px -3px rgba(3, 155, 229, 0.3)' }}
             >
-              {loading ? 'Authenticating...' : (isSigningUp ? 'Register' : 'Authorize Access')}
+              {loading ? 'Authenticating...' : (isSigningUp ? 'Join Now' : 'Sign In')}
             </button>
           </form>
 
-          <button onClick={() => setIsSigningUp(!isSigningUp)} className="mt-8 text-[10px] font-black text-[#039be5] uppercase tracking-widest">
-            {isSigningUp ? 'Return to Login' : 'Create New Account'}
+          <button 
+            onClick={() => setIsSigningUp(!isSigningUp)}
+            style={{ background: 'none', border: 'none', color: '#039be5', fontWeight: 'bold', marginTop: '2rem', cursor: 'pointer', fontSize: '12px' }}
+          >
+            {isSigningUp ? 'Already have an account? Log In' : 'Need an account? Create one'}
           </button>
         </div>
 
-        {/* Right Hero (The Design part) */}
-        <div className="hidden md:flex flex-1 relative bg-[#051e34] items-end p-16">
-          <div className="absolute inset-0 opacity-50" style={{
-            background: 'radial-gradient(circle at 0% 0%, #039be5 0%, transparent 70%), radial-gradient(circle at 100% 100%, #f4ebd1 0%, transparent 70%)'
+        {/* RIGHT: WAVE HERO SIDE */}
+        <div style={{ 
+          flex: '1.2', 
+          backgroundColor: '#051e34', 
+          padding: '4rem', 
+          display: 'flex', 
+          alignItems: 'flex-end', 
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
+          {/* Visual Gradient (The "Wave" feel) */}
+          <div style={{
+            position: 'absolute',
+            top: 0, left: 0, right: 0, bottom: 0,
+            background: 'radial-gradient(circle at 0% 0%, #039be5 0%, transparent 70%), radial-gradient(circle at 100% 100%, #f4ebd1 20%, transparent 70%)',
+            opacity: 0.4
           }}></div>
-          
-          <div className="relative z-10 text-white">
-            <h2 className="text-7xl font-black italic leading-none mb-4">Welcome.</h2>
-            <p className="text-white/60 max-w-xs font-medium text-sm leading-relaxed uppercase tracking-wider">
-              Physical Activity Towards Health and Fitness Curriculum Management System.
+
+          <div style={{ position: 'relative', zIndex: 10 }}>
+            <h2 style={{ fontSize: '5rem', color: 'white', fontWeight: '900', fontStyle: 'italic', margin: 0, lineHeight: 0.9 }}>Welcome.</h2>
+            <p style={{ color: 'rgba(255,255,255,0.6)', marginTop: '1.5rem', maxWidth: '300px', lineHeight: '1.6', fontSize: '14px' }}>
+              Access your training logs, performance metrics, and pre-test requirements.
             </p>
           </div>
         </div>
