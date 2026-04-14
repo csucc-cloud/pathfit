@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { EXERCISES } from '../../constants/exercises';
 import ExerciseCard from '../../components/dashboard/ExerciseCard';
+import Layout from '../../components/ui/Layout'; // The new App Shell
 import { supabase } from '../../lib/supabaseClient';
 
 export default function PreTest() {
@@ -45,22 +46,39 @@ export default function PreTest() {
   };
 
   return (
-    <div className="p-4 max-w-2xl mx-auto pb-20">
-      <h1 className="text-2xl font-bold mb-6 text-[#051e34]">Phase 1: Pre-Test Diagnostic</h1>
-      
-      {EXERCISES.map(ex => (
-        <ExerciseCard key={ex.id} exercise={ex} onUpdate={handleUpdate} />
-      ))}
-
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t">
-        <button 
-          onClick={savePreTest}
-          disabled={isSubmitting}
-          className="btn-primary w-full max-w-2xl mx-auto block"
-        >
-          {isSubmitting ? "Uploading to Database..." : "Submit All Scores"}
-        </button>
+    <Layout title="Phase 1: Pre-Test Diagnostic">
+      {/* Informational Hint for Students */}
+      <div className="mb-8 p-4 bg-[#039be5]/10 border border-[#039be5]/20 rounded-2xl">
+        <p className="text-sm text-[#051e34] font-medium flex items-center gap-2">
+          <span>🎯</span> Establish your baseline scores for the semester.
+        </p>
       </div>
-    </div>
+
+      {/* Exercise List */}
+      <div className="space-y-4">
+        {EXERCISES.map(ex => (
+          <ExerciseCard key={ex.id} exercise={ex} onUpdate={handleUpdate} />
+        ))}
+      </div>
+
+      {/* Action Button: Fixed at bottom within the Layout's safe zone */}
+      <div className="fixed bottom-[80px] left-0 right-0 px-4 pointer-events-none">
+        <div className="max-w-4xl mx-auto pointer-events-auto">
+          <button 
+            onClick={savePreTest}
+            disabled={isSubmitting}
+            className="btn-primary w-full shadow-2xl flex items-center justify-center gap-2 py-5 text-lg"
+          >
+            {isSubmitting ? (
+              <>
+                <span className="animate-pulse">Syncing to Cloud...</span>
+              </>
+            ) : (
+              "Complete Pre-Test"
+            )}
+          </button>
+        </div>
+      </div>
+    </Layout>
   );
 }
