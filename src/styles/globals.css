@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 0. Global Reset - REMOVES THE WHITE BORDER */
+html, body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  background-color: #051e34; /* Prevents white flash on load */
+}
+
 /* 1. Root Variables - Maintaining your exact color codes */
 :root {
   --fb-blue: #039be5;
@@ -14,6 +22,7 @@ body {
   background-color: var(--fb-gray);
   color: var(--fb-navy);
   font-family: 'Inter', -apple-system, sans-serif;
+  min-height: 100vh;
   @apply antialiased;
 }
 
