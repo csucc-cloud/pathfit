@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabaseClient';
 export function useExerciseLog(practicumId, studentId) {
   const [logData, setLogData] = useState({});
   const [loading, setLoading] = useState(true);
+  const [metadata, setMetadata] = useState({ is_submitted: false }); // Track lock status
 
   // 1. Load existing data when the page opens
   useEffect(() => {
@@ -22,7 +23,7 @@ export function useExerciseLog(practicumId, studentId) {
         .eq('student_id', studentId)
         .eq('practicum_type', practicumId);
 
-      if (data) {
+      if (data && data.length > 0) {
         // Transform array to object { ex1: { set1: 10, ... } }
         const formatted = data.reduce((acc, row) => {
           acc[row.exercise_id] = { 
@@ -33,6 +34,9 @@ export function useExerciseLog(practicumId, studentId) {
           return acc;
         }, {});
         setLogData(formatted);
+        
+        // Update metadata based on the first record (since all rows for this module share status)
+        setMetadata({ is_submitted: data[0].is_submitted || false });
       }
       
       if (error) {
@@ -45,9 +49,16 @@ export function useExerciseLog(practicumId, studentId) {
   }, [practicumId, studentId]);
 
   // 2. Save all changes at once
-  const saveLogs = async () => {
+  // Enhanced to handle final submission and pre-test trigger
+  const saveLogs = async ({ submitted = false, isPreTest = false } = {}) => {
     if (!supabase) {
       alert("Database connection not initialized.");
+      return;
+    }
+
+    // Protection: Block saving if already submitted
+    if (metadata.is_submitted) {
+      alert("This record is locked and cannot be edited.");
       return;
     }
 
@@ -58,6 +69,7 @@ export function useExerciseLog(practicumId, studentId) {
       set_1_val: parseFloat(sets.set1 || 0),
       set_2_val: parseFloat(sets.set2 || 0),
       set_3_val: parseFloat(sets.set3 || 0),
+      is_submitted: submitted, // Feature: Mark as final
       updated_at: new Date(),
     }));
 
@@ -70,9 +82,15 @@ export function useExerciseLog(practicumId, studentId) {
       .from('exercise_logs')
       .upsert(rowsToUpsert, { onConflict: 'student_id, exercise_id, practicum_type' });
 
-    if (error) alert("Error saving: " + error.message);
-    else alert("Progress saved successfully!");
+    if (error) {
+      alert("Error saving: " + error.message);
+    } else {
+      // Update local metadata state if we just submitted
+      if (submitted) setMetadata({ is_submitted: true });
+      
+      alert(submitted ? "Final record submitted and locked!" : "Progress saved successfully!");
+    }
   };
 
-  return { logData, setLogData, saveLogs, loading };
+  return { logData, setLogData, saveLogs, loading, metadata };
 }
