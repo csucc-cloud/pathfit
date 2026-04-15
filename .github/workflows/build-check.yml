@@ -2,7 +2,7 @@ name: PATHFit Pro Build Check
 
 on:
   push:
-    branches: [ main, dev ] # Runs on every push to these branches
+    branches: [ main, dev ]
   pull_request:
     branches: [ main ]
 
@@ -18,7 +18,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
+          # Removed the cache: 'npm' line to prevent the lockfile error
 
       - name: 3. Install dependencies
         run: npm install
@@ -26,6 +26,5 @@ jobs:
       - name: 4. Production Build
         run: npm run build
         env:
-          # These must match your Supabase config in lib/supabaseClient.js
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
