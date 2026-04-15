@@ -1,29 +1,26 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
-import { Mail, Lock, LogIn, UserPlus, Loader2 } from 'lucide-react';
+import { Mail, Lock, LogIn, Loader2 } from 'lucide-react';
 
 export default function Login() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [isSignUp, setIsSignUp] = useState(false);
 
   const handleEmailAuth = async (e) => {
     e.preventDefault();
     if (!supabase) return;
     setLoading(true);
 
-    const { data, error } = isSignUp 
-      ? await supabase.auth.signUp({ email, password })
-      : await supabase.auth.signInWithPassword({ email, password });
+    // Only performing Sign In here since Sign Up is moved to a dedicated page
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
       alert(error.message);
     } else {
-      if (isSignUp) alert("Account created! You can now log in.");
-      else router.push('/practicum/1');
+      router.push('/practicum/1');
     }
     setLoading(false);
   };
@@ -77,12 +74,10 @@ export default function Login() {
           >
             {loading ? (
               <Loader2 className="w-4 h-4 animate-spin" />
-            ) : isSignUp ? (
-              <UserPlus className="w-4 h-4" />
             ) : (
               <LogIn className="w-4 h-4" />
             )}
-            <span>{loading ? 'Processing...' : (isSignUp ? 'Create Account' : 'Login')}</span>
+            <span>{loading ? 'Processing...' : 'Login'}</span>
           </button>
         </form>
 
@@ -90,17 +85,17 @@ export default function Login() {
           <div className="flex-1 border-t border-gray-100"></div>
         </div>
 
-        {/* Switch between Sign In / Sign Up */}
+        {/* Teleport to Register Page */}
         <button 
-          onClick={() => setIsSignUp(!isSignUp)}
+          onClick={() => router.push('/auth/register')}
           className="text-xs font-bold text-fbOrange hover:underline flex items-center justify-center gap-1 mx-auto"
         >
-          {isSignUp ? "Already have an account? Login" : "New student? Create an account"}
+          New student? Create an account
         </button>
 
         {/* Footer Note */}
         <p className="mt-8 text-[10px] text-gray-300 uppercase tracking-widest font-black">
-          Student Portal v1.0
+          Student Portal v1.1
         </p>
       </div>
     </div>
