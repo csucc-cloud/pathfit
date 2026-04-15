@@ -53,7 +53,7 @@ export default function Login() {
         router.push('/admin');
       } else {
         // Teleport to Student Practicum Log
-        router.push('/practicum/1');
+        router.push('/dashboard');
       }
     }
     setLoading(false);
