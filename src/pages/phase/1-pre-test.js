@@ -138,113 +138,124 @@ export default function PreTest() {
 
   // ... (keep all your imports and logic at the top exactly the same)
 
-  return (
-    <Layout title="Phase 1: Pre-Test Diagnostic">
-      <div className="max-w-[1400px] mx-auto px-4 pb-40">
-        
-        {/* HEADER SECTION */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between py-10 gap-6 border-b border-gray-100 mb-10">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="bg-[#039be5]/10 text-[#039be5] text-[10px] font-black px-2 py-1 rounded uppercase tracking-wider">Phase 1</span>
-              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">Institutional Fitness Curriculum</span>
-            </div>
-            <h1 className="text-4xl font-black text-gray-900 tracking-tighter uppercase italic">
-              Baseline <span className="text-[#039be5]">Assessment</span>
-            </h1>
-            <p className="text-gray-500 text-sm mt-2 max-w-xl">
-              Complete your initial diagnostic sets. These scores will serve as your semester baseline for progress tracking.
-            </p>
-          </div>
+  // ... (Logic remains identical)
 
-          <div className="flex flex-col items-end gap-3">
-            {!hasCompleted ? (
-              <button 
-                onClick={savePreTest}
-                disabled={isSubmitting}
-                className="group relative flex items-center gap-3 bg-[#039be5] text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-200 hover:bg-blue-600 transition-all active:scale-95 disabled:opacity-50"
-              >
-                {isSubmitting ? <RefreshCw className="animate-spin" size={18} /> : <ShieldCheck size={18} />}
-                Sync Baseline & Lock
-              </button>
-            ) : (
-              <button 
-                onClick={() => router.push('/phase/2-weekly-logs')}
-                className="flex items-center gap-3 bg-gray-900 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl hover:bg-black transition-all active:scale-95"
-              >
-                Go to Weekly Logs <ChevronRight size={18} />
-              </button>
-            )}
+return (
+  <Layout title="Phase 1: Pre-Test Diagnostic">
+    {/* Animated Background Decor */}
+    <div className="fixed top-0 right-0 -z-10 opacity-5">
+       <Dumbbell size={600} className="rotate-12 text-slate-900" />
+    </div>
+
+    <div className="max-w-[1400px] mx-auto px-6 pb-40">
+      
+      {/* ENHANCED HEADER */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between py-12 gap-8 border-b border-slate-100 mb-12">
+        <div className="space-y-3">
+          <div className="inline-flex items-center gap-2 bg-slate-900 text-white px-4 py-1.5 rounded-full shadow-lg">
+            <Activity size={14} className="text-[#039be5]" />
+            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Diagnostic Session 01</span>
           </div>
+          <h1 className="text-5xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">
+            Performance <span className="text-[#039be5]">Baseline</span>
+          </h1>
+          <p className="text-slate-500 text-base font-medium max-w-2xl border-l-4 border-[#039be5] pl-4">
+            Establishing your initial biometric output. This data is permanent and serves as the foundation for your semester growth curve.
+          </p>
         </div>
 
-        {/* EXERCISE CARDS GRID - Now using styles.exerciseCard */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {EXERCISES.map((ex) => (
-            <div 
-              key={ex.id} 
-              className={`${styles.exerciseCard} group ${hasCompleted ? 'opacity-90' : ''}`}
+        <div className="flex items-center gap-4">
+          {!hasCompleted ? (
+            <button 
+              onClick={savePreTest}
+              disabled={isSubmitting}
+              className="flex items-center gap-4 bg-[#039be5] hover:bg-[#01579b] text-white px-10 py-5 rounded-[2rem] font-black text-sm uppercase tracking-widest shadow-[0_20px_40px_-10px_rgba(3,155,229,0.4)] transition-all active:scale-95 disabled:opacity-50"
             >
-              <div className="flex justify-between items-start mb-6">
-                <div className="flex-1">
-                  <h3 className="text-lg font-black text-gray-900 uppercase italic tracking-tight group-hover:text-[#039be5] transition-colors leading-tight">
-                    {ex.name}
-                  </h3>
-                  <div className="flex items-center gap-2 mt-2">
-                    <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Target: {ex.goal || 'Max Effort'}</span>
-                    <span className="w-1 h-1 rounded-full bg-gray-300"></span>
-                    <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">{ex.sets} Sets</span>
-                  </div>
-                </div>
-                <div className={`p-3 rounded-2xl ${hasCompleted ? 'bg-green-50 text-green-500' : 'bg-gray-50 text-gray-400'}`}>
-                  {hasCompleted ? <Lock size={20} /> : <Dumbbell size={20} />}
-                </div>
-              </div>
-
-              {/* SET INPUTS - Now using styles.setInput and styles.noSpinners */}
-              <div className="grid grid-cols-3 gap-3 mb-8">
-                {[1, 2, 3].map((s) => (
-                  <div key={s} className="flex flex-col gap-2">
-                    <label className="text-[8px] font-black text-gray-300 uppercase tracking-tighter ml-1">Set {s}</label>
-                    <input 
-                      type="number" 
-                      disabled={hasCompleted || isLockedOut || (ex.sets < s)}
-                      value={results[`${ex.id}_set${s}`] || ""}
-                      placeholder={ex.sets < s ? "—" : "0"}
-                      className={`${styles.setInput} ${styles.noSpinners}`}
-                      onChange={(e) => handleUpdate(ex.id, s, e.target.value)}
-                    />
-                  </div>
-                ))}
-              </div>
-
-              {/* CARD FOOTER */}
-              <div className="flex items-center justify-between pt-6 border-t border-gray-50">
-                <div className="flex flex-col">
-                  <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">Mean Baseline</span>
-                  <span className="text-xl font-black text-gray-900 tracking-tighter mt-1">
-                    {calculateMean(ex.id)} <span className="text-[10px] text-gray-400">{ex.unit || 'Reps'}</span>
-                  </span>
-                </div>
-                {results[`${ex.id}_set1`] ? (
-                  <div className="bg-green-100 p-2 rounded-full">
-                    <CheckCircle2 size={16} className="text-green-600" />
-                  </div>
-                ) : (
-                  <div className="bg-gray-50 p-2 rounded-full">
-                    <Clock size={16} className="text-gray-300" />
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
+              {isSubmitting ? <RefreshCw className="animate-spin" size={20} /> : <ShieldCheck size={20} />}
+              Authorize & Lock Baseline
+            </button>
+          ) : (
+            <button 
+              onClick={() => router.push('/phase/2-weekly-logs')}
+              className="flex items-center gap-4 bg-slate-900 hover:bg-black text-white px-10 py-5 rounded-[2rem] font-black text-sm uppercase tracking-widest shadow-2xl transition-all active:scale-95"
+            >
+              Enter Training Phase <ChevronRight size={20} />
+            </button>
+          )}
         </div>
       </div>
 
-      <style jsx global>{`
-        body { background-color: #f8fafc !important; }
-      `}</style>
-    </Layout>
-  );
-}
+      {/* ENHANCED CARDS GRID */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+        {EXERCISES.map((ex) => (
+          <div 
+            key={ex.id} 
+            className={`${styles.exerciseCard} ${hasCompleted ? 'opacity-80' : ''}`}
+          >
+            {/* Exercise Title Area */}
+            <div className="flex justify-between items-start mb-8">
+              <div className="space-y-1">
+                <h3 className="text-2xl font-black text-slate-900 uppercase italic tracking-tighter leading-tight group-hover:text-[#039be5]">
+                  {ex.name}
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                   <span className="bg-slate-100 text-slate-500 text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest">
+                     Target: {ex.goal || '8-12 reps'}
+                   </span>
+                   <span className="bg-blue-50 text-[#039be5] text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest">
+                     {ex.sets} Sets Required
+                   </span>
+                </div>
+              </div>
+              <div className={`p-4 rounded-[1.25rem] shadow-sm ${hasCompleted ? 'bg-green-100 text-green-600' : 'bg-slate-50 text-slate-400'}`}>
+                {hasCompleted ? <Lock size={22} /> : <Dumbbell size={22} />}
+              </div>
+            </div>
 
+            {/* Inputs Section */}
+            <div className="grid grid-cols-3 gap-4 mb-10">
+              {[1, 2, 3].map((s) => (
+                <div key={s} className="space-y-3">
+                  <div className="flex items-center justify-center gap-1">
+                    <div className="h-1 w-4 bg-slate-200 rounded-full"></div>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Set {s}</label>
+                    <div className="h-1 w-4 bg-slate-200 rounded-full"></div>
+                  </div>
+                  <input 
+                    type="number" 
+                    disabled={hasCompleted || isLockedOut || (ex.sets < s)}
+                    value={results[`${ex.id}_set${s}`] || ""}
+                    placeholder={ex.sets < s ? "—" : "0"}
+                    className={`${styles.setInput} ${styles.noSpinners}`}
+                    onChange={(e) => handleUpdate(ex.id, s, e.target.value)}
+                  />
+                </div>
+              ))}
+            </div>
+
+            {/* Enhanced Footer Statistics */}
+            <div className="flex items-center justify-between p-6 bg-slate-50/50 rounded-3xl border border-slate-100">
+              <div className="flex flex-col">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Mean Diagnostic Output</span>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-3xl font-black text-slate-900 italic tracking-tighter">
+                    {calculateMean(ex.id)}
+                  </span>
+                  <span className="text-xs font-black text-[#039be5] uppercase tracking-widest italic">{ex.unit || 'Reps'}</span>
+                </div>
+              </div>
+              
+              <div className="flex items-center justify-center h-12 w-12 rounded-2xl bg-white shadow-sm border border-slate-100">
+                {results[`${ex.id}_set1`] ? (
+                   <CheckCircle2 size={24} className="text-green-500" />
+                ) : (
+                   <div className="h-3 w-3 bg-slate-200 rounded-full animate-pulse"></div>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </Layout>
+);
