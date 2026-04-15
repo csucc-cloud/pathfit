@@ -14,7 +14,7 @@ import {
   Dumbbell,
   AlertCircle
 } from 'lucide-react';
-import '../../styles/pretest.css';
+import styles from '../../styles/pretest.module.css';
 
 export default function PreTest() {
   const router = useRouter();
@@ -136,6 +136,8 @@ export default function PreTest() {
     );
   }
 
+  // ... (keep all your imports and logic at the top exactly the same)
+
   return (
     <Layout title="Phase 1: Pre-Test Diagnostic">
       <div className="max-w-[1400px] mx-auto px-4 pb-40">
@@ -176,12 +178,12 @@ export default function PreTest() {
           </div>
         </div>
 
-        {/* EXERCISE CARDS GRID */}
+        {/* EXERCISE CARDS GRID - Now using styles.exerciseCard */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {EXERCISES.map((ex) => (
             <div 
               key={ex.id} 
-              className={`bg-white rounded-[2rem] border border-gray-100 p-8 shadow-sm transition-all hover:shadow-md relative overflow-hidden group ${hasCompleted ? 'opacity-90' : ''}`}
+              className={`${styles.exerciseCard} group ${hasCompleted ? 'opacity-90' : ''}`}
             >
               <div className="flex justify-between items-start mb-6">
                 <div className="flex-1">
@@ -199,7 +201,7 @@ export default function PreTest() {
                 </div>
               </div>
 
-              {/* SET INPUTS */}
+              {/* SET INPUTS - Now using styles.setInput and styles.noSpinners */}
               <div className="grid grid-cols-3 gap-3 mb-8">
                 {[1, 2, 3].map((s) => (
                   <div key={s} className="flex flex-col gap-2">
@@ -209,13 +211,7 @@ export default function PreTest() {
                       disabled={hasCompleted || isLockedOut || (ex.sets < s)}
                       value={results[`${ex.id}_set${s}`] || ""}
                       placeholder={ex.sets < s ? "—" : "0"}
-                      className={`
-                        w-full h-14 rounded-2xl text-center font-black text-base outline-none transition-all
-                        ${ex.sets < s 
-                          ? 'bg-gray-50 text-gray-200 border-transparent cursor-not-allowed' 
-                          : 'bg-gray-50/50 border-2 border-transparent text-[#039be5] focus:bg-white focus:border-[#039be5] focus:ring-4 focus:ring-blue-50'}
-                        ${hasCompleted ? 'bg-gray-50/30 text-gray-400' : ''}
-                      `}
+                      className={`${styles.setInput} ${styles.noSpinners}`}
                       onChange={(e) => handleUpdate(ex.id, s, e.target.value)}
                     />
                   </div>
@@ -247,9 +243,7 @@ export default function PreTest() {
 
       <style jsx global>{`
         body { background-color: #f8fafc !important; }
-        input::-webkit-outer-spin-button, 
-        input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
       `}</style>
     </Layout>
   );
-              }
+}
