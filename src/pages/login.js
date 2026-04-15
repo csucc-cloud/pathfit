@@ -1,3 +1,4 @@
+// src/pages/login.js (or wherever your login file is located)
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
@@ -52,8 +53,9 @@ export default function Login() {
         // Teleport to Instructor Dashboard
         router.push('/admin');
       } else {
-        // Teleport to Student Practicum Log
-        router.push('/dashboard');
+        // UPDATED: Teleport to the new Student Dashboard
+        // This ensures students land on the 8-week timeline hub
+        router.push('/dashboard'); 
       }
     }
     setLoading(false);
