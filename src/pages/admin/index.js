@@ -56,7 +56,7 @@ export default function AdminDashboard() {
               <input 
                 type="text"
                 placeholder="Search Student ID..."
-                className="pl-10 pr-4 py-2 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-fbOrange outline-none w-64"
+                className="pl-10 pr-4 py-2 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-fbOrange outline-none w-64 shadow-sm"
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
@@ -97,7 +97,7 @@ export default function AdminDashboard() {
                 <th className="p-4 text-[10px] font-black uppercase text-gray-400">Completion</th>
                 <th className="p-4 text-[10px] font-black uppercase text-gray-400">
                    <div className="flex items-center gap-2">
-                    <Calendar className="w-3 h-3" /> Last Activity
+                    <Calendar className="w-3 h-3 text-fbOrange" /> Last Activity
                    </div>
                 </th>
                 <th className="p-4 text-[10px] font-black uppercase text-gray-400 text-right">Action</th>
@@ -114,24 +114,26 @@ export default function AdminDashboard() {
                   </td>
                 </tr>
               ) : filteredStudents.map((s) => (
-                <tr key={s.id} className="hover:bg-fbGray/50 transition-colors">
-                  <td className="p-4 font-bold text-sm text-fbNavy font-mono">{s.id.slice(0, 8)}...</td>
+                <tr key={s.id} className="hover:bg-fbGray/50 transition-colors group">
+                  <td className="p-4 font-bold text-sm text-fbNavy font-mono uppercase tracking-tight">
+                    {s.id.slice(0, 8)}...
+                  </td>
                   <td className="p-4">
                     <div className="flex items-center gap-3">
                       <div className="flex-1 h-1.5 bg-gray-100 rounded-full max-w-[100px]">
                         <div 
-                          className="h-full bg-fbOrange rounded-full shadow-[0_0_8px_rgba(245,124,0,0.4)]" 
+                          className="h-full bg-fbOrange rounded-full shadow-[0_0_8px_rgba(245,124,0,0.4)] transition-all duration-700" 
                           style={{ width: `${(s.exercises / 15) * 100}%` }}
                         ></div>
                       </div>
                       <span className="text-xs font-bold text-fbNavy">{s.exercises}/15</span>
                     </div>
                   </td>
-                  <td className="p-4 text-xs text-gray-500">
+                  <td className="p-4 text-xs text-gray-500 font-medium">
                     {new Date(s.lastActive).toLocaleDateString()}
                   </td>
                   <td className="p-4 text-right">
-                    <button className="text-fbOrange font-bold text-xs hover:underline flex items-center gap-1 justify-end ml-auto">
+                    <button className="text-fbOrange font-bold text-xs hover:underline flex items-center gap-1 justify-end ml-auto group-hover:translate-x-[-4px] transition-transform">
                       <Eye className="w-3 h-3" />
                       View Full Log
                     </button>
@@ -143,7 +145,8 @@ export default function AdminDashboard() {
                   <td colSpan="4" className="p-10 text-center text-gray-400">
                     <div className="flex flex-col items-center gap-2">
                       <Search className="w-8 h-8 opacity-20" />
-                      <p>No student records found.</p>
+                      <p className="font-bold">No student records found.</p>
+                      <span className="text-xs opacity-60">Try searching for a different ID</span>
                     </div>
                   </td>
                 </tr>
