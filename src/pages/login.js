@@ -1,18 +1,16 @@
-// src/pages/login.js
-import React, { useState } from 'react'; // Added useState for credentials
+
+import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
+import { Mail, Lock, LogIn, UserPlus, Chrome, Loader2 } from 'lucide-react';
 
 export default function Login() {
   const router = useRouter();
-
-  // Added state for Email/Password management
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
-
-  // Your original handleLogin logic preserved (referenced for Google if needed)
+  
   const handleGoogleLogin = async () => {
     if (!supabase) {
       console.error("Supabase client not initialized.");
@@ -26,7 +24,7 @@ export default function Login() {
     });
   };
 
-  // New Email/Password Auth Logic
+
   const handleEmailAuth = async (e) => {
     e.preventDefault();
     if (!supabase) return;
@@ -52,7 +50,7 @@ export default function Login() {
         
         {/* Brand Logo - Orange Firebase Aesthetic */}
         <div className="w-16 h-16 bg-fbOrange rounded-2xl rotate-3 shadow-lg mx-auto mb-6 flex items-center justify-center transition-transform hover:rotate-0">
-          <span className="text-white text-3xl font-bold">P</span>
+          <LogIn className="text-white w-8 h-8" />
         </div>
 
         {/* Branding Text */}
@@ -65,26 +63,41 @@ export default function Login() {
         
         {/* Email & Password Form */}
         <form onSubmit={handleEmailAuth} className="space-y-3 mb-4">
-          <input 
-            type="email" 
-            placeholder="University Email" 
-            required
-            className="w-full p-3 rounded-xl border border-gray-100 bg-fbGray/30 text-sm focus:ring-2 focus:ring-fbOrange outline-none transition-all"
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <input 
-            type="password" 
-            placeholder="Password" 
-            required
-            className="w-full p-3 rounded-xl border border-gray-100 bg-fbGray/30 text-sm focus:ring-2 focus:ring-fbOrange outline-none transition-all"
-            onChange={(e) => setPassword(e.target.value)}
-          />
+          <div className="relative">
+            <Mail className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
+            <input 
+              type="email" 
+              placeholder="University Email" 
+              required
+              className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-100 bg-fbGray/30 text-sm focus:ring-2 focus:ring-fbOrange outline-none transition-all"
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+          
+          <div className="relative">
+            <Lock className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
+            <input 
+              type="password" 
+              placeholder="Password" 
+              required
+              className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-100 bg-fbGray/30 text-sm focus:ring-2 focus:ring-fbOrange outline-none transition-all"
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+
           <button 
             type="submit"
             disabled={loading}
-            className="w-full bg-fbNavy text-white py-3 rounded-xl font-bold hover:bg-opacity-90 transition-all active:scale-95 shadow-md disabled:opacity-50"
+            className="w-full bg-fbNavy text-white py-3 rounded-xl font-bold hover:bg-opacity-90 transition-all active:scale-95 shadow-md disabled:opacity-50 flex items-center justify-center gap-2"
           >
-            {loading ? 'Processing...' : (isSignUp ? 'Create Account' : 'Login')}
+            {loading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : isSignUp ? (
+              <UserPlus className="w-4 h-4" />
+            ) : (
+              <LogIn className="w-4 h-4" />
+            )}
+            <span>{loading ? 'Processing...' : (isSignUp ? 'Create Account' : 'Login')}</span>
           </button>
         </form>
 
@@ -97,20 +110,16 @@ export default function Login() {
         {/* Your Original Auth Button (Google) */}
         <button 
           onClick={handleGoogleLogin}
-          className="w-full flex items-center justify-center gap-3 bg-white border-2 border-gray-100 py-3 rounded-xl font-bold text-fbNavy hover:bg-gray-50 hover:border-fbOrange/20 transition-all active:scale-95 shadow-sm mb-4"
+          className="w-full flex items-center justify-center gap-3 bg-white border-2 border-gray-100 py-3 rounded-xl font-bold text-fbNavy hover:bg-gray-50 hover:border-fbOrange/20 transition-all active:scale-95 shadow-sm mb-4 text-sm"
         >
-          <img 
-            src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" 
-            className="w-5 h-5" 
-            alt="Google Logo" 
-          />
+          <Chrome className="w-5 h-5 text-fbOrange" />
           <span className="bg-clip-text">Continue with Google</span>
         </button>
 
         {/* Switch between Sign In / Sign Up */}
         <button 
           onClick={() => setIsSignUp(!isSignUp)}
-          className="text-xs font-bold text-fbOrange hover:underline"
+          className="text-xs font-bold text-fbOrange hover:underline flex items-center justify-center gap-1 mx-auto"
         >
           {isSignUp ? "Already have an account? Login" : "New student? Create an account"}
         </button>
