@@ -2,9 +2,9 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import Layout from '../components/Layout';
-import RoleGuard from '../components/RoleGuard';
-import { supabase } from '../lib/supabaseClient';
+import Layout from '../../components/Layout';
+import RoleGuard from '../../components/RoleGuard';
+import { supabase } from '../../lib/supabaseClient';
 import { 
   Lock, 
   CheckCircle2, 
