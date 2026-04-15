@@ -14,6 +14,7 @@ import {
   Dumbbell,
   AlertCircle
 } from 'lucide-react';
+import styles from './styles/pretest.css';
 
 export default function PreTest() {
   const router = useRouter();
