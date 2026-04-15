@@ -1,59 +1,35 @@
 .exerciseCard {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(10px);
-  border-radius: 2.5rem;
-  border: 1px solid rgba(241, 245, 249, 0.5);
-  padding: 2.5rem;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.04);
-  position: relative;
-  overflow: hidden;
+  background: #ffffff;
+  border-radius: 12px; /* Matching the screenshot's subtle roundness */
+  border: 1px solid #eef2f6;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  transition: transform 0.2s ease;
 }
 
 .exerciseCard:hover {
-  transform: translateY(-8px) scale(1.02);
-  box-shadow: 0 30px 60px -15px rgba(3, 155, 229, 0.15);
+  transform: translateY(-2px);
   border-color: #039be5;
-  background: #ffffff;
-}
-
-/* A subtle accent line for each card */
-.exerciseCard::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 4px;
-  background: linear-gradient(90deg, #039be5, #01579b);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.exerciseCard:hover::before {
-  opacity: 1;
 }
 
 .setInput {
   width: 100%;
-  height: 4rem;
-  border-radius: 1.25rem;
+  height: 45px;
+  background-color: #f1f5f9; /* The specific light gray from your screenshot */
+  border: 1px solid transparent;
+  border-radius: 8px;
   text-align: center;
-  font-weight: 900;
-  font-size: 1.25rem;
-  border: 2px solid #f1f5f9;
-  background-color: #f8fafc;
-  color: #039be5;
-  transition: all 0.3s ease;
-  outline: none;
-  font-family: inherit;
+  font-weight: 700;
+  color: #1e293b;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
 }
 
 .setInput:focus {
   background-color: #ffffff;
   border-color: #039be5;
-  color: #051e34;
-  box-shadow: 0 10px 20px -5px rgba(3, 155, 229, 0.2);
+  box-shadow: 0 0 0 3px rgba(3, 155, 229, 0.1);
+  outline: none;
 }
 
 .noSpinners::-webkit-outer-spin-button,
