@@ -42,7 +42,7 @@ const Layout = ({ children }) => {
             P
           </div>
           <h1 className="text-xl font-bold tracking-tight">
-            PATHFit <span className="text-fbAmber">Pro</span>
+            PATHFit <span className="text-fbAmber">Portal</span>
           </h1>
         </div>
         
