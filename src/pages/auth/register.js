@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { useRouter } from 'next/router'; // Import useRouter for the teleport
 import { supabase } from '../../lib/supabaseClient';
 
 export default function Register() {
+  const router = useRouter(); // Initialize the router
   const [formData, setFormData] = useState({
     studentId: '',
     email: '',
@@ -45,6 +47,8 @@ export default function Register() {
         alert("Auth created, but profile failed: " + profileError.message);
       } else {
         alert("Account Created! You can now log in.");
+        // THE TELEPORT: Redirecting back to the login page (root path)
+        router.push('/'); 
       }
     }
   };
@@ -85,7 +89,7 @@ export default function Register() {
           onChange={(e) => setFormData({...formData, password: e.target.value})} required />
 
         <button type="submit" className="w-full bg-fbOrange text-white font-black py-4 rounded-2xl shadow-lg hover:scale-[1.02] transition-transform">
-          Submit Enrollment
+          Create Account
         </button>
       </form>
     </div>
