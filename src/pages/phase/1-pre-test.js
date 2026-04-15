@@ -35,7 +35,6 @@ export default function PreTest() {
       return;
     }
 
-    // Check if Phase 1 is already completed
     const { data: existingLogs } = await supabase
       .from('performance_logs')
       .select('*')
@@ -53,7 +52,6 @@ export default function PreTest() {
       setResults(savedResults);
     }
 
-    // 10-Day Deadline Logic
     const accountCreated = new Date(user.created_at);
     const now = new Date();
     const diffTime = Math.abs(now - accountCreated);
@@ -130,131 +128,123 @@ export default function PreTest() {
             <AlertCircle size={40} className="text-red-500" />
           </div>
           <h1 className="text-2xl font-black text-gray-900 uppercase">Window Closed</h1>
-          <p className="text-gray-500 mt-4 text-sm leading-relaxed">The 10-day baseline submission period has ended. You can no longer submit or edit Phase 1 data.</p>
+          <p className="text-gray-500 mt-4 text-sm leading-relaxed">The 10-day baseline submission period has ended.</p>
         </div>
       </Layout>
     );
   }
 
-  // ... (keep all your imports and logic at the top exactly the same)
-
-  // ... (Logic remains identical)
-
-return (
-  <Layout title="Phase 1: Pre-Test Diagnostic">
-    {/* Animated Background Decor */}
-    <div className="fixed top-0 right-0 -z-10 opacity-5">
-       <Dumbbell size={600} className="rotate-12 text-slate-900" />
-    </div>
-
-    <div className="max-w-[1400px] mx-auto px-6 pb-40">
-      
-      {/* ENHANCED HEADER */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between py-12 gap-8 border-b border-slate-100 mb-12">
-        <div className="space-y-3">
-          <div className="inline-flex items-center gap-2 bg-slate-900 text-white px-4 py-1.5 rounded-full shadow-lg">
-            <Activity size={14} className="text-[#039be5]" />
-            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Diagnostic Session 01</span>
+  return (
+    <Layout title="Phase 1: Pre-Test Diagnostic">
+      <div className="max-w-[1400px] mx-auto px-6 pb-40">
+        
+        {/* HEADER SECTION */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between py-12 gap-8 border-b border-slate-100 mb-12">
+          <div className="space-y-3">
+            <div className="inline-flex items-center gap-2 bg-slate-900 text-white px-4 py-1.5 rounded-full shadow-lg">
+              <Activity size={14} className="text-[#039be5]" />
+              <span className="text-[10px] font-black uppercase tracking-[0.2em]">Diagnostic Session 01</span>
+            </div>
+            <h1 className="text-5xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">
+              Performance <span className="text-[#039be5]">Baseline</span>
+            </h1>
+            <p className="text-slate-500 text-base font-medium max-w-2xl border-l-4 border-[#039be5] pl-4">
+              Establishing your initial biometric output. This data serves as the foundation for your semester growth curve.
+            </p>
           </div>
-          <h1 className="text-5xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">
-            Performance <span className="text-[#039be5]">Baseline</span>
-          </h1>
-          <p className="text-slate-500 text-base font-medium max-w-2xl border-l-4 border-[#039be5] pl-4">
-            Establishing your initial biometric output. This data is permanent and serves as the foundation for your semester growth curve.
-          </p>
+
+          <div className="flex items-center gap-4">
+            {!hasCompleted ? (
+              <button 
+                onClick={savePreTest}
+                disabled={isSubmitting}
+                className="flex items-center gap-4 bg-[#039be5] hover:bg-[#01579b] text-white px-10 py-5 rounded-[2rem] font-black text-sm uppercase tracking-widest shadow-[0_20px_40px_-10px_rgba(3,155,229,0.4)] transition-all active:scale-95 disabled:opacity-50"
+              >
+                {isSubmitting ? <RefreshCw className="animate-spin" size={20} /> : <ShieldCheck size={20} />}
+                Authorize & Lock Baseline
+              </button>
+            ) : (
+              <button 
+                onClick={() => router.push('/phase/2-weekly-logs')}
+                className="flex items-center gap-4 bg-slate-900 hover:bg-black text-white px-10 py-5 rounded-[2rem] font-black text-sm uppercase tracking-widest shadow-2xl transition-all active:scale-95"
+              >
+                Enter Training Phase <ChevronRight size={20} />
+              </button>
+            )}
+          </div>
         </div>
 
-        <div className="flex items-center gap-4">
-          {!hasCompleted ? (
-            <button 
-              onClick={savePreTest}
-              disabled={isSubmitting}
-              className="flex items-center gap-4 bg-[#039be5] hover:bg-[#01579b] text-white px-10 py-5 rounded-[2rem] font-black text-sm uppercase tracking-widest shadow-[0_20px_40px_-10px_rgba(3,155,229,0.4)] transition-all active:scale-95 disabled:opacity-50"
+        {/* CARDS GRID */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+          {EXERCISES.map((ex) => (
+            <div 
+              key={ex.id} 
+              className={`${styles.exerciseCard} ${hasCompleted ? 'opacity-80' : ''}`}
             >
-              {isSubmitting ? <RefreshCw className="animate-spin" size={20} /> : <ShieldCheck size={20} />}
-              Authorize & Lock Baseline
-            </button>
-          ) : (
-            <button 
-              onClick={() => router.push('/phase/2-weekly-logs')}
-              className="flex items-center gap-4 bg-slate-900 hover:bg-black text-white px-10 py-5 rounded-[2rem] font-black text-sm uppercase tracking-widest shadow-2xl transition-all active:scale-95"
-            >
-              Enter Training Phase <ChevronRight size={20} />
-            </button>
-          )}
+              <div className="flex justify-between items-start mb-8">
+                <div className="space-y-1">
+                  <h3 className="text-2xl font-black text-slate-900 uppercase italic tracking-tighter leading-tight">
+                    {ex.name}
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                     <span className="bg-slate-100 text-slate-500 text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest">
+                       Target: {ex.goal || 'Max Effort'}
+                     </span>
+                     <span className="bg-blue-50 text-[#039be5] text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest">
+                       {ex.sets} Sets Required
+                     </span>
+                  </div>
+                </div>
+                <div className={`p-4 rounded-[1.25rem] shadow-sm ${hasCompleted ? 'bg-green-100 text-green-600' : 'bg-slate-50 text-slate-400'}`}>
+                  {hasCompleted ? <Lock size={22} /> : <Dumbbell size={22} />}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4 mb-10">
+                {[1, 2, 3].map((s) => (
+                  <div key={s} className="space-y-3">
+                    <div className="flex items-center justify-center gap-1">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Set {s}</label>
+                    </div>
+                    <input 
+                      type="number" 
+                      disabled={hasCompleted || isLockedOut || (ex.sets < s)}
+                      value={results[`${ex.id}_set${s}`] || ""}
+                      placeholder={ex.sets < s ? "—" : "0"}
+                      className={`${styles.setInput} ${styles.noSpinners}`}
+                      onChange={(e) => handleUpdate(ex.id, s, e.target.value)}
+                    />
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex items-center justify-between p-6 bg-slate-50/50 rounded-3xl border border-slate-100">
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Mean Diagnostic</span>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-3xl font-black text-slate-900 italic tracking-tighter">
+                      {calculateMean(ex.id)}
+                    </span>
+                    <span className="text-xs font-black text-[#039be5] uppercase tracking-widest italic">{ex.unit || 'Reps'}</span>
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-center h-12 w-12 rounded-2xl bg-white shadow-sm border border-slate-100">
+                  {results[`${ex.id}_set1`] ? (
+                     <CheckCircle2 size={24} className="text-green-500" />
+                  ) : (
+                     <div className="h-3 w-3 bg-slate-200 rounded-full animate-pulse"></div>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* ENHANCED CARDS GRID */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-        {EXERCISES.map((ex) => (
-          <div 
-            key={ex.id} 
-            className={`${styles.exerciseCard} ${hasCompleted ? 'opacity-80' : ''}`}
-          >
-            {/* Exercise Title Area */}
-            <div className="flex justify-between items-start mb-8">
-              <div className="space-y-1">
-                <h3 className="text-2xl font-black text-slate-900 uppercase italic tracking-tighter leading-tight group-hover:text-[#039be5]">
-                  {ex.name}
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                   <span className="bg-slate-100 text-slate-500 text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest">
-                     Target: {ex.goal || '8-12 reps'}
-                   </span>
-                   <span className="bg-blue-50 text-[#039be5] text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest">
-                     {ex.sets} Sets Required
-                   </span>
-                </div>
-              </div>
-              <div className={`p-4 rounded-[1.25rem] shadow-sm ${hasCompleted ? 'bg-green-100 text-green-600' : 'bg-slate-50 text-slate-400'}`}>
-                {hasCompleted ? <Lock size={22} /> : <Dumbbell size={22} />}
-              </div>
-            </div>
-
-            {/* Inputs Section */}
-            <div className="grid grid-cols-3 gap-4 mb-10">
-              {[1, 2, 3].map((s) => (
-                <div key={s} className="space-y-3">
-                  <div className="flex items-center justify-center gap-1">
-                    <div className="h-1 w-4 bg-slate-200 rounded-full"></div>
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Set {s}</label>
-                    <div className="h-1 w-4 bg-slate-200 rounded-full"></div>
-                  </div>
-                  <input 
-                    type="number" 
-                    disabled={hasCompleted || isLockedOut || (ex.sets < s)}
-                    value={results[`${ex.id}_set${s}`] || ""}
-                    placeholder={ex.sets < s ? "—" : "0"}
-                    className={`${styles.setInput} ${styles.noSpinners}`}
-                    onChange={(e) => handleUpdate(ex.id, s, e.target.value)}
-                  />
-                </div>
-              ))}
-            </div>
-
-            {/* Enhanced Footer Statistics */}
-            <div className="flex items-center justify-between p-6 bg-slate-50/50 rounded-3xl border border-slate-100">
-              <div className="flex flex-col">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Mean Diagnostic Output</span>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-3xl font-black text-slate-900 italic tracking-tighter">
-                    {calculateMean(ex.id)}
-                  </span>
-                  <span className="text-xs font-black text-[#039be5] uppercase tracking-widest italic">{ex.unit || 'Reps'}</span>
-                </div>
-              </div>
-              
-              <div className="flex items-center justify-center h-12 w-12 rounded-2xl bg-white shadow-sm border border-slate-100">
-                {results[`${ex.id}_set1`] ? (
-                   <CheckCircle2 size={24} className="text-green-500" />
-                ) : (
-                   <div className="h-3 w-3 bg-slate-200 rounded-full animate-pulse"></div>
-                )}
-              </div>
-            </div>
-          </div>
-        ))}
-    </div>
-  </Layout>
-);
+      <style jsx global>{`
+        body { background-color: #f8fafc !important; }
+      `}</style>
+    </Layout>
+  );
+}
