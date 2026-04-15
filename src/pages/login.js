@@ -55,7 +55,7 @@ export default function Login() {
 
         {/* Branding Text */}
         <h1 className="text-2xl font-extrabold text-fbNavy mb-2 tracking-tight">
-          PATHFit <span className="text-fbOrange">Pro</span>
+          PATHFit <span className="text-fbOrange">Portal</span>
         </h1>
         <p className="text-gray-500 text-sm mb-8 leading-relaxed">
           Sign in to track your university fitness progress.
