@@ -1,0 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base styles to ensure the app feels like a native dashboard */
+@layer base {
+  body {
+    @apply bg-fbGray text-fbNavy antialiased;
+    /* Prevents the 'bouncy' scroll on mobile but keeps it smooth */
+    overflow-x: hidden;
+  }
+
+  /* Customizing the selection color to match your branding */
+  ::selection {
+    @apply bg-fbOrange/30 text-fbNavy;
+  }
+}
+
+/* Custom utility for the Firebase-style glowing progress bars */
+@layer utilities {
+  .shadow-orange-glow {
+    box-shadow: 0 0 15px rgba(245, 124, 0, 0.4);
+  }
+}
+
+/* Smooth transitions for all interactive elements */
+* {
+  @apply transition-colors duration-200;
+}
