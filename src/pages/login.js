@@ -14,15 +14,28 @@ export default function Login() {
     if (!supabase) return;
     setLoading(true);
 
-    // Only performing Sign In here since Sign Up is moved to a dedicated page
+    // 1. Authenticate the user
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
       alert(error.message);
+      setLoading(false);
     } else {
-      router.push('/practicum/1');
+      // 2. Check if the authenticated user is an instructor
+      const { data: instructor } = await supabase
+        .from('instructors')
+        .select('id')
+        .eq('id', data.user.id)
+        .single();
+
+      if (instructor) {
+        // Teleport to Instructor Dashboard
+        router.push('/admin');
+      } else {
+        // Teleport to Student Practicum Log
+        router.push('/practicum/1');
+      }
     }
-    setLoading(false);
   };
 
   return (
@@ -68,7 +81,7 @@ export default function Login() {
           </div>
 
           <button 
-            type="submit"
+            type="submit" 
             disabled={loading}
             className="w-full bg-fbNavy text-white py-3 rounded-xl font-bold hover:bg-opacity-90 transition-all active:scale-95 shadow-md disabled:opacity-50 flex items-center justify-center gap-2"
           >
@@ -94,8 +107,15 @@ export default function Login() {
         </button>
 
         {/* Footer Note */}
-        <p className="mt-8 text-[10px] text-gray-300 uppercase tracking-widest font-black">
-          Student Portal v1.1
+        <p className="mt-8 text-[10px] text-gray-300 uppercase tracking-widest font-black flex justify-between items-center px-1">
+          <span>Student Portal v1.1</span>
+          {/* Secret tiny link to Faculty Registration */}
+          <button 
+            onClick={() => router.push('/auth/faculty-enroll')} 
+            className="hover:text-fbOrange transition-colors opacity-50"
+          >
+            ·
+          </button>
         </p>
       </div>
     </div>
