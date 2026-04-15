@@ -1,32 +1,69 @@
+// src/pages/admin/index.js
 import React, { useState } from 'react';
 import Layout from '../../components/Layout';
 import { useAdminData } from '../../hooks/useAdminData';
+import { downloadCSV } from '../../utils/exportHelper'; // Assuming the helper is in utils
 
 export default function AdminDashboard() {
   const [pId, setPId] = useState(1);
   const { students, loading } = useAdminData(pId);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Filter students based on ID search without mutating original data
+  const filteredStudents = students.filter(s => 
+    s.id.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handleExport = () => {
+    const exportData = filteredStudents.map(s => ({
+      StudentID: s.id,
+      ExercisesCompleted: s.exercises,
+      Progress: `${Math.round((s.exercises / 15) * 100)}%`,
+      LastActive: new Date(s.lastActive).toLocaleDateString(),
+    }));
+    downloadCSV(exportData, `PATHFit_Practicum_${pId}_Grades`);
+  };
 
   return (
     <Layout>
       <main className="p-8">
-        <header className="flex justify-between items-end mb-8">
+        <header className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
           <div>
             <h1 className="text-3xl font-black text-fbNavy">Instructor Console</h1>
             <p className="text-gray-500 font-medium">Monitoring 500+ Student Enrollments</p>
           </div>
           
-          <div className="flex gap-2 bg-white p-1 rounded-xl border border-gray-200">
-            {[1, 2].map((num) => (
-              <button
-                key={num}
-                onClick={() => setPId(num)}
-                className={`px-6 py-2 rounded-lg font-bold text-sm transition-all ${
-                  pId === num ? 'bg-fbOrange text-white shadow-md' : 'text-gray-400 hover:bg-fbGray'
-                }`}
-              >
-                Practicum {num}
-              </button>
-            ))}
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Search Input for high-volume management */}
+            <input 
+              type="text"
+              placeholder="Search Student ID..."
+              className="px-4 py-2 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-fbOrange outline-none"
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+
+            {/* Export Action */}
+            <button 
+              onClick={handleExport}
+              className="bg-white border border-gray-200 text-fbNavy font-bold px-4 py-2 rounded-xl text-sm hover:bg-fbGray transition-all flex items-center gap-2"
+            >
+              <span>📤</span> Export
+            </button>
+
+            {/* Your Original Practicum Toggle */}
+            <div className="flex gap-2 bg-white p-1 rounded-xl border border-gray-200">
+              {[1, 2].map((num) => (
+                <button
+                  key={num}
+                  onClick={() => setPId(num)}
+                  className={`px-6 py-2 rounded-lg font-bold text-sm transition-all ${
+                    pId === num ? 'bg-fbOrange text-white shadow-md' : 'text-gray-400 hover:bg-fbGray'
+                  }`}
+                >
+                  Practicum {num}
+                </button>
+              ))}
+            </div>
           </div>
         </header>
 
@@ -43,7 +80,7 @@ export default function AdminDashboard() {
             <tbody className="divide-y divide-gray-50">
               {loading ? (
                 <tr><td colSpan="4" className="p-10 text-center animate-pulse text-gray-400">Loading master records...</td></tr>
-              ) : students.map((s) => (
+              ) : filteredStudents.map((s) => (
                 <tr key={s.id} className="hover:bg-fbGray/50 transition-colors">
                   <td className="p-4 font-bold text-sm text-fbNavy font-mono">{s.id.slice(0, 8)}...</td>
                   <td className="p-4">
@@ -65,6 +102,9 @@ export default function AdminDashboard() {
                   </td>
                 </tr>
               ))}
+              {!loading && filteredStudents.length === 0 && (
+                <tr><td colSpan="4" className="p-10 text-center text-gray-400">No student records found.</td></tr>
+              )}
             </tbody>
           </table>
         </div>
