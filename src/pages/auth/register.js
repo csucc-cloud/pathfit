@@ -85,7 +85,7 @@ export default function Register() {
           onChange={(e) => setFormData({...formData, password: e.target.value})} required />
 
         <button type="submit" className="w-full bg-fbOrange text-white font-black py-4 rounded-2xl shadow-lg hover:scale-[1.02] transition-transform">
-          INITIALIZE ENROLLMENT
+          Submit Enrollment
         </button>
       </form>
     </div>
