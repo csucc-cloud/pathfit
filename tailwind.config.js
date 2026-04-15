@@ -1,13 +1,18 @@
-
+/** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ["./src/**/*.{js,ts,jsx,tsx}"],
+  content: [
+    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/hooks/**/*.{js,ts,jsx,tsx,mdx}",
+  ],
   theme: {
     extend: {
       colors: {
-        fbOrange: '#f57c00',    // Primary Action Orange
-        fbAmber: '#ffca28',     // Light Accent Orange
-        fbNavy: '#051e34',      // Sidebar & Depth
-        fbGray: '#f4f7f9',      // App Background
+        // Your specific Firebase-inspired palette
+        fbOrange: '#f57c00',
+        fbAmber: '#ffca28',
+        fbNavy: '#051e34',
+        fbGray: '#f4f7f9',
       },
     },
   },
