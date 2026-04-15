@@ -1,25 +1,48 @@
 // src/pages/login.js
-import React from 'react';
+import React, { useState } from 'react'; // Added useState for credentials
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
 
 export default function Login() {
   const router = useRouter();
 
-  const handleLogin = async () => {
-    // Basic guard: Check if supabase is initialized properly
+  // Added state for Email/Password management
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
+
+  // Your original handleLogin logic preserved (referenced for Google if needed)
+  const handleGoogleLogin = async () => {
     if (!supabase) {
       console.error("Supabase client not initialized.");
       return;
     }
-
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { 
-        // Redirecting specifically to Practicum 1 per your requirement
         redirectTo: `${window.location.origin}/practicum/1` 
       }
     });
+  };
+
+  // New Email/Password Auth Logic
+  const handleEmailAuth = async (e) => {
+    e.preventDefault();
+    if (!supabase) return;
+    setLoading(true);
+
+    const { data, error } = isSignUp 
+      ? await supabase.auth.signUp({ email, password })
+      : await supabase.auth.signInWithPassword({ email, password });
+
+    if (error) {
+      alert(error.message);
+    } else {
+      if (isSignUp) alert("Account created! You can now log in.");
+      else router.push('/practicum/1');
+    }
+    setLoading(false);
   };
 
   return (
@@ -40,18 +63,56 @@ export default function Login() {
           Sign in to track your university fitness progress.
         </p>
         
-        {/* Auth Button */}
+        {/* Email & Password Form */}
+        <form onSubmit={handleEmailAuth} className="space-y-3 mb-4">
+          <input 
+            type="email" 
+            placeholder="University Email" 
+            required
+            className="w-full p-3 rounded-xl border border-gray-100 bg-fbGray/30 text-sm focus:ring-2 focus:ring-fbOrange outline-none transition-all"
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <input 
+            type="password" 
+            placeholder="Password" 
+            required
+            className="w-full p-3 rounded-xl border border-gray-100 bg-fbGray/30 text-sm focus:ring-2 focus:ring-fbOrange outline-none transition-all"
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <button 
+            type="submit"
+            disabled={loading}
+            className="w-full bg-fbNavy text-white py-3 rounded-xl font-bold hover:bg-opacity-90 transition-all active:scale-95 shadow-md disabled:opacity-50"
+          >
+            {loading ? 'Processing...' : (isSignUp ? 'Create Account' : 'Login')}
+          </button>
+        </form>
+
+        <div className="flex items-center my-4">
+          <div className="flex-1 border-t border-gray-100"></div>
+          <span className="px-3 text-[10px] text-gray-300 font-bold uppercase">OR</span>
+          <div className="flex-1 border-t border-gray-100"></div>
+        </div>
+
+        {/* Your Original Auth Button (Google) */}
         <button 
-          onClick={handleLogin}
-          className="w-full flex items-center justify-center gap-3 bg-white border-2 border-gray-100 py-3 rounded-xl font-bold text-fbNavy hover:bg-gray-50 hover:border-fbOrange/20 transition-all active:scale-95 shadow-sm"
+          onClick={handleGoogleLogin}
+          className="w-full flex items-center justify-center gap-3 bg-white border-2 border-gray-100 py-3 rounded-xl font-bold text-fbNavy hover:bg-gray-50 hover:border-fbOrange/20 transition-all active:scale-95 shadow-sm mb-4"
         >
-          {/* Using a Google Icon placeholder that matches the UI aesthetic */}
           <img 
             src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" 
             className="w-5 h-5" 
             alt="Google Logo" 
           />
-          <span className="bg-clip-text">Login with Google</span>
+          <span className="bg-clip-text">Continue with Google</span>
+        </button>
+
+        {/* Switch between Sign In / Sign Up */}
+        <button 
+          onClick={() => setIsSignUp(!isSignUp)}
+          className="text-xs font-bold text-fbOrange hover:underline"
+        >
+          {isSignUp ? "Already have an account? Login" : "New student? Create an account"}
         </button>
 
         {/* Footer Note */}
