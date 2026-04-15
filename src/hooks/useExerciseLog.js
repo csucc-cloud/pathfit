@@ -1,3 +1,4 @@
+// src/hooks/useExerciseLog.js
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 
@@ -8,7 +9,13 @@ export function useExerciseLog(practicumId, studentId) {
   // 1. Load existing data when the page opens
   useEffect(() => {
     async function fetchData() {
-      if (!studentId) return;
+      // Guard: Ensure both IDs and supabase client exist before fetching
+      if (!studentId || !practicumId || !supabase) {
+        setLoading(false);
+        return;
+      }
+      
+      setLoading(true);
       const { data, error } = await supabase
         .from('exercise_logs')
         .select('*')
@@ -18,11 +25,20 @@ export function useExerciseLog(practicumId, studentId) {
       if (data) {
         // Transform array to object { ex1: { set1: 10, ... } }
         const formatted = data.reduce((acc, row) => {
-          acc[row.exercise_id] = { set1: row.set_1_val, set2: row.set_2_val, set3: row.set_3_val };
+          acc[row.exercise_id] = { 
+            set1: row.set_1_val, 
+            set2: row.set_2_val, 
+            set3: row.set_3_val 
+          };
           return acc;
         }, {});
         setLogData(formatted);
       }
+      
+      if (error) {
+        console.error("Error fetching logs:", error.message);
+      }
+      
       setLoading(false);
     }
     fetchData();
@@ -30,6 +46,11 @@ export function useExerciseLog(practicumId, studentId) {
 
   // 2. Save all changes at once
   const saveLogs = async () => {
+    if (!supabase) {
+      alert("Database connection not initialized.");
+      return;
+    }
+
     const rowsToUpsert = Object.entries(logData).map(([exId, sets]) => ({
       student_id: studentId,
       exercise_id: exId,
@@ -39,6 +60,11 @@ export function useExerciseLog(practicumId, studentId) {
       set_3_val: parseFloat(sets.set3 || 0),
       updated_at: new Date(),
     }));
+
+    if (rowsToUpsert.length === 0) {
+      alert("No changes to save.");
+      return;
+    }
 
     const { error } = await supabase
       .from('exercise_logs')
