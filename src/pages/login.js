@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
 import { Mail, Lock, LogIn, Loader2 } from 'lucide-react';
@@ -8,6 +8,26 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Triple-tap secret logic
+  const [tapCount, setTapCount] = useState(0);
+
+  // Resets the secret tap count if user stops tapping for 2 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setTapCount(0);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [tapCount]);
+
+  const handleSecretTap = () => {
+    const nextCount = tapCount + 1;
+    if (nextCount === 3) {
+      router.push('/auth/faculty-enroll');
+    } else {
+      setTapCount(nextCount);
+    }
+  };
 
   const handleEmailAuth = async (e) => {
     e.preventDefault();
@@ -36,6 +56,7 @@ export default function Login() {
         router.push('/practicum/1');
       }
     }
+    setLoading(false);
   };
 
   return (
@@ -106,17 +127,17 @@ export default function Login() {
           New student? Create an account
         </button>
 
-        {/* Footer Note */}
-        <p className="mt-8 text-[10px] text-gray-300 uppercase tracking-widest font-black flex justify-between items-center px-1">
-          <span>Student Portal v1.1</span>
-          {/* Secret tiny link to Faculty Registration */}
+        {/* Footer Note with Triple-Tap '1' Secret */}
+        <div className="mt-8 text-[10px] text-gray-300 uppercase tracking-widest font-black flex justify-center items-center px-1 select-none">
+          <span>Student Portal v1.</span>
           <button 
-            onClick={() => router.push('/auth/faculty-enroll')} 
-            className="hover:text-fbOrange transition-colors opacity-50"
+            type="button"
+            onClick={handleSecretTap}
+            className="hover:text-fbOrange transition-colors cursor-default outline-none"
           >
-            ·
+            1
           </button>
-        </p>
+        </div>
       </div>
     </div>
   );
