@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
-import { Mail, Lock, LogIn, UserPlus, Chrome, Loader2 } from 'lucide-react';
+import { Mail, Lock, LogIn, UserPlus, Loader2 } from 'lucide-react';
 
 export default function Login() {
   const router = useRouter();
@@ -10,20 +9,6 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
-  
-  const handleGoogleLogin = async () => {
-    if (!supabase) {
-      console.error("Supabase client not initialized.");
-      return;
-    }
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { 
-        redirectTo: `${window.location.origin}/practicum/1` 
-      }
-    });
-  };
-
 
   const handleEmailAuth = async (e) => {
     e.preventDefault();
@@ -101,20 +86,9 @@ export default function Login() {
           </button>
         </form>
 
-        <div className="flex items-center my-4">
-          <div className="flex-1 border-t border-gray-100"></div>
-          <span className="px-3 text-[10px] text-gray-300 font-bold uppercase">OR</span>
+        <div className="flex items-center my-6">
           <div className="flex-1 border-t border-gray-100"></div>
         </div>
-
-        {/* Your Original Auth Button (Google) */}
-        <button 
-          onClick={handleGoogleLogin}
-          className="w-full flex items-center justify-center gap-3 bg-white border-2 border-gray-100 py-3 rounded-xl font-bold text-fbNavy hover:bg-gray-50 hover:border-fbOrange/20 transition-all active:scale-95 shadow-sm mb-4 text-sm"
-        >
-          <Chrome className="w-5 h-5 text-fbOrange" />
-          <span className="bg-clip-text">Continue with Google</span>
-        </button>
 
         {/* Switch between Sign In / Sign Up */}
         <button 
@@ -132,6 +106,3 @@ export default function Login() {
     </div>
   );
 }
-
-
-
