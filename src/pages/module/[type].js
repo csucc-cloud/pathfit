@@ -1,13 +1,12 @@
-// src/pages/practicum/[id].js
+// src/pages/module/[type].js
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Layout from '../../components/Layout';
 import ExerciseCard from '../../components/ExerciseCard';
-import RoleGuard from '../../components/RoleGuard'; // Added the security guard
+import RoleGuard from '../../components/RoleGuard'; 
 import { PATHFIT_EXERCISES } from '../../constants/exercises';
 import { useExerciseLog } from '../../hooks/useExerciseLog';
 import { supabase } from '../../lib/supabaseClient';
-// Importing Lucide icons for the student portal
 import { 
   Dumbbell, 
   Save, 
@@ -15,43 +14,76 @@ import {
   Loader2, 
   CheckCircle2, 
   Trophy,
-  Activity
+  Activity,
+  Lock, // Added Lock icon
+  AlertCircle
 } from 'lucide-react';
 
 export default function PracticumLog() {
   const router = useRouter();
-  const { id } = router.query; // Capture '1' or '2' from URL
+  const { type } = router.query; // 'pre', 'post', or '1'-'8'
   const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
 
-  // 1. Check for authenticated user
   useEffect(() => {
     const getUser = async () => {
       if (!supabase) return;
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        router.push('/login'); // Redirect if not logged in
+        router.push('/login');
       } else {
         setUser(user);
+        const { data: prof } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+        setProfile(prof);
       }
     };
     getUser();
   }, [router]);
 
-  // 2. Initialize the Hook with the current Practicum ID
-  const { logData, setLogData, saveLogs, loading } = useExerciseLog(id, user?.id);
+  // Initialize hook with dynamic type
+  const { logData, setLogData, saveLogs, loading, metadata } = useExerciseLog(type, user?.id);
 
-  // 3. Logic to calculate how many cards are "touched" or completed
   const completedCount = Object.keys(logData).length;
 
-  // 4. Update local state when a user types in a card
+  // LOGIC: Determine if this specific module is locked
+  const isExpired = () => {
+    if (!profile?.pre_test_submitted_at || type === 'pre') return false;
+    
+    const start = new Date(profile.pre_test_submitted_at);
+    const now = new Date();
+    const weekNum = parseInt(type);
+    
+    if (isNaN(weekNum)) return false; // Post-test logic handled separately if needed
+
+    const openDate = new Date(start.getTime() + (weekNum * 7 * 24 * 60 * 60 * 1000));
+    const expiryDate = new Date(openDate.getTime() + (11 * 24 * 60 * 60 * 1000));
+    
+    return now > expiryDate;
+  };
+
+  // Final Lock State: If already submitted OR if the 11-day window passed
+  const isLocked = metadata?.is_submitted || isExpired();
+
   const handleInputChange = (exId, setKey, value) => {
+    if (isLocked) return; // Prevent state updates if locked
     setLogData((prev) => ({
       ...prev,
-      [exId]: {
-        ...prev[exId],
-        [setKey]: value,
-      },
+      [exId]: { ...prev[exId], [setKey]: value },
     }));
+  };
+
+  const handleFinalSubmit = async () => {
+    const confirm = window.confirm("FINAL SUBMISSION: Once submitted, you cannot edit this record again. Proceed?");
+    if (confirm) {
+      await saveLogs({ submitted: true, isPreTest: type === 'pre' });
+      if (type === 'pre') {
+        // Trigger the global start date for the semester
+        await supabase.from('profiles').update({ 
+          pre_test_submitted_at: new Date().toISOString() 
+        }).eq('id', user.id);
+      }
+      router.push('/dashboard');
+    }
   };
 
   if (loading || !user) {
@@ -66,27 +98,37 @@ export default function PracticumLog() {
   }
 
   return (
-    /* Wrap the entire page in the RoleGuard to ensure only students enter */
     <RoleGuard allowedRole="student">
       <Layout>
         <main className="p-4 md:p-10 max-w-7xl mx-auto">
-          {/* Header Section */}
+          
+          {/* Lock Banner */}
+          {isLocked && (
+            <div className="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-r-2xl flex items-center gap-3 animate-in fade-in slide-in-from-top-4">
+              <Lock className="text-red-500 w-6 h-6" />
+              <div>
+                <p className="text-red-800 font-black text-sm uppercase italic">Module Locked</p>
+                <p className="text-red-600 text-xs font-medium">This record has been submitted or the time limit has expired. Editing is disabled.</p>
+              </div>
+            </div>
+          )}
+
           <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-10">
             <div>
               <nav className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1 flex items-center gap-2">
                 <Trophy className="w-3 h-3 text-fbAmber" />
-                University Fitness Curriculum • Semester 1
+                University Fitness Curriculum • {type === 'pre' ? 'Initial Assessment' : type === 'post' ? 'Final Assessment' : `Weekly Progress`}
               </nav>
               <div className="flex items-center gap-3">
                 <button 
-                  onClick={() => router.back()}
-                  className="lg:hidden p-2 bg-white rounded-xl shadow-sm border border-gray-100"
+                  onClick={() => router.push('/dashboard')}
+                  className="p-2 bg-white rounded-xl shadow-sm border border-gray-100"
                 >
                   <ChevronLeft className="w-5 h-5 text-fbNavy" />
                 </button>
-                <h2 className="text-3xl font-extrabold text-fbNavy flex items-center gap-3">
+                <h2 className="text-3xl font-extrabold text-fbNavy flex items-center gap-3 capitalize">
                   <Dumbbell className="text-fbOrange w-8 h-8" />
-                  Exercise Log: Practicum {id}
+                  {type === 'pre' || type === 'post' ? `${type}-Test` : `Weekly Log: Week ${type}`}
                 </h2>
               </div>
               
@@ -109,24 +151,31 @@ export default function PracticumLog() {
             </div>
 
             <div className="flex items-center gap-3">
-              <button
-                onClick={saveLogs}
-                className="bg-fbOrange hover:bg-fbOrange/90 text-white px-8 py-4 rounded-2xl font-bold shadow-lg shadow-fbOrange/20 transition-all flex items-center gap-3 active:scale-95 whitespace-nowrap group"
-              >
-                <Save className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-                Save Changes
-              </button>
+              {!isLocked ? (
+                <button
+                  onClick={handleFinalSubmit}
+                  className="bg-fbOrange hover:bg-fbOrange/90 text-white px-8 py-4 rounded-2xl font-bold shadow-lg shadow-fbOrange/20 transition-all flex items-center gap-3 active:scale-95 whitespace-nowrap group"
+                >
+                  <Save className="w-5 h-5 group-hover:rotate-12 transition-transform" />
+                  Final Submission
+                </button>
+              ) : (
+                <div className="bg-gray-100 text-gray-400 px-8 py-4 rounded-2xl font-bold flex items-center gap-3 cursor-not-allowed border border-gray-200">
+                  <Lock className="w-5 h-5" />
+                  Record Sealed
+                </div>
+              )}
             </div>
           </header>
 
-          {/* Dynamic Exercise Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pb-20">
             {PATHFIT_EXERCISES.map((ex) => (
               <ExerciseCard
                 key={ex.id}
                 exercise={ex}
-                values={logData[ex.id]} // Pass existing values from Supabase
-                onChange={handleInputChange} // Pass the change handler
+                values={logData[ex.id]}
+                onChange={handleInputChange}
+                disabled={isLocked} // Ensure ExerciseCard component implements this prop
               />
             ))}
           </div>
