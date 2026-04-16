@@ -11,7 +11,7 @@ import {
   Menu, 
   X, 
   ChevronRight,
-  User,
+  User, // For Profile
   PanelLeftClose,
   PanelLeftOpen,
   ClipboardCheck,
@@ -45,9 +45,10 @@ const Layout = ({ children }) => {
     checkProgress();
   }, []);
 
-  // UPDATED: Added locked status to specific items
+  // UPDATED: Added Profile and kept locked status for specific items
   const menuItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, requiresUnlock: false },
+    { name: 'Student Profile', path: '/profile', icon: User, requiresUnlock: false },
     { name: 'Initial Pre-Test', path: '/module/pre', icon: ClipboardCheck, requiresUnlock: false },
     { name: 'Weekly Logs', path: '/dashboard#logs', icon: Dumbbell, requiresUnlock: true }, 
     { name: 'Final Post-Test', path: '/module/post', icon: History, requiresUnlock: true },
@@ -119,7 +120,7 @@ const Layout = ({ children }) => {
                   <Icon className={`w-5 h-5 min-w-[20px] transition-transform duration-200 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
                   
                   {!isSidebarCollapsed && (
-                    <span className="font-bold text-sm tracking-tight animate-in slide-in-from-left-2 duration-300">
+                    <span className="font-bold text-sm tracking-tight animate-in slide-in-from-left-2 duration-300 text-nowrap">
                       {item.name}
                     </span>
                   )}
