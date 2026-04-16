@@ -1,4 +1,3 @@
-// src/components/Layout.js
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -16,8 +15,27 @@ import {
   PanelLeftOpen,
   ClipboardCheck,
   History,
-  Lock // Added Lock icon for visual feedback
+  Lock, // Added Lock icon for visual feedback
+  Loader2,
+  Activity
 } from 'lucide-react';
+
+// --- UNIVERSAL SKELETON COMPONENT ---
+const UniversalSkeleton = () => (
+  <div className="max-w-[1250px] mx-auto px-4 mt-8 space-y-8 animate-pulse">
+    <div className="h-48 md:h-64 w-full bg-gray-200 rounded-xl" />
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="lg:col-span-4 space-y-4">
+        <div className="h-32 w-full bg-gray-200 rounded-xl" />
+        <div className="h-64 w-full bg-gray-200 rounded-xl" />
+      </div>
+      <div className="lg:col-span-8 space-y-4">
+        <div className="h-12 w-1/3 bg-gray-200 rounded-lg" />
+        <div className="h-96 w-full bg-gray-200 rounded-xl" />
+      </div>
+    </div>
+  </div>
+);
 
 const Layout = ({ children }) => {
   const router = useRouter();
@@ -25,6 +43,7 @@ const Layout = ({ children }) => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [isLocked, setIsLocked] = useState(true); // State to handle locking logic
+  const [isPageLoading, setIsPageLoading] = useState(true); // Skeleton State
 
   // Fetch progress to see if pre-test is done
   useEffect(() => {
@@ -48,7 +67,6 @@ const Layout = ({ children }) => {
   // UPDATED: Added Profile and kept locked status for specific items
   const menuItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, requiresUnlock: false },
-    // Inside src/components/Layout.js
     { name: 'Student Profile', path: '/studprofile/profile', icon: User, requiresUnlock: false },
     { name: 'Initial Pre-Test', path: '/module/pre', icon: ClipboardCheck, requiresUnlock: false },
     { name: 'Weekly Logs', path: '/dashboard#logs', icon: Dumbbell, requiresUnlock: true }, 
@@ -65,6 +83,14 @@ const Layout = ({ children }) => {
   useEffect(() => {
     setMounted(true);
     setIsMobileMenuOpen(false);
+    
+    // Trigger skeleton on every route change
+    setIsPageLoading(true);
+    const timer = setTimeout(() => {
+      setIsPageLoading(false);
+    }, 600); // 600ms is the "sweet spot" for smooth transitions
+
+    return () => clearTimeout(timer);
   }, [router.asPath]);
 
   if (!mounted) return null;
@@ -222,8 +248,14 @@ const Layout = ({ children }) => {
           isSidebarCollapsed ? 'md:ml-20' : 'md:ml-64'
         }`}
       >
-        <div className="flex-1 relative animate-in fade-in duration-500">
-          {children}
+        <div className="flex-1 relative">
+          {isPageLoading ? (
+             <UniversalSkeleton />
+          ) : (
+            <div className="animate-in fade-in duration-500">
+              {children}
+            </div>
+          )}
         </div>
       </main>
     </div>
