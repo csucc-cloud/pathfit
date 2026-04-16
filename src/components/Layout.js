@@ -1,4 +1,4 @@
-// src/components/Layout.jsx
+// src/components/Layout.js
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -22,6 +22,7 @@ const Layout = ({ children }) => {
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   // Consolidated menu items reflecting the new module structure
   const menuItems = [
@@ -38,10 +39,13 @@ const Layout = ({ children }) => {
     }
   };
 
-  // Close mobile menu on route change
+  // Close mobile menu on route change & handle hydration
   useEffect(() => {
+    setMounted(true);
     setIsMobileMenuOpen(false);
   }, [router.asPath]);
+
+  if (!mounted) return null;
 
   return (
     <div className="flex min-h-screen bg-fbGray text-fbNavy font-sans overflow-x-hidden">
