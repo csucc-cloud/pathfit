@@ -1,188 +1,251 @@
-// src/components/Layout.jsx
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
+// src/pages/dashboard.js
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import { supabase } from '../lib/supabaseClient';
+import Link from 'next/link';
+import Layout from '../../components/Layout';
+import RoleGuard from '../../components/RoleGuard';
+import { supabase } from '../../lib/supabaseClient';
 import { 
-  LayoutDashboard, 
-  Dumbbell, 
-  Trophy, 
-  LogOut, 
-  Menu, 
-  X, 
+  Lock, 
+  CheckCircle2, 
+  Clock, 
+  PlayCircle, 
+  AlertTriangle,
+  Trophy,
+  Calendar,
   ChevronRight,
-  User,
-  PanelLeftClose,
-  PanelLeftOpen,
-  ClipboardCheck,
-  History
+  Activity,
+  Loader2,
+  ClipboardCheck
 } from 'lucide-react';
 
-const Layout = ({ children }) => {
+export default function StudentDashboard() {
   const router = useRouter();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Consolidated menu items reflecting the new module structure
-  const menuItems = [
-    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'Initial Pre-Test', path: '/module/pre', icon: ClipboardCheck },
-    { name: 'Weekly Logs', path: '/dashboard', icon: Dumbbell }, // Links back to hub for 11-day logic
-    { name: 'Final Post-Test', path: '/module/post', icon: History },
-  ];
+  useEffect(() => {
+    fetchProfile();
+  }, []);
 
-  const handleSignOut = async () => {
-    if (supabase) {
-      await supabase.auth.signOut();
+  const fetchProfile = async () => {
+    if (!supabase) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
       router.push('/login');
+      return;
     }
+    const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+    setProfile(data);
+    setLoading(false);
   };
 
-  // Close mobile menu on route change
-  useEffect(() => {
-    setIsMobileMenuOpen(false);
-  }, [router.asPath]);
+  // LOGIC: The 11-day locking and 7-day opening rule
+  const getModuleStatus = (weekNum) => {
+    // If Pre-test isn't done, everything else is locked
+    if (!profile?.pre_test_submitted_at) return 'LOCKED';
+    
+    const start = new Date(profile.pre_test_submitted_at);
+    const now = new Date();
+    
+    // Week N opens at (N * 7) days and expires at (N * 7 + 11) days
+    const openDate = new Date(start.getTime() + (weekNum * 7 * 24 * 60 * 60 * 1000));
+    const expiryDate = new Date(openDate.getTime() + (11 * 24 * 60 * 60 * 1000));
+
+    if (now < openDate) return 'LOCKED';
+    if (now > expiryDate) return 'EXPIRED';
+    return 'OPEN';
+  };
+
+  // LOGIC: Post-test specifically unlocks only after 8 weeks (56 days) of logs are done
+  const isPostTestUnlocked = () => {
+    if (!profile?.pre_test_submitted_at) return false;
+    const start = new Date(profile.pre_test_submitted_at);
+    const now = new Date();
+    const unlockDate = new Date(start.getTime() + (8 * 7 * 24 * 60 * 60 * 1000)); 
+    return now >= unlockDate;
+  };
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="flex h-screen flex-col items-center justify-center gap-4">
+          <Loader2 className="h-12 w-12 animate-spin text-fbOrange" />
+          <p className="text-fbNavy font-bold animate-pulse">Loading Fitness Curriculum...</p>
+        </div>
+      </Layout>
+    );
+  }
+
+  // Helper check for the overlay
+  const isPreTestFinished = !!profile?.pre_test_submitted_at;
 
   return (
-    <div className="flex min-h-screen bg-fbGray text-fbNavy font-sans overflow-x-hidden">
-      
-      {/* DESKTOP SIDEBAR */}
-      <aside 
-        className={`bg-fbNavy text-white hidden md:flex flex-col fixed h-full z-30 shadow-xl transition-all duration-300 ease-in-out ${
-          isSidebarCollapsed ? 'w-20' : 'w-64'
-        }`}
-      >
-        <div className="p-6 flex items-center justify-between border-b border-white/10 overflow-hidden">
-          {!isSidebarCollapsed && (
-            <div className="flex items-center gap-3 animate-in fade-in duration-300">
-              <div className="w-8 h-8 bg-fbOrange rounded-lg rotate-3 shadow-lg shadow-fbOrange/20 flex items-center justify-center font-bold text-white transition-transform hover:rotate-0">
-                P
-              </div>
-              <h1 className="text-xl font-bold tracking-tight whitespace-nowrap">
-                PATHFit <span className="text-fbAmber">Portal</span>
-              </h1>
+    <RoleGuard allowedRole="student">
+      <Layout>
+        <main className="p-4 md:p-10 max-w-5xl mx-auto">
+          {/* Header Section */}
+          <header className="mb-10">
+            <div className="flex items-center gap-2 mb-2">
+              <Trophy className="w-5 h-5 text-fbAmber" />
+              <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Student Portal</span>
             </div>
-          )}
-          <button 
-            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-            className={`p-2 hover:bg-white/10 rounded-lg transition-colors ${isSidebarCollapsed ? 'mx-auto' : ''}`}
-            title={isSidebarCollapsed ? "Open Sidebar" : "Close Sidebar"}
-          >
-            {isSidebarCollapsed ? <PanelLeftOpen size={20} /> : <PanelLeftClose size={20} />}
-          </button>
-        </div>
-        
-        <nav className="flex-1 p-4 space-y-2 mt-4 overflow-y-auto">
-          {menuItems.map((item) => {
-            const isActive = router.asPath === item.path;
-            const Icon = item.icon;
-            return (
-              <Link key={item.path} href={item.path}>
-                <div className={`flex items-center gap-3 p-3 rounded-xl transition-all cursor-pointer group relative ${
-                  isActive 
-                    ? 'bg-fbOrange text-white shadow-lg shadow-fbOrange/30 translate-x-1' 
-                    : 'hover:bg-white/5 text-gray-400 hover:text-white'
-                } ${isSidebarCollapsed ? 'justify-center' : ''}`}>
-                  <Icon className={`w-5 h-5 min-w-[20px] transition-transform duration-200 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
-                  
-                  {!isSidebarCollapsed && (
-                    <span className="font-bold text-sm tracking-tight animate-in slide-in-from-left-2 duration-300">
-                      {item.name}
-                    </span>
-                  )}
+            <h1 className="text-4xl font-black text-fbNavy uppercase tracking-tight">My Fitness Journey</h1>
+            <p className="text-gray-500 font-medium mt-1">Track your progress and complete weekly modules on time.</p>
+          </header>
 
-                  {/* Tooltip for collapsed mode */}
-                  {isSidebarCollapsed && (
-                    <div className="absolute left-16 bg-fbNavy text-white text-xs font-bold px-3 py-2 rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity border border-white/10 z-50 whitespace-nowrap">
-                      {item.name}
+          {/* Progress Overview Card */}
+          <div className="bg-fbNavy rounded-3xl p-6 mb-10 text-white shadow-xl shadow-fbNavy/20 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div className="flex items-center gap-5">
+              <div className="p-4 bg-white/10 rounded-2xl">
+                <Activity className="w-8 h-8 text-fbOrange" />
+              </div>
+              <div>
+                <p className="text-white/60 text-sm font-bold uppercase tracking-wider">Overall Status</p>
+                <h3 className="text-2xl font-black">
+                  {isPreTestFinished ? "Curriculum in Progress" : "Awaiting Pre-Test"}
+                </h3>
+              </div>
+            </div>
+            {isPreTestFinished && (
+              <div className="text-right">
+                <p className="text-white/60 text-xs font-bold uppercase mb-1">Started On</p>
+                <div className="flex items-center gap-2 font-mono text-fbOrange font-bold">
+                  <Calendar className="w-4 h-4" />
+                  {new Date(profile.pre_test_submitted_at).toLocaleDateString()}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Module Grid Section */}
+          <div className="grid gap-4">
+            {/* Pre-Test Module - Always Visible/Accessible until complete */}
+            <ModuleCard 
+              title="Initial Pre-Test" 
+              subtitle="Mandatory baseline assessment"
+              href="/module/pre" 
+              status={isPreTestFinished ? 'COMPLETED' : 'OPEN'} 
+            />
+
+            {/* WRAPPER FOR PROTECTED CONTENT */}
+            <div className="relative mt-4">
+              
+              {/* LOCK OVERLAY: Flashes if pre-test is missing */}
+              {!isPreTestFinished && (
+                <div className="absolute inset-x-0 -inset-y-4 z-20 backdrop-blur-md bg-white/40 rounded-3xl flex items-center justify-center p-6 border-2 border-dashed border-fbOrange/30">
+                  <div className="bg-white p-8 rounded-3xl shadow-2xl text-center max-w-sm animate-in zoom-in duration-300 border border-gray-100">
+                    <div className="w-16 h-16 bg-fbOrange/10 rounded-2xl rotate-3 flex items-center justify-center mx-auto mb-6">
+                      <ClipboardCheck className="text-fbOrange w-8 h-8" />
                     </div>
-                  )}
-                  
-                  {!isSidebarCollapsed && isActive && <ChevronRight className="w-4 h-4 ml-auto opacity-50" />}
+                    <h3 className="text-xl font-black text-fbNavy mb-2">Weekly Logs Locked</h3>
+                    <p className="text-gray-500 font-bold text-sm leading-relaxed mb-6">
+                      Please fill out the <span className="text-fbOrange">Initial Pre-test</span> to proceed with the Weekly Logs.
+                    </p>
+                    <button 
+                      onClick={() => router.push('/module/pre')}
+                      className="w-full bg-fbNavy text-white px-6 py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-fbOrange transition-all active:scale-95 shadow-lg shadow-fbNavy/20"
+                    >
+                      Complete Pre-test Now
+                    </button>
+                  </div>
                 </div>
-              </Link>
-            );
-          })}
-        </nav>
+              )}
 
-        <div className="p-4 border-t border-white/10">
-          <button 
-            onClick={handleSignOut}
-            className={`w-full flex items-center gap-3 text-gray-400 p-3 hover:bg-red-500/10 hover:text-red-400 rounded-xl transition-all font-bold text-sm group ${
-              isSidebarCollapsed ? 'justify-center' : ''
-            }`}
-          >
-            <LogOut className="w-5 h-5 min-w-[20px] group-hover:-translate-x-1 transition-transform" /> 
-            {!isSidebarCollapsed && <span>Sign Out</span>}
-          </button>
-        </div>
-      </aside>
-
-      {/* MOBILE HEADER */}
-      <header className="md:hidden fixed top-0 w-full bg-fbNavy p-4 flex justify-between items-center text-white z-40 shadow-md">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 bg-fbOrange rounded rotate-3 shadow-md flex items-center justify-center text-[10px] font-bold">P</div>
-          <h1 className="font-black text-sm uppercase tracking-tighter">
-            PATHFit <span className="text-fbAmber">Pro</span>
-          </h1>
-        </div>
-        <button 
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="p-2 bg-white/5 rounded-lg active:scale-90 transition-all"
-        >
-          {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
-      </header>
-
-      {/* MOBILE MENU OVERLAY (Slide-out drawer) */}
-      <div className={`md:hidden fixed inset-0 z-50 transition-all duration-300 ease-in-out ${
-        isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-      }`}>
-        {/* Backdrop */}
-        <div className="absolute inset-0 bg-fbNavy/90 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)} />
-        
-        <nav className="relative w-4/5 h-full bg-fbNavy p-6 pt-24 space-y-4 shadow-2xl border-r border-white/10">
-          <div className="mb-8 px-4">
-            <p className="text-fbOrange text-[10px] font-black uppercase tracking-widest opacity-70">Main Navigation</p>
-          </div>
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = router.asPath === item.path;
-            return (
-              <Link key={item.path} href={item.path}>
-                <div className={`flex items-center gap-4 p-4 rounded-2xl font-bold transition-all ${
-                  isActive ? 'bg-fbOrange text-white shadow-lg shadow-fbOrange/20' : 'bg-white/5 text-white/70 hover:text-white'
-                }`}>
-                  <Icon className={`w-6 h-6 ${isActive ? 'text-white' : 'text-fbOrange'}`} />
-                  {item.name}
+              {/* Weekly Logs Grid (Blurred when locked) */}
+              <div className={!isPreTestFinished ? 'opacity-40 grayscale pointer-events-none select-none' : ''}>
+                <div className="py-4 flex items-center gap-4">
+                  <div className="h-px bg-gray-200 flex-1"></div>
+                  <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Weekly Logs</span>
+                  <div className="h-px bg-gray-200 flex-1"></div>
                 </div>
-              </Link>
-            );
-          })}
-          <div className="pt-8 mt-8 border-t border-white/10">
-            <button 
-              onClick={handleSignOut}
-              className="w-full flex items-center gap-4 text-red-400 p-4 rounded-2xl bg-red-500/10 font-bold active:scale-95 transition-all"
-            >
-              <LogOut size={24} />
-              Sign Out
-            </button>
+
+                <div className="grid gap-4">
+                  {[1, 2, 3, 4, 5, 6, 7, 8].map((week) => (
+                    <ModuleCard 
+                      key={week}
+                      title={`Weekly Log: Week ${week}`}
+                      subtitle={`7-day cycle fitness tracking`}
+                      href={`/module/${week}`}
+                      status={getModuleStatus(week)}
+                    />
+                  ))}
+
+                  <div className="py-4 flex items-center gap-4">
+                    <div className="h-px bg-gray-200 flex-1"></div>
+                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Final Assessment</span>
+                    <div className="h-px bg-gray-200 flex-1"></div>
+                  </div>
+
+                  {/* Post-Test Card with secondary time-lock logic */}
+                  <div className="relative">
+                    {!isPostTestUnlocked() && isPreTestFinished && (
+                      <div className="absolute inset-0 z-10 bg-fbGray/60 backdrop-blur-[1px] rounded-3xl flex items-center justify-center border border-dashed border-gray-300">
+                        <div className="bg-white px-4 py-2 rounded-full shadow-sm flex items-center gap-2">
+                          <Lock className="w-3 h-3 text-gray-400" />
+                          <span className="text-[10px] font-black text-gray-500 uppercase">Unlocks after Week 8</span>
+                        </div>
+                      </div>
+                    )}
+                    <ModuleCard 
+                      title="Final Post-Test" 
+                      subtitle="End of semester comparison"
+                      href="/module/post" 
+                      status={isPostTestUnlocked() ? 'OPEN' : 'LOCKED'} 
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-        </nav>
+        </main>
+      </Layout>
+    </RoleGuard>
+  );
+}
+
+function ModuleCard({ title, subtitle, href, status }) {
+  const styles = {
+    LOCKED: "bg-gray-50 border-gray-100 text-gray-400 opacity-60 cursor-not-allowed",
+    OPEN: "bg-white border-fbOrange text-fbNavy hover:shadow-xl hover:shadow-fbOrange/10 hover:-translate-y-1",
+    COMPLETED: "bg-green-50/50 border-green-200 text-green-700",
+    EXPIRED: "bg-red-50/50 border-red-100 text-red-700"
+  };
+
+  const icons = {
+    LOCKED: <Lock className="w-6 h-6" />,
+    OPEN: <PlayCircle className="w-6 h-6 text-fbOrange animate-pulse" />,
+    COMPLETED: <CheckCircle2 className="w-6 h-6 text-green-500" />,
+    EXPIRED: <AlertTriangle className="w-6 h-6 text-red-500" />
+  };
+
+  const Content = (
+    <div className={`group flex items-center justify-between p-6 rounded-3xl border-2 transition-all duration-300 ${styles[status]}`}>
+      <div className="flex items-center gap-5">
+        <div className={`p-3 rounded-2xl bg-white shadow-sm border border-inherit`}>
+          {icons[status]}
+        </div>
+        <div>
+          <h4 className="font-black text-lg tracking-tight">{title}</h4>
+          <p className="text-xs font-medium opacity-60">{subtitle}</p>
+        </div>
       </div>
-
-      {/* MAIN CONTENT AREA */}
-      <main 
-        className={`flex-1 flex flex-col min-h-screen transition-all duration-300 pt-16 md:pt-0 ${
-          isSidebarCollapsed ? 'md:ml-20' : 'md:ml-64'
-        }`}
-      >
-        <div className="flex-1 relative animate-in fade-in duration-500">
-          {children}
+      
+      <div className="flex items-center gap-4">
+        <div className="hidden md:flex flex-col items-end">
+          <span className="text-[10px] font-black uppercase tracking-widest mb-1 opacity-40">Status</span>
+          <span className="text-xs font-bold uppercase">{status}</span>
         </div>
-      </main>
+        {status !== 'LOCKED' && <ChevronRight className="w-5 h-5 opacity-40 group-hover:translate-x-1 transition-transform" />}
+      </div>
     </div>
   );
-};
 
-export default Layout;
+  if (status === 'LOCKED') return Content;
+
+  return (
+    <Link href={href} className="block">
+      {Content}
+    </Link>
+  );
+}
