@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../../components/Layout';
 import EditProfileModal from '../../components/EditProfileModal'; 
-import FitnessLogTab from '../../components/FitnessLogTab'; // Added Import
+import FitnessLogTab from '../../components/FitnessLogTab'; 
 import { supabase } from '../../lib/supabaseClient';
 import { 
   Camera, 
@@ -195,85 +195,86 @@ export default function StudentProfile() {
           </div>
         </div>
 
-        {/* CONTENT */}
+        {/* CONTENT SECTION */}
         <div className="max-w-[1250px] mx-auto px-4 mt-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             
-            {/* SIDEBAR */}
-            <div className="lg:col-span-4 space-y-4">
-              
-              {/* CURRENT FOCUS */}
-              <div className="bg-fbOrange/10 border border-fbOrange/20 p-4 rounded-xl">
-                <div className="flex items-center gap-2 text-fbOrange mb-1">
-                  <Activity size={18} />
-                  <span className="text-[10px] font-black uppercase tracking-widest">Current Module</span>
+            {/* SIDEBAR - Only visible when About tab is active */}
+            {activeTab === 'About' && (
+              <div className="lg:col-span-4 space-y-4">
+                {/* CURRENT FOCUS */}
+                <div className="bg-fbOrange/10 border border-fbOrange/20 p-4 rounded-xl">
+                  <div className="flex items-center gap-2 text-fbOrange mb-1">
+                    <Activity size={18} />
+                    <span className="text-[10px] font-black uppercase tracking-widest">Current Module</span>
+                  </div>
+                  <p className="text-sm font-bold text-fbNavy">Physical Fitness Assessment</p>
+                  <p className="text-[11px] text-gray-500 mt-1">Status: Active Assessment Period</p>
                 </div>
-                <p className="text-sm font-bold text-fbNavy">Physical Fitness Assessment</p>
-                <p className="text-[11px] text-gray-500 mt-1">Status: Active Assessment Period</p>
-              </div>
 
-              {/* INTRO BOX */}
-              <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-                <h2 className="text-xl font-black text-fbNavy mb-4">Intro</h2>
-                <div className="mb-6">
-                  {isEditingBio ? (
-                    <div className="space-y-2">
-                      <textarea className="w-full p-3 bg-gray-50 border border-gray-300 rounded-lg text-sm text-center focus:ring-2 focus:ring-fbOrange outline-none" value={bio} onChange={(e) => setBio(e.target.value)} rows="3" />
-                      <div className="flex gap-2">
-                        <button onClick={handleSaveBio} className="flex-1 bg-fbOrange text-white py-2 rounded-lg text-xs font-bold">Save</button>
-                        <button onClick={() => setIsEditingBio(false)} className="flex-1 bg-gray-200 py-2 rounded-lg text-xs font-bold">Cancel</button>
+                {/* INTRO BOX */}
+                <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+                  <h2 className="text-xl font-black text-fbNavy mb-4">Intro</h2>
+                  <div className="mb-6">
+                    {isEditingBio ? (
+                      <div className="space-y-2">
+                        <textarea className="w-full p-3 bg-gray-50 border border-gray-300 rounded-lg text-sm text-center focus:ring-2 focus:ring-fbOrange outline-none" value={bio} onChange={(e) => setBio(e.target.value)} rows="3" />
+                        <div className="flex gap-2">
+                          <button onClick={handleSaveBio} className="flex-1 bg-fbOrange text-white py-2 rounded-lg text-xs font-bold">Save</button>
+                          <button onClick={() => setIsEditingBio(false)} className="flex-1 bg-gray-200 py-2 rounded-lg text-xs font-bold">Cancel</button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-center">
+                        <p className="text-sm font-medium text-gray-700 mb-3 px-2">"{bio}"</p>
+                        <button onClick={() => setIsEditingBio(true)} className="w-full bg-gray-100 hover:bg-gray-200 py-2 rounded-lg text-sm font-bold transition-colors">Edit Bio</button>
+                      </div>
+                    )}
+                  </div>
+                  <div className="space-y-3 pt-4 border-t border-gray-100">
+                    <div className="flex items-center gap-3 text-gray-700 text-sm font-medium"><School className="text-gray-400" size={18} /><span>College of <span className="font-bold">{profile?.college || "University"}</span></span></div>
+                    <div className="flex items-center gap-3 text-gray-700 text-sm font-medium"><Calendar className="text-gray-400" size={18} /><span>Student ID: <span className="font-bold">{profile?.student_id || profile?.student_number}</span></span></div>
+                    <div className="flex items-center gap-3 text-gray-700 text-sm font-medium"><Globe className="text-gray-400" size={18} /><span>Section: <span className="font-bold">{profile?.section_code || profile?.section}</span></span></div>
+                  </div>
+                </div>
+
+                {/* BMI CALCULATOR */}
+                <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+                  <h2 className="text-lg font-black text-fbNavy mb-3 flex items-center gap-2">
+                    <Scale size={20} className="text-fbOrange" /> Body Composition
+                  </h2>
+                  {bmiResult ? (
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center bg-fbGray/50 p-3 rounded-lg">
+                        <div>
+                          <p className="text-[10px] font-black text-gray-400 uppercase">BMI Score</p>
+                          <p className="text-xl font-black text-fbOrange">{bmiResult.score}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-[10px] font-black text-gray-400 uppercase">Status</p>
+                          <span className="text-xs font-bold px-2 py-1 bg-fbNavy text-white rounded-full">{bmiResult.category}</span>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 text-center">
+                        <div className="p-2 border border-gray-100 rounded-lg">
+                          <Ruler size={14} className="mx-auto text-gray-400 mb-1" />
+                          <p className="text-xs font-bold">{profile?.height} cm</p>
+                        </div>
+                        <div className="p-2 border border-gray-100 rounded-lg">
+                          <Scale size={14} className="mx-auto text-gray-400 mb-1" />
+                          <p className="text-xs font-bold">{profile?.weight} kg</p>
+                        </div>
                       </div>
                     </div>
                   ) : (
-                    <div className="text-center">
-                      <p className="text-sm font-medium text-gray-700 mb-3 px-2">"{bio}"</p>
-                      <button onClick={() => setIsEditingBio(true)} className="w-full bg-gray-100 hover:bg-gray-200 py-2 rounded-lg text-sm font-bold transition-colors">Edit Bio</button>
-                    </div>
+                    <p className="text-xs text-gray-400 italic text-center py-2">Update your Height/Weight in settings to calculate BMI.</p>
                   )}
                 </div>
-                <div className="space-y-3 pt-4 border-t border-gray-100">
-                  <div className="flex items-center gap-3 text-gray-700 text-sm font-medium"><School className="text-gray-400" size={18} /><span>College of <span className="font-bold">{profile?.college || "University"}</span></span></div>
-                  <div className="flex items-center gap-3 text-gray-700 text-sm font-medium"><Calendar className="text-gray-400" size={18} /><span>Student ID: <span className="font-bold">{profile?.student_id || profile?.student_number}</span></span></div>
-                  <div className="flex items-center gap-3 text-gray-700 text-sm font-medium"><Globe className="text-gray-400" size={18} /><span>Section: <span className="font-bold">{profile?.section_code || profile?.section}</span></span></div>
-                </div>
               </div>
+            )}
 
-              {/* BMI CALCULATOR */}
-              <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-                <h2 className="text-lg font-black text-fbNavy mb-3 flex items-center gap-2">
-                  <Scale size={20} className="text-fbOrange" /> Body Composition
-                </h2>
-                {bmiResult ? (
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center bg-fbGray/50 p-3 rounded-lg">
-                      <div>
-                        <p className="text-[10px] font-black text-gray-400 uppercase">BMI Score</p>
-                        <p className="text-xl font-black text-fbOrange">{bmiResult.score}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-[10px] font-black text-gray-400 uppercase">Status</p>
-                        <span className="text-xs font-bold px-2 py-1 bg-fbNavy text-white rounded-full">{bmiResult.category}</span>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2 text-center">
-                      <div className="p-2 border border-gray-100 rounded-lg">
-                        <Ruler size={14} className="mx-auto text-gray-400 mb-1" />
-                        <p className="text-xs font-bold">{profile?.height} cm</p>
-                      </div>
-                      <div className="p-2 border border-gray-100 rounded-lg">
-                        <Scale size={14} className="mx-auto text-gray-400 mb-1" />
-                        <p className="text-xs font-bold">{profile?.weight} kg</p>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-xs text-gray-400 italic text-center py-2">Update your Height/Weight in settings to calculate BMI.</p>
-                )}
-              </div>
-            </div>
-
-            {/* MAIN CONTENT AREA */}
-            <div className="lg:col-span-8 space-y-6">
+            {/* MAIN CONTENT AREA - Spans full width (12) on Logs tab, or 8 on About tab */}
+            <div className={`${activeTab === 'About' ? 'lg:col-span-8' : 'lg:col-span-12'} space-y-6`}>
               {activeTab === 'About' ? (
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
                   <h2 className="text-xl font-black text-fbNavy mb-6">About Me</h2>
@@ -285,7 +286,6 @@ export default function StudentProfile() {
                   </div>
                 </div>
               ) : (
-                /* MOVED EXERCISE HISTORY TO SEPARATE COMPONENT */
                 <FitnessLogTab logs={exerciseLogs} />
               )}
             </div>
