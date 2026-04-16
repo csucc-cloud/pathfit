@@ -69,7 +69,7 @@ export default function PracticumLog() {
     }));
   };
 
-  const handleFinalSubmit = async () => {
+const handleFinalSubmit = async () => {
     const confirm = window.confirm("FINAL SUBMISSION: Once submitted, you cannot edit this record again. Proceed?");
     if (confirm) {
       // UPDATED: Explicitly define the log type and test name for the profile progress tracker
@@ -84,7 +84,10 @@ export default function PracticumLog() {
         student_id: user.id, 
         log_type: isAssessment ? 'assessment' : 'workout',
         test_name: isPre ? 'Pre-Test' : isPost ? 'Post-Test' : null,
-        week_number: isAssessment ? null : parseInt(type)
+        // Added explicit check to ensure week_number is a valid integer or null
+        week_number: isAssessment ? null : parseInt(type),
+        // Added locked_at to ensure the timestamp is captured on final submission
+        locked_at: new Date().toISOString()
       });
 
       if (isPre) {
