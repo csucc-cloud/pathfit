@@ -203,7 +203,6 @@ export default function StudentProfile() {
                 </div>
               </div>
             </div>
-.d
             <div className="lg:col-span-8">
               {activeTab === 'About' ? (
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
