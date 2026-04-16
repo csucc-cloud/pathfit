@@ -197,13 +197,13 @@ export default function StudentProfile() {
                   )}
                 </div>
                 <div className="space-y-3 pt-4 border-t border-gray-100">
-                  <div className="flex items-center gap-3 text-gray-700 text-sm font-medium"><School className="text-gray-400" size={18} /><span>Studies at <span className="font-bold">University College</span></span></div>
-                  <div className="flex items-center gap-3 text-gray-700 text-sm font-medium"><Calendar className="text-gray-400" size={18} /><span>Student ID: <span className="font-bold">{profile?.student_number}</span></span></div>
-                  <div className="flex items-center gap-3 text-gray-700 text-sm font-medium"><Globe className="text-gray-400" size={18} /><span>Section: <span className="font-bold">{profile?.section}</span></span></div>
+                  <div className="flex items-center gap-3 text-gray-700 text-sm font-medium"><School className="text-gray-400" size={18} /><span>Studying at <span className="font-bold"{profile?.college}</span></span></div>
+                  <div className="flex items-center gap-3 text-gray-700 text-sm font-medium"><Calendar className="text-gray-400" size={18} /><span>Student ID: <span className="font-bold">{profile?.student_id}</span></span></div>
+                  <div className="flex items-center gap-3 text-gray-700 text-sm font-medium"><Globe className="text-gray-400" size={18} /><span>Section: <span className="font-bold">{profile?.section_code}</span></span></div>
                 </div>
               </div>
             </div>
-
+.d
             <div className="lg:col-span-8">
               {activeTab === 'About' ? (
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
