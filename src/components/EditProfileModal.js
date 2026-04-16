@@ -5,8 +5,8 @@ import { supabase } from '../lib/supabaseClient';
 export default function EditProfileModal({ profile, isOpen, onClose, onRefresh }) {
   const [formData, setFormData] = useState({
     full_name: profile?.full_name || '',
-    student_number: profile?.student_number || '',
-    section: profile?.section || '',
+    student_number: profile?.student_id || '',
+    section: profile?.section_code || '',
     college: profile?.college || '', // Added
     height: profile?.height || '',   // Added
     weight: profile?.weight || '',   // Added
@@ -22,8 +22,8 @@ export default function EditProfileModal({ profile, isOpen, onClose, onRefresh }
         .from('profiles')
         .update({
           full_name: formData.full_name,
-          student_number: formData.student_number,
-          section: formData.section,
+          student_number: formData.student_id,
+          section: formData.section_code,
           college: formData.college, // Added
           height: formData.height ? parseFloat(formData.height) : null, // Added
           weight: formData.weight ? parseFloat(formData.weight) : null, // Added
@@ -78,7 +78,7 @@ export default function EditProfileModal({ profile, isOpen, onClose, onRefresh }
               <input 
                 type="text"
                 className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-fbOrange outline-none text-sm font-bold"
-                value={formData.student_number}
+                value={formData.student_id}
                 onChange={(e) => setFormData({...formData, student_number: e.target.value})}
               />
             </div>
@@ -105,7 +105,7 @@ export default function EditProfileModal({ profile, isOpen, onClose, onRefresh }
               <input 
                 type="text"
                 className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-fbOrange outline-none text-sm font-bold"
-                value={formData.section}
+                value={formData.section_code}
                 onChange={(e) => setFormData({...formData, section: e.target.value})}
               />
             </div>
