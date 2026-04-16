@@ -3,6 +3,7 @@ import Layout from '../../components/Layout';
 import EditProfileModal from '../../components/EditProfileModal'; 
 import FitnessLogTab from '../../components/FitnessLogTab'; 
 import { supabase } from '../../lib/supabaseClient';
+import { EXERCISES } from '../../constants/exercises';
 import { 
   Camera, 
   Edit2, 
@@ -24,7 +25,8 @@ import {
   Flame,
   BookOpen,
   Trophy,
-  ChevronRight
+  ChevronRight,
+  UserCircle // Added for Gender icon
 } from 'lucide-react';
 
 export default function StudentProfile() {
@@ -41,7 +43,6 @@ export default function StudentProfile() {
   const fetchData = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
-      // 1. Fetch Profile
       const { data: profileData } = await supabase
         .from('profiles')
         .select('*')
@@ -51,7 +52,6 @@ export default function StudentProfile() {
       setProfile(profileData);
       setBio(profileData?.bio || "Welcome to my PATHFit profile!");
 
-      // 2. Fetch Exercise Logs
       const { data: logData } = await supabase
         .from('exercise_logs')
         .select('*')
@@ -60,7 +60,6 @@ export default function StudentProfile() {
 
       setExerciseLogs(logData || []);
 
-      // 3. Fetch Course Progress
       const { data: progressData } = await supabase
         .from('course_progress')
         .select('*')
@@ -76,20 +75,15 @@ export default function StudentProfile() {
     fetchData();
   }, []);
 
-  // --- CALCULATIONS FOR NEW FEATURES ---
-  
-  // Feature #18: Total Calories
   const totalCalories = exerciseLogs.reduce((sum, log) => sum + (log.calories_burned || 0), 0);
 
-  // Feature #1: Assessment Comparison
   const assessments = exerciseLogs
     .filter(log => log.log_type === 'assessment')
     .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
   
-  const preTest = assessments[0] || null;
-  const currentTest = assessments.length > 1 ? assessments[assessments.length - 1] : null;
+  const preTest = assessments.find(l => l.test_name?.toLowerCase().includes('pre')) || null;
+  const postTest = assessments.find(l => l.test_name?.toLowerCase().includes('post')) || null;
 
-  // Feature #5: Streak Logic (Unique weeks)
   const getStreak = () => {
     const uniqueWeeks = new Set(exerciseLogs.map(log => {
       const d = new Date(log.created_at);
@@ -103,29 +97,15 @@ export default function StudentProfile() {
       setUploading(true);
       const file = event.target.files[0];
       if (!file) return;
-
       const fileExt = file.name.split('.').pop();
       const fileName = `${profile.id}-${type}-${Math.random()}.${fileExt}`;
       const filePath = `${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, file);
-
+      const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, file);
       if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath);
-
+      const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(filePath);
       const updateField = type === 'cover' ? 'cover_url' : 'avatar_url';
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ [updateField]: publicUrl })
-        .eq('id', profile.id);
-
+      const { error: updateError } = await supabase.from('profiles').update({ [updateField]: publicUrl }).eq('id', profile.id);
       if (updateError) throw updateError;
-      
       await fetchData(); 
       alert(`${type === 'cover' ? 'Cover' : 'Profile'} photo updated!`);
     } catch (error) {
@@ -137,11 +117,7 @@ export default function StudentProfile() {
 
   const handleSaveBio = async () => {
     const { data: { user } } = await supabase.auth.getUser();
-    const { error } = await supabase
-      .from('profiles')
-      .update({ bio: bio })
-      .eq('id', user.id);
-
+    const { error } = await supabase.from('profiles').update({ bio: bio }).eq('id', user.id);
     if (!error) setIsEditingBio(false);
     else alert("Error updating bio: " + error.message);
   };
@@ -150,24 +126,32 @@ export default function StudentProfile() {
     if (!profile?.height || !profile?.weight) return null;
     const heightInMeters = profile.height / 100;
     const bmi = (profile.weight / (heightInMeters * heightInMeters)).toFixed(1);
-    let category = "";
-    if (bmi < 18.5) category = "Underweight";
-    else if (bmi < 25) category = "Normal";
-    else if (bmi < 30) category = "Overweight";
-    else category = "Obese";
+    let category = bmi < 18.5 ? "Underweight" : bmi < 25 ? "Normal" : bmi < 30 ? "Overweight" : "Obese";
     return { score: bmi, category };
   };
 
   const bmiResult = calculateBMI();
+
+  const MilestoneStep = ({ label, isDone, icon }) => (
+    <div className="flex flex-col items-center z-10 relative group">
+      <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center border-4 transition-all duration-500 shadow-sm
+        ${isDone ? 'bg-fbOrange border-orange-100 text-white' : 'bg-white border-gray-100 text-gray-300'}`}>
+        {isDone ? <CheckCircle2 size={16} /> : (icon || <span className="text-[9px] font-black">{label}</span>)}
+      </div>
+      <span className={`text-[8px] font-black mt-2 uppercase tracking-tighter ${isDone ? 'text-fbNavy' : 'text-gray-400'}`}>
+        {label}
+      </span>
+    </div>
+  );
 
   if (loading) return null;
 
   return (
     <Layout>
       <main className="bg-[#F0F2F5] min-h-screen pb-12">
+        {/* HEADER SECTION */}
         <div className="bg-white shadow-sm border-b">
           <div className="max-w-[1250px] mx-auto">
-            
             <div className="relative h-[200px] md:h-[350px] w-full bg-fbNavy rounded-b-xl overflow-hidden shadow-inner group">
                {profile?.cover_url ? (
                  <img src={profile.cover_url} className="w-full h-full object-cover" alt="Cover" />
@@ -203,10 +187,7 @@ export default function StudentProfile() {
                 </div>
 
                 <div className="flex gap-2 mb-6">
-                  <button 
-                    onClick={() => setIsEditModalOpen(true)}
-                    className="bg-fbOrange text-white px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 shadow-sm hover:brightness-110 transition-all"
-                  >
+                  <button onClick={() => setIsEditModalOpen(true)} className="bg-fbOrange text-white px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 shadow-sm hover:brightness-110 transition-all">
                     <Edit2 size={16} /> Edit Profile
                   </button>
                 </div>
@@ -232,12 +213,12 @@ export default function StudentProfile() {
                 <div className="bg-fbOrange/10 border border-fbOrange/20 p-4 rounded-xl">
                   <div className="flex items-center gap-2 text-fbOrange mb-1">
                     <Activity size={18} />
-                    <span className="text-[10px] font-black uppercase tracking-widest">Current Module</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest">Current Semester Plan</span>
                   </div>
-                  <p className="text-sm font-bold text-fbNavy">Physical Fitness Assessment</p>
-                  <p className="text-[11px] text-gray-500 mt-1">Status: Active Assessment Period</p>
+                  <p className="text-sm font-bold text-fbNavy">10-Step Fitness Progression</p>
                 </div>
 
+                {/* UPDATED INTRO SECTION */}
                 <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
                   <h2 className="text-xl font-black text-fbNavy mb-4">Intro</h2>
                   <div className="mb-6">
@@ -260,6 +241,9 @@ export default function StudentProfile() {
                     <div className="flex items-center gap-3 text-gray-700 text-sm font-medium"><School className="text-gray-400" size={18} /><span>College of <span className="font-bold">{profile?.college || "University"}</span></span></div>
                     <div className="flex items-center gap-3 text-gray-700 text-sm font-medium"><Calendar className="text-gray-400" size={18} /><span>Student ID: <span className="font-bold">{profile?.student_id || profile?.student_number}</span></span></div>
                     <div className="flex items-center gap-3 text-gray-700 text-sm font-medium"><Globe className="text-gray-400" size={18} /><span>Section: <span className="font-bold">{profile?.section_code || profile?.section}</span></span></div>
+                    {/* Integrated Personal Info */}
+                    <div className="flex items-center gap-3 text-gray-700 text-sm font-medium"><UserCircle className="text-gray-400" size={18} /><span>Sex: <span className="font-bold">{profile?.sex || "N/A"}</span></span></div>
+                    <div className="flex items-center gap-3 text-gray-700 text-sm font-medium"><Clock className="text-gray-400" size={18} /><span>Age: <span className="font-bold">{profile?.age ? `${profile.age} Years Old` : "N/A"}</span></span></div>
                   </div>
                 </div>
 
@@ -301,36 +285,34 @@ export default function StudentProfile() {
               {activeTab === 'About' ? (
                 <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
                   
-                  {/* FEATURE #3: MODULE PROGRESS TRACKER */}
+                  {/* FIXED 10-STEP SEMESTER ROADMAP */}
                   <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                    <h3 className="text-xs font-black text-fbNavy/40 uppercase tracking-widest mb-6 flex items-center gap-2">
-                      <BookOpen size={14} /> Course Journey Progress
+                    <h3 className="text-xs font-black text-fbNavy/40 uppercase tracking-widest mb-8 flex items-center gap-2">
+                      <BookOpen size={14} /> PATHFit Semester Roadmap
                     </h3>
-                    <div className="relative flex justify-between items-center">
-                      {[
-                        { label: 'Pre-Test', key: 'pre_test_completed' },
-                        { label: 'Module 1', key: 'module_1_read' },
-                        { label: 'Midterm', key: 'midterm_passed' },
-                        { label: 'Post-Test', key: 'post_test_completed' }
-                      ].map((step, idx) => {
-                        const isDone = courseProgress?.[step.key];
-                        return (
-                          <div key={idx} className="flex flex-col items-center z-10 relative">
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center border-4 transition-all duration-500 ${
-                              isDone ? 'bg-fbOrange border-fbOrange/20 text-white' : 'bg-gray-100 border-transparent text-gray-400'
-                            }`}>
-                              {isDone ? <CheckCircle2 size={20} /> : idx + 1}
-                            </div>
-                            <span className="text-[10px] font-black mt-2 text-fbNavy uppercase tracking-tighter">{step.label}</span>
-                          </div>
-                        );
-                      })}
-                      <div className="absolute top-5 left-0 w-full h-1 bg-gray-100 -z-0"></div>
+                    <div className="relative flex justify-between items-center px-2">
+                      <MilestoneStep 
+                        label="Pre-Test" 
+                        isDone={exerciseLogs.some(l => l.log_type === 'assessment' && l.test_name?.toLowerCase().includes('pre'))} 
+                        icon={<Activity size={16} />} 
+                      />
+                      {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
+                        <MilestoneStep 
+                          key={num} 
+                          label={`W${num}`} 
+                          isDone={exerciseLogs.some(l => l.log_type === 'workout' && l.week_number === num)} 
+                        />
+                      ))}
+                      <MilestoneStep 
+                        label="Post-Test" 
+                        isDone={exerciseLogs.some(l => l.log_type === 'assessment' && l.test_name?.toLowerCase().includes('post'))} 
+                        icon={<Trophy size={16} />} 
+                      />
+                      <div className="absolute top-4 md:top-5 left-0 w-full h-[2px] bg-gray-100 -z-0"></div>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* FEATURE #4 & #5: CLASSIFICATION & STREAK */}
                     <div className="bg-gradient-to-br from-fbNavy to-blue-900 p-6 rounded-2xl text-white shadow-lg relative overflow-hidden group">
                       <div className="absolute -right-4 -bottom-4 opacity-10 group-hover:scale-110 transition-transform">
                         <Trophy size={120} />
@@ -353,37 +335,49 @@ export default function StudentProfile() {
                       </div>
                     </div>
 
-                    {/* FEATURE #1: COMPARISON TABLE */}
                     <div className="md:col-span-2 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
                       <h3 className="text-xs font-black text-fbNavy/40 uppercase tracking-widest mb-6 flex items-center gap-2">
                         <Activity size={16} className="text-fbOrange" /> Performance Benchmark
                       </h3>
-                      <div className="overflow-x-auto">
+                      <div className="overflow-x-auto max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                         <table className="w-full text-left">
-                          <thead>
+                          <thead className="sticky top-0 bg-white z-10">
                             <tr className="text-[10px] text-gray-400 uppercase tracking-widest border-b border-gray-50">
                               <th className="pb-4">Fitness Test</th>
                               <th className="pb-4">Pre-Test</th>
-                              <th className="pb-4">Current Best</th>
+                              <th className="pb-4 text-fbOrange">Current Best</th>
+                              <th className="pb-4 text-right">Progress</th>
                             </tr>
                           </thead>
                           <tbody className="text-sm font-bold text-fbNavy">
-                            <tr className="border-b border-gray-50 group hover:bg-gray-50 transition-colors">
-                              <td className="py-4 text-gray-500 group-hover:text-fbNavy">Push-ups</td>
-                              <td className="py-4">{preTest?.metrics?.push_ups || "--"}</td>
-                              <td className="py-4 text-fbOrange">{currentTest?.metrics?.push_ups || "--"}</td>
-                            </tr>
-                            <tr className="border-b border-gray-50 group hover:bg-gray-50 transition-colors">
-                              <td className="py-4 text-gray-500 group-hover:text-fbNavy">Plank (sec)</td>
-                              <td className="py-4">{preTest?.metrics?.plank_seconds ? `${preTest.metrics.plank_seconds}s` : "--"}</td>
-                              <td className="py-4 text-fbOrange">{currentTest?.metrics?.plank_seconds ? `${currentTest.metrics.plank_seconds}s` : "--"}</td>
-                            </tr>
+                            {EXERCISES.map((ex) => {
+                              const preVal = preTest?.metrics?.[ex.id] || 0;
+                              const currVal = exerciseLogs.reduce((max, log) => {
+                                const val = log.metrics?.[ex.id] || 0;
+                                return val > max ? val : max;
+                              }, 0);
+                              const diff = currVal - preVal;
+
+                              return (
+                                <tr key={ex.id} className="border-b border-gray-50 group hover:bg-gray-50 transition-colors">
+                                  <td className="py-4 text-gray-500 group-hover:text-fbNavy">{ex.label}</td>
+                                  <td className="py-4">{preVal > 0 ? `${preVal}${ex.unit === 'reps' ? '' : ex.unit}` : "--"}</td>
+                                  <td className="py-4 text-fbOrange">{currVal > 0 ? `${currVal}${ex.unit === 'reps' ? '' : ex.unit}` : "--"}</td>
+                                  <td className="py-4 text-right">
+                                    {diff > 0 ? (
+                                      <span className="text-[10px] bg-green-100 text-green-600 px-2 py-1 rounded-full">+{diff}</span>
+                                    ) : (
+                                      <span className="text-xs text-gray-300">--</span>
+                                    )}
+                                  </td>
+                                </tr>
+                              );
+                            })}
                           </tbody>
                         </table>
                       </div>
                     </div>
 
-                    {/* FEATURE #18: TOTAL CALORIES */}
                     <div className="md:col-span-2 bg-fbOrange p-[1px] rounded-2xl shadow-xl shadow-fbOrange/10">
                       <div className="bg-white p-6 rounded-[15px] flex flex-col md:flex-row justify-between items-center gap-6">
                         <div className="flex items-center gap-5">
@@ -402,17 +396,7 @@ export default function StudentProfile() {
                       </div>
                     </div>
                   </div>
-
-                  {/* ORIGINAL ABOUT ME SECTION */}
-                  <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                    <h2 className="text-xl font-black text-fbNavy mb-6">Personal Information</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="p-4 bg-fbGray/30 rounded-xl border border-white"><p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Full Name</p><p className="text-sm font-bold text-fbNavy">{profile?.full_name}</p></div>
-                      <div className="p-4 bg-fbGray/30 rounded-xl border border-white"><p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Role</p><p className="text-sm font-bold text-fbNavy capitalize">{profile?.role}</p></div>
-                      <div className="p-4 bg-fbGray/30 rounded-xl border border-white"><p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Sex</p><p className="text-sm font-bold text-fbNavy">{profile?.sex || "N/A"}</p></div>
-                      <div className="p-4 bg-fbGray/30 rounded-xl border border-white"><p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Age</p><p className="text-sm font-bold text-fbNavy">{profile?.age ? `${profile.age} Years Old` : "N/A"}</p></div>
-                    </div>
-                  </div>
+                  {/* Personal Information card removed from here */}
                 </div>
               ) : (
                 <FitnessLogTab logs={exerciseLogs} />
