@@ -5,11 +5,11 @@ import { supabase } from '../lib/supabaseClient';
 export default function EditProfileModal({ profile, isOpen, onClose, onRefresh }) {
   const [formData, setFormData] = useState({
     full_name: profile?.full_name || '',
-    student_number: profile?.student_id || '',
-    section: profile?.section_code || '',
-    college: profile?.college || '', // Added
-    height: profile?.height || '',   // Added
-    weight: profile?.weight || '',   // Added
+    student_id: profile?.student_id || '', // Changed to student_id
+    section_code: profile?.section_code || '', // Changed to section_code
+    college: profile?.college || '',
+    height: profile?.height || '',
+    weight: profile?.weight || '',
   });
   const [loading, setLoading] = useState(false);
 
@@ -22,18 +22,18 @@ export default function EditProfileModal({ profile, isOpen, onClose, onRefresh }
         .from('profiles')
         .update({
           full_name: formData.full_name,
-          student_number: formData.student_id,
-          section: formData.section_code,
-          college: formData.college, // Added
-          height: formData.height ? parseFloat(formData.height) : null, // Added
-          weight: formData.weight ? parseFloat(formData.weight) : null, // Added
+          student_id: formData.student_id, // Match DB column
+          section_code: formData.section_code, // Match DB column
+          college: formData.college,
+          height: formData.height ? parseFloat(formData.height) : null,
+          weight: formData.weight ? parseFloat(formData.weight) : null,
         })
         .eq('id', profile.id);
 
       if (error) throw error;
       
-      onRefresh(); // Trigger data refresh in profile.js
-      onClose();   // Close modal
+      onRefresh(); 
+      onClose();   
     } catch (error) {
       alert("Error updating profile: " + error.message);
     } finally {
@@ -43,12 +43,9 @@ export default function EditProfileModal({ profile, isOpen, onClose, onRefresh }
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
-      {/* Overlay */}
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
       
-      {/* Modal Card */}
       <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl relative z-10 overflow-hidden animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
-        {/* Header */}
         <div className="p-4 border-b flex items-center justify-between bg-fbGray/10 sticky top-0 bg-white z-20">
           <h2 className="text-xl font-black text-fbNavy">Edit Profile</h2>
           <button onClick={onClose} className="p-2 hover:bg-gray-200 rounded-full transition-colors">
@@ -56,7 +53,6 @@ export default function EditProfileModal({ profile, isOpen, onClose, onRefresh }
           </button>
         </div>
 
-        {/* Body */}
         <div className="p-6 space-y-4">
           <div>
             <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1 ml-1">Full Name</label>
@@ -72,14 +68,14 @@ export default function EditProfileModal({ profile, isOpen, onClose, onRefresh }
           </div>
 
           <div>
-            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1 ml-1">Student Number</label>
+            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1 ml-1">Student ID</label>
             <div className="relative">
               <Hash className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
               <input 
                 type="text"
                 className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-fbOrange outline-none text-sm font-bold"
                 value={formData.student_id}
-                onChange={(e) => setFormData({...formData, student_number: e.target.value})}
+                onChange={(e) => setFormData({...formData, student_id: e.target.value})}
               />
             </div>
           </div>
@@ -99,19 +95,18 @@ export default function EditProfileModal({ profile, isOpen, onClose, onRefresh }
           </div>
 
           <div>
-            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1 ml-1">Section</label>
+            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1 ml-1">Section Code</label>
             <div className="relative">
               <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
               <input 
                 type="text"
                 className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-fbOrange outline-none text-sm font-bold"
                 value={formData.section_code}
-                onChange={(e) => setFormData({...formData, section: e.target.value})}
+                onChange={(e) => setFormData({...formData, section_code: e.target.value})}
               />
             </div>
           </div>
 
-          {/* BMI Info Row */}
           <div className="grid grid-cols-2 gap-4 pt-2">
             <div>
               <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1 ml-1">Height (cm)</label>
@@ -119,7 +114,6 @@ export default function EditProfileModal({ profile, isOpen, onClose, onRefresh }
                 <Ruler className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                 <input 
                   type="number"
-                  placeholder="cm"
                   className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-fbOrange outline-none text-sm font-bold"
                   value={formData.height}
                   onChange={(e) => setFormData({...formData, height: e.target.value})}
@@ -132,7 +126,6 @@ export default function EditProfileModal({ profile, isOpen, onClose, onRefresh }
                 <Scale className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                 <input 
                   type="number"
-                  placeholder="kg"
                   className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-fbOrange outline-none text-sm font-bold"
                   value={formData.weight}
                   onChange={(e) => setFormData({...formData, weight: e.target.value})}
@@ -142,12 +135,8 @@ export default function EditProfileModal({ profile, isOpen, onClose, onRefresh }
           </div>
         </div>
 
-        {/* Footer */}
         <div className="p-4 border-t bg-gray-50 flex gap-3 sticky bottom-0 z-20">
-          <button 
-            onClick={onClose}
-            className="flex-1 py-3 text-sm font-bold text-gray-500 hover:bg-gray-200 rounded-xl transition-colors"
-          >
+          <button onClick={onClose} className="flex-1 py-3 text-sm font-bold text-gray-500 hover:bg-gray-200 rounded-xl transition-colors">
             Cancel
           </button>
           <button 
