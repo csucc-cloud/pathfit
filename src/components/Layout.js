@@ -48,7 +48,8 @@ const Layout = ({ children }) => {
   // UPDATED: Added Profile and kept locked status for specific items
   const menuItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, requiresUnlock: false },
-    { name: 'Student Profile', path: '/profile', icon: User, requiresUnlock: false },
+    // Inside src/components/Layout.js
+    { name: 'Student Profile', path: '/studprofile/profile', icon: User, requiresUnlock: false },
     { name: 'Initial Pre-Test', path: '/module/pre', icon: ClipboardCheck, requiresUnlock: false },
     { name: 'Weekly Logs', path: '/dashboard#logs', icon: Dumbbell, requiresUnlock: true }, 
     { name: 'Final Post-Test', path: '/module/post', icon: History, requiresUnlock: true },
