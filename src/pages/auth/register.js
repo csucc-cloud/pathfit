@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { useRouter } from 'next/router'; // Import useRouter for the teleport
+import { useRouter } from 'next/router';
 import { supabase } from '../../lib/supabaseClient';
 
 export default function Register() {
-  const router = useRouter(); // Initialize the router
+  const router = useRouter();
   const [formData, setFormData] = useState({
     studentId: '',
     email: '',
@@ -12,24 +12,23 @@ export default function Register() {
     age: '',
     sex: 'Male',
     course: '',
+    college: '', // Added this
     sectionCode: ''
   });
 
   const handleRegister = async (e) => {
     e.preventDefault();
     
-    // 1. Sign up the user in Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: formData.email,
       password: formData.password,
       options: {
-        data: { student_id: formData.studentId } // Stores ID in metadata
+        data: { student_id: formData.studentId }
       }
     });
 
     if (authError) return alert(authError.message);
 
-    // 2. If Auth is successful, insert the details into our Profiles table
     if (authData.user) {
       const { error: profileError } = await supabase
         .from('profiles')
@@ -40,6 +39,7 @@ export default function Register() {
           age: parseInt(formData.age),
           sex: formData.sex,
           course: formData.course,
+          college: formData.college, // Added this to the database insert
           section_code: formData.sectionCode
         }]);
 
@@ -47,7 +47,6 @@ export default function Register() {
         alert("Auth created, but profile failed: " + profileError.message);
       } else {
         alert("Account Created! You can now log in.");
-        // THE TELEPORT: Redirecting back to the login page (root path)
         router.push('/'); 
       }
     }
@@ -73,6 +72,10 @@ export default function Register() {
             <option value="Female">Female</option>
           </select>
         </div>
+
+        {/* Added College Field */}
+        <input type="text" placeholder="College (e.g. CAS, COED, CET)" className="w-full p-3 bg-fbGray rounded-xl outline-none" 
+          onChange={(e) => setFormData({...formData, college: e.target.value})} required />
 
         <input type="text" placeholder="Course (e.g. BSIT)" className="w-full p-3 bg-fbGray rounded-xl outline-none" 
           onChange={(e) => setFormData({...formData, course: e.target.value})} />
