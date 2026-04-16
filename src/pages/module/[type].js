@@ -75,13 +75,22 @@ export default function PracticumLog() {
   const handleFinalSubmit = async () => {
     const confirm = window.confirm("FINAL SUBMISSION: Once submitted, you cannot edit this record again. Proceed?");
     if (confirm) {
-      await saveLogs({ submitted: true, isPreTest: type === 'pre' });
+      // Pass the converted numeric value or the pre/post flag to your hook
+      // This ensures "pre" isn't sent to an 'int4' column in Supabase
+      await saveLogs({ 
+        submitted: true, 
+        isPreTest: type === 'pre',
+        isPostTest: type === 'post' 
+      });
+
       if (type === 'pre') {
-        // Trigger the global start date for the semester
+        // Trigger the global start date for the semester AND unlock sidebar
         await supabase.from('profiles').update({ 
-          pre_test_submitted_at: new Date().toISOString() 
+          pre_test_submitted_at: new Date().toISOString(),
+          pre_test_completed: true // This unlocks Weekly Logs & Post-Test in Layout.js
         }).eq('id', user.id);
       }
+      
       router.push('/dashboard');
     }
   };
