@@ -3,7 +3,8 @@ import Layout from '../../components/Layout';
 import EditProfileModal from '../../components/EditProfileModal'; 
 import FitnessLogTab from '../../components/FitnessLogTab'; 
 import { supabase } from '../../lib/supabaseClient';
-import { EXERCISES } from '../../constants/exercises';
+// Updated import to match your constant name
+import { PATHFIT_EXERCISES } from '../../constants/exercises';
 import { 
   Camera, 
   Edit2, 
@@ -26,7 +27,7 @@ import {
   BookOpen,
   Trophy,
   ChevronRight,
-  UserCircle // Added for Gender icon
+  UserCircle 
 } from 'lucide-react';
 
 export default function StudentProfile() {
@@ -149,7 +150,6 @@ export default function StudentProfile() {
   return (
     <Layout>
       <main className="bg-[#F0F2F5] min-h-screen pb-12">
-        {/* HEADER SECTION */}
         <div className="bg-white shadow-sm border-b">
           <div className="max-w-[1250px] mx-auto">
             <div className="relative h-[200px] md:h-[350px] w-full bg-fbNavy rounded-b-xl overflow-hidden shadow-inner group">
@@ -218,7 +218,6 @@ export default function StudentProfile() {
                   <p className="text-sm font-bold text-fbNavy">10-Step Fitness Progression</p>
                 </div>
 
-                {/* UPDATED INTRO SECTION */}
                 <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
                   <h2 className="text-xl font-black text-fbNavy mb-4">Intro</h2>
                   <div className="mb-6">
@@ -241,7 +240,6 @@ export default function StudentProfile() {
                     <div className="flex items-center gap-3 text-gray-700 text-sm font-medium"><School className="text-gray-400" size={18} /><span>College of <span className="font-bold">{profile?.college || "University"}</span></span></div>
                     <div className="flex items-center gap-3 text-gray-700 text-sm font-medium"><Calendar className="text-gray-400" size={18} /><span>Student ID: <span className="font-bold">{profile?.student_id || profile?.student_number}</span></span></div>
                     <div className="flex items-center gap-3 text-gray-700 text-sm font-medium"><Globe className="text-gray-400" size={18} /><span>Section: <span className="font-bold">{profile?.section_code || profile?.section}</span></span></div>
-                    {/* Integrated Personal Info */}
                     <div className="flex items-center gap-3 text-gray-700 text-sm font-medium"><UserCircle className="text-gray-400" size={18} /><span>Sex: <span className="font-bold">{profile?.sex || "N/A"}</span></span></div>
                     <div className="flex items-center gap-3 text-gray-700 text-sm font-medium"><Clock className="text-gray-400" size={18} /><span>Age: <span className="font-bold">{profile?.age ? `${profile.age} Years Old` : "N/A"}</span></span></div>
                   </div>
@@ -285,7 +283,6 @@ export default function StudentProfile() {
               {activeTab === 'About' ? (
                 <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
                   
-                  {/* FIXED 10-STEP SEMESTER ROADMAP */}
                   <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
                     <h3 className="text-xs font-black text-fbNavy/40 uppercase tracking-widest mb-8 flex items-center gap-2">
                       <BookOpen size={14} /> PATHFit Semester Roadmap
@@ -350,7 +347,8 @@ export default function StudentProfile() {
                             </tr>
                           </thead>
                           <tbody className="text-sm font-bold text-fbNavy">
-                            {EXERCISES.map((ex) => {
+                            {/* Updated to PATHFIT_EXERCISES and adjusted property keys */}
+                            {PATHFIT_EXERCISES.map((ex) => {
                               const preVal = preTest?.metrics?.[ex.id] || 0;
                               const currVal = exerciseLogs.reduce((max, log) => {
                                 const val = log.metrics?.[ex.id] || 0;
@@ -360,9 +358,9 @@ export default function StudentProfile() {
 
                               return (
                                 <tr key={ex.id} className="border-b border-gray-50 group hover:bg-gray-50 transition-colors">
-                                  <td className="py-4 text-gray-500 group-hover:text-fbNavy">{ex.label}</td>
-                                  <td className="py-4">{preVal > 0 ? `${preVal}${ex.unit === 'reps' ? '' : ex.unit}` : "--"}</td>
-                                  <td className="py-4 text-fbOrange">{currVal > 0 ? `${currVal}${ex.unit === 'reps' ? '' : ex.unit}` : "--"}</td>
+                                  <td className="py-4 text-gray-500 group-hover:text-fbNavy">{ex.name}</td>
+                                  <td className="py-4">{preVal > 0 ? `${preVal}${ex.unit === 'reps' ? '' : ' ' + ex.unit}` : "--"}</td>
+                                  <td className="py-4 text-fbOrange">{currVal > 0 ? `${currVal}${ex.unit === 'reps' ? '' : ' ' + ex.unit}` : "--"}</td>
                                   <td className="py-4 text-right">
                                     {diff > 0 ? (
                                       <span className="text-[10px] bg-green-100 text-green-600 px-2 py-1 rounded-full">+{diff}</span>
@@ -396,7 +394,6 @@ export default function StudentProfile() {
                       </div>
                     </div>
                   </div>
-                  {/* Personal Information card removed from here */}
                 </div>
               ) : (
                 <FitnessLogTab logs={exerciseLogs} />
