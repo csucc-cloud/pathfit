@@ -1,7 +1,7 @@
 // src/pages/admin/index.js
 import React, { useState } from 'react';
-import Layout from '../components/Layout';
-import RoleGuard from '../components/RoleGuard'; // Added the security guard
+import Layout from '../../components/Layout';
+import RoleGuard from '../../components/RoleGuard'; // Added the security guard
 import { useAdminData } from '../../hooks/useAdminData';
 import { downloadCSV } from '../../utils/exportHelper'; 
 // Importing Lucide icons for high-volume management UI
