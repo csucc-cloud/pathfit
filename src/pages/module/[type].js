@@ -72,7 +72,6 @@ export default function PracticumLog() {
 const handleFinalSubmit = async () => {
     const confirm = window.confirm("FINAL SUBMISSION: Once submitted, you cannot edit this record again. Proceed?");
     if (confirm) {
-      // UPDATED: Explicitly define the log type and test name for the profile progress tracker
       const isPre = type === 'pre';
       const isPost = type === 'post';
       const isAssessment = isPre || isPost;
@@ -84,24 +83,21 @@ const handleFinalSubmit = async () => {
         student_id: user.id, 
         log_type: isAssessment ? 'assessment' : 'workout',
         test_name: isPre ? 'Pre-Test' : isPost ? 'Post-Test' : null,
-        // Added explicit check to ensure week_number is a valid integer or null
-        week_number: isAssessment ? null : parseInt(type),
-        // Added locked_at to ensure the timestamp is captured on final submission
+        week_number: isPre ? 0 : isPost ? 9 : parseInt(type),
+        
         locked_at: new Date().toISOString()
       });
 
       if (isPre) {
         await supabase.from('profiles').update({ 
           pre_test_submitted_at: new Date().toISOString(),
-          pre_test_completed: true // This unlocks Weekly Logs & Post-Test in Layout.js
+          pre_test_completed: true 
         }).eq('id', user.id);
       }
       
-      // Redirecting to profile so user can see their progress immediately
       router.push('/studprofile/profile');
     }
   };
-
   if (loading || !user) {
     return (
       <Layout>
