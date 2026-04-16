@@ -1,9 +1,8 @@
 // src/components/Layout.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
-// Importing Lucide icons for professional navigation
 import { 
   LayoutDashboard, 
   Dumbbell, 
@@ -12,17 +11,24 @@ import {
   Menu, 
   X, 
   ChevronRight,
-  User
+  User,
+  PanelLeftClose,
+  PanelLeftOpen,
+  ClipboardCheck,
+  History
 } from 'lucide-react';
 
 const Layout = ({ children }) => {
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
+  // Consolidated menu items reflecting the new module structure
   const menuItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'Practicum 1', path: '/practicum/1', icon: Dumbbell },
-    { name: 'Practicum 2', path: '/practicum/2', icon: Trophy },
+    { name: 'Initial Pre-Test', path: '/module/pre', icon: ClipboardCheck },
+    { name: 'Weekly Logs', path: '/dashboard', icon: Dumbbell }, // Links back to hub for 11-day logic
+    { name: 'Final Post-Test', path: '/module/post', icon: History },
   ];
 
   const handleSignOut = async () => {
@@ -32,106 +38,151 @@ const Layout = ({ children }) => {
     }
   };
 
+  // Close mobile menu on route change
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [router.asPath]);
+
   return (
-    <div className="flex min-h-screen bg-fbGray text-fbNavy font-sans">
-      {/* Navigation Sidebar */}
-      <aside className="w-64 bg-fbNavy text-white hidden md:flex flex-col fixed h-full z-10 shadow-xl transition-all duration-300">
-        <div className="p-6 flex items-center gap-3 border-b border-white/10">
-          {/* Brand Logo - Firebase Orange Style */}
-          <div className="w-8 h-8 bg-fbOrange rounded-lg rotate-3 shadow-lg shadow-fbOrange/20 flex items-center justify-center font-bold text-white transition-transform hover:rotate-0">
-            P
-          </div>
-          <h1 className="text-xl font-bold tracking-tight">
-            PATHFit <span className="text-fbAmber">Portal</span>
-          </h1>
+    <div className="flex min-h-screen bg-fbGray text-fbNavy font-sans overflow-x-hidden">
+      
+      {/* DESKTOP SIDEBAR */}
+      <aside 
+        className={`bg-fbNavy text-white hidden md:flex flex-col fixed h-full z-30 shadow-xl transition-all duration-300 ease-in-out ${
+          isSidebarCollapsed ? 'w-20' : 'w-64'
+        }`}
+      >
+        <div className="p-6 flex items-center justify-between border-b border-white/10 overflow-hidden">
+          {!isSidebarCollapsed && (
+            <div className="flex items-center gap-3 animate-in fade-in duration-300">
+              <div className="w-8 h-8 bg-fbOrange rounded-lg rotate-3 shadow-lg shadow-fbOrange/20 flex items-center justify-center font-bold text-white transition-transform hover:rotate-0">
+                P
+              </div>
+              <h1 className="text-xl font-bold tracking-tight whitespace-nowrap">
+                PATHFit <span className="text-fbAmber">Portal</span>
+              </h1>
+            </div>
+          )}
+          <button 
+            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+            className={`p-2 hover:bg-white/10 rounded-lg transition-colors ${isSidebarCollapsed ? 'mx-auto' : ''}`}
+            title={isSidebarCollapsed ? "Open Sidebar" : "Close Sidebar"}
+          >
+            {isSidebarCollapsed ? <PanelLeftOpen size={20} /> : <PanelLeftClose size={20} />}
+          </button>
         </div>
         
-        <nav className="flex-1 p-4 space-y-2 mt-4">
+        <nav className="flex-1 p-4 space-y-2 mt-4 overflow-y-auto">
           {menuItems.map((item) => {
             const isActive = router.asPath === item.path;
             const Icon = item.icon;
             return (
               <Link key={item.path} href={item.path}>
-                <div className={`flex items-center gap-3 p-3 rounded-xl transition-all cursor-pointer group ${
+                <div className={`flex items-center gap-3 p-3 rounded-xl transition-all cursor-pointer group relative ${
                   isActive 
                     ? 'bg-fbOrange text-white shadow-lg shadow-fbOrange/30 translate-x-1' 
                     : 'hover:bg-white/5 text-gray-400 hover:text-white'
-                }`}>
-                  <Icon className={`w-5 h-5 transition-transform duration-200 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
-                  <span className="font-bold text-sm tracking-tight">{item.name}</span>
-                  {isActive && <ChevronRight className="w-4 h-4 ml-auto opacity-50" />}
+                } ${isSidebarCollapsed ? 'justify-center' : ''}`}>
+                  <Icon className={`w-5 h-5 min-w-[20px] transition-transform duration-200 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
+                  
+                  {!isSidebarCollapsed && (
+                    <span className="font-bold text-sm tracking-tight animate-in slide-in-from-left-2 duration-300">
+                      {item.name}
+                    </span>
+                  )}
+
+                  {/* Tooltip for collapsed mode */}
+                  {isSidebarCollapsed && (
+                    <div className="absolute left-16 bg-fbNavy text-white text-xs font-bold px-3 py-2 rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity border border-white/10 z-50 whitespace-nowrap">
+                      {item.name}
+                    </div>
+                  )}
+                  
+                  {!isSidebarCollapsed && isActive && <ChevronRight className="w-4 h-4 ml-auto opacity-50" />}
                 </div>
               </Link>
             );
           })}
         </nav>
 
-        {/* User Actions */}
         <div className="p-4 border-t border-white/10">
           <button 
             onClick={handleSignOut}
-            className="w-full flex items-center gap-3 text-gray-400 p-3 hover:bg-red-500/10 hover:text-red-400 rounded-xl transition-all font-bold text-sm group"
+            className={`w-full flex items-center gap-3 text-gray-400 p-3 hover:bg-red-500/10 hover:text-red-400 rounded-xl transition-all font-bold text-sm group ${
+              isSidebarCollapsed ? 'justify-center' : ''
+            }`}
           >
-            <LogOut className="w-5 h-5 group-hover:-translate-x-1 transition-transform" /> 
-            <span>Sign Out</span>
+            <LogOut className="w-5 h-5 min-w-[20px] group-hover:-translate-x-1 transition-transform" /> 
+            {!isSidebarCollapsed && <span>Sign Out</span>}
           </button>
         </div>
       </aside>
 
-      {/* Main Container - Adjusted for Sidebar Width */}
-      <div className="flex-1 md:ml-64 flex flex-col min-h-screen">
-        {/* Mobile Header (Only visible on small screens) */}
-        <header className="md:hidden bg-fbNavy p-4 flex justify-between items-center text-white sticky top-0 z-20 shadow-md">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-fbOrange rounded rotate-3 shadow-md flex items-center justify-center text-[10px] font-bold">P</div>
-            <h1 className="font-black text-sm uppercase tracking-tighter">
-              PATHFit <span className="text-fbAmber">Pro</span>
-            </h1>
-          </div>
-          <button 
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="p-2 bg-white/5 rounded-lg active:scale-90 transition-all"
-          >
-            {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
-        </header>
+      {/* MOBILE HEADER */}
+      <header className="md:hidden fixed top-0 w-full bg-fbNavy p-4 flex justify-between items-center text-white z-40 shadow-md">
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 bg-fbOrange rounded rotate-3 shadow-md flex items-center justify-center text-[10px] font-bold">P</div>
+          <h1 className="font-black text-sm uppercase tracking-tighter">
+            PATHFit <span className="text-fbAmber">Pro</span>
+          </h1>
+        </div>
+        <button 
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="p-2 bg-white/5 rounded-lg active:scale-90 transition-all"
+        >
+          {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+      </header>
 
-        {/* Mobile Menu Overlay */}
-        {isMobileMenuOpen && (
-          <div className="md:hidden fixed inset-0 z-30 bg-fbNavy p-6 pt-20 animate-in fade-in slide-in-from-top duration-300">
-            <nav className="space-y-4">
-              {menuItems.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <Link key={item.path} href={item.path} onClick={() => setIsMobileMenuOpen(false)}>
-                    <div className="flex items-center gap-4 text-white p-4 rounded-2xl bg-white/5 font-bold">
-                      <Icon className="w-6 h-6 text-fbOrange" />
-                      {item.name}
-                    </div>
-                  </Link>
-                );
-              })}
-              <button 
-                onClick={handleSignOut}
-                className="w-full flex items-center gap-4 text-red-400 p-4 rounded-2xl bg-red-500/10 font-bold"
-              >
-                <LogOut className="w-6 h-6" />
-                Sign Out
-              </button>
-            </nav>
+      {/* MOBILE MENU OVERLAY (Slide-out drawer) */}
+      <div className={`md:hidden fixed inset-0 z-50 transition-all duration-300 ease-in-out ${
+        isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+      }`}>
+        {/* Backdrop */}
+        <div className="absolute inset-0 bg-fbNavy/90 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)} />
+        
+        <nav className="relative w-4/5 h-full bg-fbNavy p-6 pt-24 space-y-4 shadow-2xl border-r border-white/10">
+          <div className="mb-8 px-4">
+            <p className="text-fbOrange text-[10px] font-black uppercase tracking-widest opacity-70">Main Navigation</p>
           </div>
-        )}
+          {menuItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = router.asPath === item.path;
+            return (
+              <Link key={item.path} href={item.path}>
+                <div className={`flex items-center gap-4 p-4 rounded-2xl font-bold transition-all ${
+                  isActive ? 'bg-fbOrange text-white shadow-lg shadow-fbOrange/20' : 'bg-white/5 text-white/70 hover:text-white'
+                }`}>
+                  <Icon className={`w-6 h-6 ${isActive ? 'text-white' : 'text-fbOrange'}`} />
+                  {item.name}
+                </div>
+              </Link>
+            );
+          })}
+          <div className="pt-8 mt-8 border-t border-white/10">
+            <button 
+              onClick={handleSignOut}
+              className="w-full flex items-center gap-4 text-red-400 p-4 rounded-2xl bg-red-500/10 font-bold active:scale-95 transition-all"
+            >
+              <LogOut size={24} />
+              Sign Out
+            </button>
+          </div>
+        </nav>
+      </div>
 
-        {/* Page Content */}
-        <div className="flex-1 relative">
+      {/* MAIN CONTENT AREA */}
+      <main 
+        className={`flex-1 flex flex-col min-h-screen transition-all duration-300 pt-16 md:pt-0 ${
+          isSidebarCollapsed ? 'md:ml-20' : 'md:ml-64'
+        }`}
+      >
+        <div className="flex-1 relative animate-in fade-in duration-500">
           {children}
         </div>
-      </div>
+      </main>
     </div>
   );
 };
 
 export default Layout;
-
-
-
