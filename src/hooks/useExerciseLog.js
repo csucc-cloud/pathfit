@@ -7,6 +7,16 @@ export function useExerciseLog(practicumId, studentId) {
   const [loading, setLoading] = useState(true);
   const [metadata, setMetadata] = useState({ is_submitted: false }); // Track lock status
 
+  // NEW: Helper to convert string IDs ('pre', 'post') to integers for the DB
+  const getNumericPracticumId = (id) => {
+    if (id === 'pre') return 0;
+    if (id === 'post') return 99;
+    const parsed = parseInt(id);
+    return isNaN(parsed) ? id : parsed;
+  };
+
+  const dbPracticumId = getNumericPracticumId(practicumId);
+
   // 1. Load existing data when the page opens
   useEffect(() => {
     async function fetchData() {
@@ -21,7 +31,7 @@ export function useExerciseLog(practicumId, studentId) {
         .from('exercise_logs')
         .select('*')
         .eq('student_id', studentId)
-        .eq('practicum_type', practicumId);
+        .eq('practicum_type', dbPracticumId); // Use numeric ID here
 
       if (data && data.length > 0) {
         // Transform array to object { ex1: { set1: 10, ... } }
@@ -46,7 +56,7 @@ export function useExerciseLog(practicumId, studentId) {
       setLoading(false);
     }
     fetchData();
-  }, [practicumId, studentId]);
+  }, [practicumId, studentId, dbPracticumId]);
 
   // 2. Save all changes at once
   // Enhanced to handle final submission and pre-test trigger
@@ -65,7 +75,7 @@ export function useExerciseLog(practicumId, studentId) {
     const rowsToUpsert = Object.entries(logData).map(([exId, sets]) => ({
       student_id: studentId,
       exercise_id: exId,
-      practicum_type: practicumId,
+      practicum_type: dbPracticumId, // Use numeric ID for DB compatibility
       set_1_val: parseFloat(sets.set1 || 0),
       set_2_val: parseFloat(sets.set2 || 0),
       set_3_val: parseFloat(sets.set3 || 0),
