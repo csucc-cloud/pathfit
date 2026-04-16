@@ -81,7 +81,7 @@ export default function PracticumLog() {
         submitted: true, 
         isPreTest: isPre,
         isPostTest: isPost,
-        // Ensure these match the filters in profile.js
+        student_id: user.id, 
         log_type: isAssessment ? 'assessment' : 'workout',
         test_name: isPre ? 'Pre-Test' : isPost ? 'Post-Test' : null,
         week_number: isAssessment ? null : parseInt(type)
@@ -90,7 +90,7 @@ export default function PracticumLog() {
       if (isPre) {
         await supabase.from('profiles').update({ 
           pre_test_submitted_at: new Date().toISOString(),
-          pre_test_completed: true 
+          pre_test_completed: true // This unlocks Weekly Logs & Post-Test in Layout.js
         }).eq('id', user.id);
       }
       
