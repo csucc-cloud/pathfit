@@ -15,7 +15,8 @@ import {
   Calendar,
   ChevronRight,
   Activity,
-  Loader2
+  Loader2,
+  ClipboardCheck
 } from 'lucide-react';
 
 export default function StudentDashboard() {
@@ -67,6 +68,9 @@ export default function StudentDashboard() {
     );
   }
 
+  // Helper check for the overlay
+  const isPreTestFinished = !!profile?.pre_test_submitted_at;
+
   return (
     <RoleGuard allowedRole="student">
       <Layout>
@@ -90,11 +94,11 @@ export default function StudentDashboard() {
               <div>
                 <p className="text-white/60 text-sm font-bold uppercase tracking-wider">Overall Status</p>
                 <h3 className="text-2xl font-black">
-                  {profile?.pre_test_submitted_at ? "Curriculum in Progress" : "Awaiting Pre-Test"}
+                  {isPreTestFinished ? "Curriculum in Progress" : "Awaiting Pre-Test"}
                 </h3>
               </div>
             </div>
-            {profile?.pre_test_submitted_at && (
+            {isPreTestFinished && (
               <div className="text-right">
                 <p className="text-white/60 text-xs font-bold uppercase mb-1">Started On</p>
                 <div className="flex items-center gap-2 font-mono text-fbOrange font-bold">
@@ -105,46 +109,74 @@ export default function StudentDashboard() {
             )}
           </div>
 
-          {/* Module Grid */}
+          {/* Module Grid Section */}
           <div className="grid gap-4">
-            {/* Pre-Test Module */}
+            {/* Pre-Test Module - Always Visible/Accessible until complete */}
             <ModuleCard 
               title="Initial Pre-Test" 
               subtitle="Mandatory baseline assessment"
               href="/module/pre" 
-              status={profile?.pre_test_submitted_at ? 'COMPLETED' : 'OPEN'} 
+              status={isPreTestFinished ? 'COMPLETED' : 'OPEN'} 
             />
 
-            <div className="py-4 flex items-center gap-4">
-              <div className="h-px bg-gray-200 flex-1"></div>
-              <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Weekly Logs</span>
-              <div className="h-px bg-gray-200 flex-1"></div>
+            {/* WRAPPER FOR PROTECTED CONTENT */}
+            <div className="relative mt-4">
+              
+              {/* LOCK OVERLAY: Flashes if pre-test is missing */}
+              {!isPreTestFinished && (
+                <div className="absolute inset-x-0 -inset-y-4 z-20 backdrop-blur-md bg-white/40 rounded-3xl flex items-center justify-center p-6 border-2 border-dashed border-fbOrange/30">
+                  <div className="bg-white p-8 rounded-3xl shadow-2xl text-center max-w-sm animate-in zoom-in duration-300 border border-gray-100">
+                    <div className="w-16 h-16 bg-fbOrange/10 rounded-2xl rotate-3 flex items-center justify-center mx-auto mb-6">
+                      <ClipboardCheck className="text-fbOrange w-8 h-8" />
+                    </div>
+                    <h3 className="text-xl font-black text-fbNavy mb-2">Weekly Logs Locked</h3>
+                    <p className="text-gray-500 font-bold text-sm leading-relaxed mb-6">
+                      Please fill out the <span className="text-fbOrange">Initial Pre-test</span> to proceed with the Weekly Logs.
+                    </p>
+                    <button 
+                      onClick={() => router.push('/module/pre')}
+                      className="w-full bg-fbNavy text-white px-6 py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-fbOrange transition-all active:scale-95 shadow-lg shadow-fbNavy/20"
+                    >
+                      Complete Pre-test Now
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Weekly Logs Grid (Blurred when locked) */}
+              <div className={!isPreTestFinished ? 'opacity-40 grayscale pointer-events-none select-none' : ''}>
+                <div className="py-4 flex items-center gap-4">
+                  <div className="h-px bg-gray-200 flex-1"></div>
+                  <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Weekly Logs</span>
+                  <div className="h-px bg-gray-200 flex-1"></div>
+                </div>
+
+                <div className="grid gap-4">
+                  {[1, 2, 3, 4, 5, 6, 7, 8].map((week) => (
+                    <ModuleCard 
+                      key={week}
+                      title={`Weekly Log: Week ${week}`}
+                      subtitle={`7-day cycle fitness tracking`}
+                      href={`/module/${week}`}
+                      status={getModuleStatus(week)}
+                    />
+                  ))}
+
+                  <div className="py-4 flex items-center gap-4">
+                    <div className="h-px bg-gray-200 flex-1"></div>
+                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Final Assessment</span>
+                    <div className="h-px bg-gray-200 flex-1"></div>
+                  </div>
+
+                  <ModuleCard 
+                    title="Final Post-Test" 
+                    subtitle="End of semester comparison"
+                    href="/module/post" 
+                    status={getModuleStatus(9) === 'OPEN' ? 'OPEN' : 'LOCKED'} 
+                  />
+                </div>
+              </div>
             </div>
-
-            {/* Weekly Modules 1-8 */}
-            {[1, 2, 3, 4, 5, 6, 7, 8].map((week) => (
-              <ModuleCard 
-                key={week}
-                title={`Weekly Log: Week ${week}`}
-                subtitle={`7-day cycle fitness tracking`}
-                href={`/module/${week}`}
-                status={getModuleStatus(week)}
-              />
-            ))}
-
-            <div className="py-4 flex items-center gap-4">
-              <div className="h-px bg-gray-200 flex-1"></div>
-              <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Final Assessment</span>
-              <div className="h-px bg-gray-200 flex-1"></div>
-            </div>
-
-            {/* Post-Test Card */}
-            <ModuleCard 
-              title="Final Post-Test" 
-              subtitle="End of semester comparison"
-              href="/module/post" 
-              status={getModuleStatus(9) === 'OPEN' ? 'OPEN' : 'LOCKED'} 
-            />
           </div>
         </main>
       </Layout>
