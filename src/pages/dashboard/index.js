@@ -2,8 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import Layout from '../components/Layout';
-import RoleGuard from '../components/RoleGuard';
+import Layout from '../../components/Layout';
+import RoleGuard from '../../components/RoleGuard';
 import { supabase } from '../../lib/supabaseClient';
 import { 
   Lock, 
@@ -55,6 +55,15 @@ export default function StudentDashboard() {
     if (now < openDate) return 'LOCKED';
     if (now > expiryDate) return 'EXPIRED';
     return 'OPEN';
+  };
+
+  // LOGIC: Post-test specifically unlocks only after 8 weeks (56 days) of logs are done
+  const isPostTestUnlocked = () => {
+    if (!profile?.pre_test_submitted_at) return false;
+    const start = new Date(profile.pre_test_submitted_at);
+    const now = new Date();
+    const unlockDate = new Date(start.getTime() + (8 * 7 * 24 * 60 * 60 * 1000)); 
+    return now >= unlockDate;
   };
 
   if (loading) {
@@ -168,12 +177,23 @@ export default function StudentDashboard() {
                     <div className="h-px bg-gray-200 flex-1"></div>
                   </div>
 
-                  <ModuleCard 
-                    title="Final Post-Test" 
-                    subtitle="End of semester comparison"
-                    href="/module/post" 
-                    status={getModuleStatus(9) === 'OPEN' ? 'OPEN' : 'LOCKED'} 
-                  />
+                  {/* Post-Test Card with secondary time-lock logic */}
+                  <div className="relative">
+                    {!isPostTestUnlocked() && isPreTestFinished && (
+                      <div className="absolute inset-0 z-10 bg-fbGray/60 backdrop-blur-[1px] rounded-3xl flex items-center justify-center border border-dashed border-gray-300">
+                        <div className="bg-white px-4 py-2 rounded-full shadow-sm flex items-center gap-2">
+                          <Lock className="w-3 h-3 text-gray-400" />
+                          <span className="text-[10px] font-black text-gray-500 uppercase">Unlocks after Week 8</span>
+                        </div>
+                      </div>
+                    )}
+                    <ModuleCard 
+                      title="Final Post-Test" 
+                      subtitle="End of semester comparison"
+                      href="/module/post" 
+                      status={isPostTestUnlocked() ? 'OPEN' : 'LOCKED'} 
+                    />
+                  </div>
                 </div>
               </div>
             </div>
