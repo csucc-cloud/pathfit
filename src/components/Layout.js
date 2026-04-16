@@ -24,11 +24,11 @@ const Layout = ({ children }) => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  // Consolidated menu items reflecting the new module structure
+  // UPDATED: Added a hash to Weekly Logs so it has a unique path
   const menuItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Initial Pre-Test', path: '/module/pre', icon: ClipboardCheck },
-    { name: 'Weekly Logs', path: '/dashboard', icon: Dumbbell }, // Links back to hub for 11-day logic
+    { name: 'Weekly Logs', path: '/dashboard#logs', icon: Dumbbell }, 
     { name: 'Final Post-Test', path: '/module/post', icon: History },
   ];
 
@@ -39,7 +39,6 @@ const Layout = ({ children }) => {
     }
   };
 
-  // Close mobile menu on route change & handle hydration
   useEffect(() => {
     setMounted(true);
     setIsMobileMenuOpen(false);
@@ -78,8 +77,13 @@ const Layout = ({ children }) => {
         
         <nav className="flex-1 p-4 space-y-2 mt-4 overflow-y-auto">
           {menuItems.map((item) => {
-            const isActive = router.asPath === item.path;
             const Icon = item.icon;
+            
+            // NEW: Logic to prevent both Dashboard and Weekly Logs from being orange at the same time
+            const isActive = item.name === 'Dashboard' 
+              ? router.asPath === '/dashboard' 
+              : router.asPath === item.path;
+
             return (
               <Link key={item.path} href={item.path}>
                 <div className={`flex items-center gap-3 p-3 rounded-xl transition-all cursor-pointer group relative ${
@@ -95,7 +99,6 @@ const Layout = ({ children }) => {
                     </span>
                   )}
 
-                  {/* Tooltip for collapsed mode */}
                   {isSidebarCollapsed && (
                     <div className="absolute left-16 bg-fbNavy text-white text-xs font-bold px-3 py-2 rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity border border-white/10 z-50 whitespace-nowrap">
                       {item.name}
@@ -138,11 +141,10 @@ const Layout = ({ children }) => {
         </button>
       </header>
 
-      {/* MOBILE MENU OVERLAY (Slide-out drawer) */}
+      {/* MOBILE MENU OVERLAY */}
       <div className={`md:hidden fixed inset-0 z-50 transition-all duration-300 ease-in-out ${
         isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
-        {/* Backdrop */}
         <div className="absolute inset-0 bg-fbNavy/90 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)} />
         
         <nav className="relative w-4/5 h-full bg-fbNavy p-6 pt-24 space-y-4 shadow-2xl border-r border-white/10">
@@ -151,7 +153,10 @@ const Layout = ({ children }) => {
           </div>
           {menuItems.map((item) => {
             const Icon = item.icon;
-            const isActive = router.asPath === item.path;
+            const isActive = item.name === 'Dashboard' 
+              ? router.asPath === '/dashboard' 
+              : router.asPath === item.path;
+
             return (
               <Link key={item.path} href={item.path}>
                 <div className={`flex items-center gap-4 p-4 rounded-2xl font-bold transition-all ${
