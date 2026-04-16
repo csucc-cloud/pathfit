@@ -10,7 +10,7 @@ export function useExerciseLog(practicumId, studentId) {
   // NEW: Helper to convert string IDs ('pre', 'post') to integers for the DB
   const getNumericPracticumId = (id) => {
     if (id === 'pre') return 0;
-    if (id === 'post') return 99;
+    if (id === 'post') return 9; // Changed to 9 for chronological comparison
     const parsed = parseInt(id);
     return isNaN(parsed) ? id : parsed;
   };
@@ -59,8 +59,14 @@ export function useExerciseLog(practicumId, studentId) {
   }, [practicumId, studentId, dbPracticumId]);
 
   // 2. Save all changes at once
-  // Enhanced to handle final submission and pre-test trigger
-  const saveLogs = async ({ submitted = false, isPreTest = false } = {}) => {
+  // Enhanced to handle final submission and pass through profile-specific columns
+  const saveLogs = async ({ 
+    submitted = false, 
+    log_type = 'workout', 
+    test_name = null, 
+    week_number = null, 
+    locked_at = null 
+  } = {}) => {
     if (!supabase) {
       alert("Database connection not initialized.");
       return;
@@ -80,6 +86,11 @@ export function useExerciseLog(practicumId, studentId) {
       set_2_val: parseFloat(sets.set2 || 0),
       set_3_val: parseFloat(sets.set3 || 0),
       is_submitted: submitted, // Feature: Mark as final
+      // CONSOLIDATED MAPPINGS:
+      log_type: log_type,
+      test_name: test_name,
+      week_number: week_number,
+      locked_at: locked_at,
       updated_at: new Date(),
     }));
 
