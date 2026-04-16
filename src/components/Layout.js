@@ -15,7 +15,8 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   ClipboardCheck,
-  History
+  History,
+  Lock // Added Lock icon for visual feedback
 } from 'lucide-react';
 
 const Layout = ({ children }) => {
@@ -23,13 +24,33 @@ const Layout = ({ children }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [isLocked, setIsLocked] = useState(true); // State to handle locking logic
 
-  // UPDATED: Added a hash to Weekly Logs so it has a unique path
+  // Fetch progress to see if pre-test is done
+  useEffect(() => {
+    const checkProgress = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('pre_test_completed')
+          .eq('id', user.id)
+          .single();
+        
+        if (data?.pre_test_completed) {
+          setIsLocked(false);
+        }
+      }
+    };
+    checkProgress();
+  }, []);
+
+  // UPDATED: Added locked status to specific items
   const menuItems = [
-    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'Initial Pre-Test', path: '/module/pre', icon: ClipboardCheck },
-    { name: 'Weekly Logs', path: '/dashboard#logs', icon: Dumbbell }, 
-    { name: 'Final Post-Test', path: '/module/post', icon: History },
+    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, requiresUnlock: false },
+    { name: 'Initial Pre-Test', path: '/module/pre', icon: ClipboardCheck, requiresUnlock: false },
+    { name: 'Weekly Logs', path: '/dashboard#logs', icon: Dumbbell, requiresUnlock: true }, 
+    { name: 'Final Post-Test', path: '/module/post', icon: History, requiresUnlock: true },
   ];
 
   const handleSignOut = async () => {
@@ -78,19 +99,23 @@ const Layout = ({ children }) => {
         <nav className="flex-1 p-4 space-y-2 mt-4 overflow-y-auto">
           {menuItems.map((item) => {
             const Icon = item.icon;
+            const itemLocked = item.requiresUnlock && isLocked;
             
-            // NEW: Logic to prevent both Dashboard and Weekly Logs from being orange at the same time
             const isActive = item.name === 'Dashboard' 
               ? router.asPath === '/dashboard' 
               : router.asPath === item.path;
 
             return (
-              <Link key={item.path} href={item.path}>
+              <Link 
+                key={item.path} 
+                href={itemLocked ? '#' : item.path}
+                onClick={(e) => itemLocked && e.preventDefault()}
+              >
                 <div className={`flex items-center gap-3 p-3 rounded-xl transition-all cursor-pointer group relative ${
                   isActive 
                     ? 'bg-fbOrange text-white shadow-lg shadow-fbOrange/30 translate-x-1' 
                     : 'hover:bg-white/5 text-gray-400 hover:text-white'
-                } ${isSidebarCollapsed ? 'justify-center' : ''}`}>
+                } ${isSidebarCollapsed ? 'justify-center' : ''} ${itemLocked ? 'opacity-50 grayscale-[0.5]' : ''}`}>
                   <Icon className={`w-5 h-5 min-w-[20px] transition-transform duration-200 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
                   
                   {!isSidebarCollapsed && (
@@ -99,9 +124,12 @@ const Layout = ({ children }) => {
                     </span>
                   )}
 
+                  {/* Lock indicator for desktop */}
+                  {!isSidebarCollapsed && itemLocked && <Lock size={14} className="ml-auto opacity-40" />}
+
                   {isSidebarCollapsed && (
                     <div className="absolute left-16 bg-fbNavy text-white text-xs font-bold px-3 py-2 rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity border border-white/10 z-50 whitespace-nowrap">
-                      {item.name}
+                      {item.name} {itemLocked ? '(Locked)' : ''}
                     </div>
                   )}
                   
@@ -153,17 +181,23 @@ const Layout = ({ children }) => {
           </div>
           {menuItems.map((item) => {
             const Icon = item.icon;
+            const itemLocked = item.requiresUnlock && isLocked;
             const isActive = item.name === 'Dashboard' 
               ? router.asPath === '/dashboard' 
               : router.asPath === item.path;
 
             return (
-              <Link key={item.path} href={item.path}>
+              <Link 
+                key={item.path} 
+                href={itemLocked ? '#' : item.path}
+                onClick={(e) => itemLocked && e.preventDefault()}
+              >
                 <div className={`flex items-center gap-4 p-4 rounded-2xl font-bold transition-all ${
                   isActive ? 'bg-fbOrange text-white shadow-lg shadow-fbOrange/20' : 'bg-white/5 text-white/70 hover:text-white'
-                }`}>
+                } ${itemLocked ? 'opacity-50' : ''}`}>
                   <Icon className={`w-6 h-6 ${isActive ? 'text-white' : 'text-fbOrange'}`} />
-                  {item.name}
+                  <span className="flex-1">{item.name}</span>
+                  {itemLocked && <Lock size={18} className="opacity-40" />}
                 </div>
               </Link>
             );
