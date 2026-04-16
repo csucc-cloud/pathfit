@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../../components/Layout';
-import EditProfileModal from '../../components/EditProfileModal'; // New component import
+import EditProfileModal from '../../components/EditProfileModal'; 
 import { supabase } from '../../lib/supabaseClient';
 import { 
   Camera, 
@@ -16,7 +16,12 @@ import {
   Dumbbell,
   Globe,
   Loader2,
-  Clock
+  Clock,
+  Activity,
+  Scale,
+  Ruler,
+  Flame,
+  BookOpen
 } from 'lucide-react';
 
 export default function StudentProfile() {
@@ -26,7 +31,7 @@ export default function StudentProfile() {
   const [uploading, setUploading] = useState(false);
   const [activeTab, setActiveTab] = useState('About');
   const [isEditingBio, setIsEditingBio] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false); // Modal state
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false); 
   const [bio, setBio] = useState("");
 
   const fetchData = async () => {
@@ -106,6 +111,21 @@ export default function StudentProfile() {
     else alert("Error updating bio: " + error.message);
   };
 
+  // BMI Calculation Logic
+  const calculateBMI = () => {
+    if (!profile?.height || !profile?.weight) return null;
+    const heightInMeters = profile.height / 100;
+    const bmi = (profile.weight / (heightInMeters * heightInMeters)).toFixed(1);
+    let category = "";
+    if (bmi < 18.5) category = "Underweight";
+    else if (bmi < 25) category = "Normal";
+    else if (bmi < 30) category = "Overweight";
+    else category = "Obese";
+    return { score: bmi, category };
+  };
+
+  const bmiResult = calculateBMI();
+
   if (loading) return null;
 
   return (
@@ -148,7 +168,7 @@ export default function StudentProfile() {
 
                 <div className="flex-1 pb-4 text-center md:text-left">
                   <h1 className="text-3xl md:text-4xl font-black text-fbNavy">{profile?.full_name}</h1>
-                  <p className="text-gray-500 font-bold">Student Athlete • {profile?.section}</p>
+                  <p className="text-gray-500 font-bold">Student Athlete • {profile?.section_code || profile?.section}</p>
                 </div>
 
                 <div className="flex gap-2 mb-6">
@@ -177,7 +197,21 @@ export default function StudentProfile() {
         {/* CONTENT */}
         <div className="max-w-[1250px] mx-auto px-4 mt-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            {/* SIDEBAR */}
             <div className="lg:col-span-4 space-y-4">
+              
+              {/* FEATURE 4: CURRENT FOCUS */}
+              <div className="bg-fbOrange/10 border border-fbOrange/20 p-4 rounded-xl">
+                <div className="flex items-center gap-2 text-fbOrange mb-1">
+                  <Activity size={18} />
+                  <span className="text-[10px] font-black uppercase tracking-widest">Current Module</span>
+                </div>
+                <p className="text-sm font-bold text-fbNavy">Physical Fitness Assessment</p>
+                <p className="text-[11px] text-gray-500 mt-1">Status: Active Assessment Period</p>
+              </div>
+
+              {/* INTRO BOX */}
               <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
                 <h2 className="text-xl font-black text-fbNavy mb-4">Intro</h2>
                 <div className="mb-6">
@@ -197,19 +231,73 @@ export default function StudentProfile() {
                   )}
                 </div>
                 <div className="space-y-3 pt-4 border-t border-gray-100">
-                  <div className="flex items-center gap-3 text-gray-700 text-sm font-medium"><School className="text-gray-400" size={18} /><span>Studying at <span className="font-bold">{profile?.college}</span></span></div>
-                  <div className="flex items-center gap-3 text-gray-700 text-sm font-medium"><Calendar className="text-gray-400" size={18} /><span>Student ID: <span className="font-bold">{profile?.student_id}</span></span></div>
-                  <div className="flex items-center gap-3 text-gray-700 text-sm font-medium"><Globe className="text-gray-400" size={18} /><span>Section: <span className="font-bold">{profile?.section_code}</span></span></div>
+                  <div className="flex items-center gap-3 text-gray-700 text-sm font-medium"><School className="text-gray-400" size={18} /><span>College of <span className="font-bold">{profile?.college || "University"}</span></span></div>
+                  <div className="flex items-center gap-3 text-gray-700 text-sm font-medium"><Calendar className="text-gray-400" size={18} /><span>Student ID: <span className="font-bold">{profile?.student_id || profile?.student_number}</span></span></div>
+                  <div className="flex items-center gap-3 text-gray-700 text-sm font-medium"><Globe className="text-gray-400" size={18} /><span>Section: <span className="font-bold">{profile?.section_code || profile?.section}</span></span></div>
                 </div>
               </div>
+
+              {/* FEATURE 3: BMI CALCULATOR */}
+              <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+                <h2 className="text-lg font-black text-fbNavy mb-3 flex items-center gap-2">
+                  <Scale size={20} className="text-fbOrange" /> Body Composition
+                </h2>
+                {bmiResult ? (
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center bg-fbGray/50 p-3 rounded-lg">
+                      <div>
+                        <p className="text-[10px] font-black text-gray-400 uppercase">BMI Score</p>
+                        <p className="text-xl font-black text-fbOrange">{bmiResult.score}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[10px] font-black text-gray-400 uppercase">Status</p>
+                        <span className="text-xs font-bold px-2 py-1 bg-fbNavy text-white rounded-full">{bmiResult.category}</span>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-center">
+                      <div className="p-2 border border-gray-100 rounded-lg">
+                        <Ruler size={14} className="mx-auto text-gray-400 mb-1" />
+                        <p className="text-xs font-bold">{profile?.height} cm</p>
+                      </div>
+                      <div className="p-2 border border-gray-100 rounded-lg">
+                        <Scale size={14} className="mx-auto text-gray-400 mb-1" />
+                        <p className="text-xs font-bold">{profile?.weight} kg</p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-xs text-gray-400 italic text-center py-2">Update your Height/Weight in settings to calculate BMI.</p>
+                )}
+              </div>
             </div>
-            <div className="lg:col-span-8">
+
+            {/* MAIN CONTENT */}
+            <div className="lg:col-span-8 space-y-6">
+              
+              {/* FEATURE 1: QUICK STATS GRID */}
+              <div className="grid grid-cols-3 gap-4">
+                <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 text-center">
+                  <Flame size={24} className="mx-auto text-fbOrange mb-2" />
+                  <p className="text-xl font-black text-fbNavy">{exerciseLogs.length}</p>
+                  <p className="text-[10px] font-black text-gray-400 uppercase">Total Logs</p>
+                </div>
+                <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 text-center col-span-2">
+                  <Activity size={24} className="mx-auto text-blue-500 mb-2" />
+                  <p className="text-sm font-black text-fbNavy truncate px-2">
+                    {exerciseLogs[0]?.exercise_type || "No activity yet"}
+                  </p>
+                  <p className="text-[10px] font-black text-gray-400 uppercase">Latest Activity</p>
+                </div>
+              </div>
+
               {activeTab === 'About' ? (
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
                   <h2 className="text-xl font-black text-fbNavy mb-6">About Me</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="p-4 bg-fbGray/30 rounded-xl"><p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Full Name</p><p className="text-sm font-bold text-fbNavy">{profile?.full_name}</p></div>
                     <div className="p-4 bg-fbGray/30 rounded-xl"><p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Role</p><p className="text-sm font-bold text-fbNavy capitalize">{profile?.role}</p></div>
+                    <div className="p-4 bg-fbGray/30 rounded-xl"><p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Sex</p><p className="text-sm font-bold text-fbNavy">{profile?.sex || "N/A"}</p></div>
+                    <div className="p-4 bg-fbGray/30 rounded-xl"><p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Age</p><p className="text-sm font-bold text-fbNavy">{profile?.age ? `${profile.age} Years Old` : "N/A"}</p></div>
                   </div>
                 </div>
               ) : (
