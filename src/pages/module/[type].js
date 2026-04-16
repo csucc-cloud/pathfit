@@ -15,13 +15,13 @@ import {
   CheckCircle2, 
   Trophy,
   Activity,
-  Lock, // Added Lock icon
+  Lock,
   AlertCircle
 } from 'lucide-react';
 
 export default function PracticumLog() {
   const router = useRouter();
-  const { type } = router.query; // 'pre', 'post', or '1'-'8'
+  const { type } = router.query; 
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
 
@@ -40,12 +40,10 @@ export default function PracticumLog() {
     getUser();
   }, [router]);
 
-  // Initialize hook with dynamic type
   const { logData, setLogData, saveLogs, loading, metadata } = useExerciseLog(type, user?.id);
 
   const completedCount = Object.keys(logData).length;
 
-  // LOGIC: Determine if this specific module is locked
   const isExpired = () => {
     if (!profile?.pre_test_submitted_at || type === 'pre') return false;
     
@@ -53,7 +51,7 @@ export default function PracticumLog() {
     const now = new Date();
     const weekNum = parseInt(type);
     
-    if (isNaN(weekNum)) return false; // Post-test logic handled separately if needed
+    if (isNaN(weekNum)) return false; 
 
     const openDate = new Date(start.getTime() + (weekNum * 7 * 24 * 60 * 60 * 1000));
     const expiryDate = new Date(openDate.getTime() + (11 * 24 * 60 * 60 * 1000));
@@ -61,11 +59,10 @@ export default function PracticumLog() {
     return now > expiryDate;
   };
 
-  // Final Lock State: If already submitted OR if the 11-day window passed
   const isLocked = metadata?.is_submitted || isExpired();
 
   const handleInputChange = (exId, setKey, value) => {
-    if (isLocked) return; // Prevent state updates if locked
+    if (isLocked) return; 
     setLogData((prev) => ({
       ...prev,
       [exId]: { ...prev[exId], [setKey]: value },
@@ -75,23 +72,30 @@ export default function PracticumLog() {
   const handleFinalSubmit = async () => {
     const confirm = window.confirm("FINAL SUBMISSION: Once submitted, you cannot edit this record again. Proceed?");
     if (confirm) {
-      // Pass the converted numeric value or the pre/post flag to your hook
-      // This ensures "pre" isn't sent to an 'int4' column in Supabase
+      // UPDATED: Explicitly define the log type and test name for the profile progress tracker
+      const isPre = type === 'pre';
+      const isPost = type === 'post';
+      const isAssessment = isPre || isPost;
+
       await saveLogs({ 
         submitted: true, 
-        isPreTest: type === 'pre',
-        isPostTest: type === 'post' 
+        isPreTest: isPre,
+        isPostTest: isPost,
+        // Ensure these match the filters in profile.js
+        log_type: isAssessment ? 'assessment' : 'workout',
+        test_name: isPre ? 'Pre-Test' : isPost ? 'Post-Test' : null,
+        week_number: isAssessment ? null : parseInt(type)
       });
 
-      if (type === 'pre') {
-        // Trigger the global start date for the semester AND unlock sidebar
+      if (isPre) {
         await supabase.from('profiles').update({ 
           pre_test_submitted_at: new Date().toISOString(),
-          pre_test_completed: true // This unlocks Weekly Logs & Post-Test in Layout.js
+          pre_test_completed: true 
         }).eq('id', user.id);
       }
       
-      router.push('/dashboard');
+      // Redirecting to profile so user can see their progress immediately
+      router.push('/studprofile/profile');
     }
   };
 
@@ -111,7 +115,6 @@ export default function PracticumLog() {
       <Layout>
         <main className="p-4 md:p-10 max-w-7xl mx-auto">
           
-          {/* Lock Banner */}
           {isLocked && (
             <div className="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-r-2xl flex items-center gap-3 animate-in fade-in slide-in-from-top-4">
               <Lock className="text-red-500 w-6 h-6" />
@@ -184,7 +187,7 @@ export default function PracticumLog() {
                 exercise={ex}
                 values={logData[ex.id]}
                 onChange={handleInputChange}
-                disabled={isLocked} // Ensure ExerciseCard component implements this prop
+                disabled={isLocked}
               />
             ))}
           </div>
