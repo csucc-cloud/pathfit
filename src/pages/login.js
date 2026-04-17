@@ -1,5 +1,4 @@
-
-// src/pages/login.js (or wherever your login file is located)
+// src/pages/login.js
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
