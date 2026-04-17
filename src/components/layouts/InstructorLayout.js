@@ -1,6 +1,6 @@
-// src/components/layouts/InstructorLayout.js
 import React from 'react';
 import { useRouter } from 'next/router';
+import { supabase } from '../../lib/supabaseClient'; // Make sure this path is correct
 import { 
   LayoutDashboard, 
   Users, 
@@ -21,6 +21,20 @@ export default function InstructorLayout({ children }) {
     { name: 'Analytics', icon: <BarChart size={20} />, path: '/admin/analytics' },
   ];
 
+  // LOGIC TO HANDLE LOGOUT
+  const handleSignOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      // Redirect to the login page (or home) after successful sign out
+      router.push('/login'); 
+    } catch (err) {
+      console.error('Error signing out:', err.message);
+      alert('Error signing out. Please try again.');
+    }
+  };
+
   return (
     <div className="flex min-h-screen bg-[#F8F9FD] font-sans">
       {/* SIDEBAR */}
@@ -29,7 +43,7 @@ export default function InstructorLayout({ children }) {
           <div className="w-8 h-8 bg-fbOrange rounded-lg flex items-center justify-center shadow-lg shadow-fbOrange/20">
             <Zap size={18} className="text-white fill-white" />
           </div>
-          <h2 className="font-black italic tracking-tighter text-lg uppercase">
+          <h2 className="font-black italic tracking-tighter text-lg uppercase text-white">
             PATH<span className="text-fbOrange">FIT</span> <span className="text-[10px] block opacity-40 not-italic tracking-widest font-bold -mt-1">FACULTY</span>
           </h2>
         </div>
@@ -53,8 +67,12 @@ export default function InstructorLayout({ children }) {
           ))}
         </nav>
 
+        {/* UPDATED SIGN OUT BUTTON */}
         <div className="p-6 mt-auto">
-          <button className="w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-bold text-sm text-red-400 hover:bg-red-500/10 transition-all">
+          <button 
+            onClick={handleSignOut}
+            className="w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-bold text-sm text-red-400 hover:bg-red-500/10 hover:text-red-500 transition-all active:scale-95"
+          >
             <LogOut size={20} />
             Sign Out
           </button>
