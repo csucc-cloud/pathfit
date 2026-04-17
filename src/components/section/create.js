@@ -1,4 +1,3 @@
-// src/components/section/create.js
 import React, { useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import { 
@@ -29,9 +28,20 @@ export default function CreateSectionModal({ isOpen, onClose, onRefresh }) {
     setError(null);
 
     try {
+      // 1. Get current instructor's ID from Supabase Auth
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      
+      if (authError || !user) {
+        throw new Error("You must be logged in to create a section.");
+      }
+
+      // 2. Insert data including the instructor_id to satisfy the DB constraint
       const { error: submitError } = await supabase
         .from('sections')
-        .insert([formData]);
+        .insert([{
+          ...formData,
+          instructor_id: user.id 
+        }]);
 
       if (submitError) throw submitError;
 
