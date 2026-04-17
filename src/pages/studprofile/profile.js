@@ -40,7 +40,7 @@ export default function StudentProfile() {
 
   useEffect(() => { fetchData(); }, []);
 
-  // --- Logic Helpers (KEPT EXACTLY AS IS) ---
+  // --- Logic Helpers ---
   const totalCalories = exerciseLogs.reduce((sum, log) => sum + (log.calories_burned || 0), 0);
   const preTestLogs = exerciseLogs.filter(l => l.log_type === 'assessment' && l.week_number === 0);
   const postTestLogs = exerciseLogs.filter(l => l.log_type === 'assessment' && l.week_number === 9);
@@ -99,8 +99,15 @@ export default function StudentProfile() {
 
   return (
     <Layout>
+      <style dangerouslySetInnerHTML={{ __html: `
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #F8F9FD; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #FF6B00; }
+      `}} />
+
       <main className="bg-[#F8F9FD] min-h-screen pb-20">
-        {/* --- ENHANCED HEADER SECTION --- */}
+        {/* --- HEADER SECTION --- */}
         <div className="bg-white shadow-xl shadow-blue-900/5 relative z-20">
           <div className="max-w-[1400px] mx-auto">
             <div className="relative h-[250px] md:h-[400px] bg-fbNavy rounded-b-[40px] overflow-hidden group">
@@ -301,21 +308,23 @@ export default function StudentProfile() {
                     </div>
                   </div>
 
-                  {/* --- PERFORMANCE TABLE --- */}
+                  {/* --- SCROLLABLE PERFORMANCE TABLE --- */}
                   <div className="md:col-span-2 bg-white p-10 rounded-[40px] border border-gray-100 shadow-xl shadow-gray-200/30">
                     <div className="flex items-center justify-between mb-8">
                       <h3 className="text-xs font-black text-fbNavy uppercase tracking-[0.3em] flex items-center gap-3">
                         <Activity size={18} className="text-fbOrange" /> Training Benchmarks
                       </h3>
+                      <span className="text-[10px] font-black text-gray-300 uppercase italic">Scroll to view all</span>
                     </div>
-                    <div className="overflow-x-auto custom-scrollbar pr-2">
-                      <table className="w-full text-left">
-                        <thead>
-                          <tr className="text-[10px] text-gray-300 uppercase tracking-widest border-b border-gray-50">
-                            <th className="pb-6 font-black italic">Assessment Type</th>
-                            <th className="pb-6 font-black text-center">Baseline</th>
-                            <th className="pb-6 font-black text-center text-fbOrange">Peak Performance</th>
-                            <th className="pb-6 text-right font-black">Delta</th>
+                    
+                    <div className="overflow-y-auto max-h-[450px] pr-4 custom-scrollbar">
+                      <table className="w-full text-left border-separate border-spacing-0">
+                        <thead className="sticky top-0 bg-white z-20">
+                          <tr className="text-[10px] text-gray-300 uppercase tracking-widest">
+                            <th className="pb-6 font-black italic border-b border-gray-50">Assessment Type</th>
+                            <th className="pb-6 font-black text-center border-b border-gray-50">Baseline</th>
+                            <th className="pb-6 font-black text-center text-fbOrange border-b border-gray-50">Peak Performance</th>
+                            <th className="pb-6 text-right font-black border-b border-gray-50">Delta</th>
                           </tr>
                         </thead>
                         <tbody className="text-sm font-black text-fbNavy">
@@ -333,7 +342,9 @@ export default function StudentProfile() {
                                     <span className="text-[9px] font-black bg-green-500 text-white px-3 py-1 rounded-lg shadow-lg shadow-green-500/20 tracking-tighter">
                                       +{diff}
                                     </span>
-                                  ) : "--"}
+                                  ) : (
+                                    <span className="text-[9px] font-black bg-gray-100 text-gray-400 px-3 py-1 rounded-lg">0</span>
+                                  )}
                                 </td>
                               </tr>
                             );
