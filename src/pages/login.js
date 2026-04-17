@@ -7,9 +7,7 @@ import {
   Lock, 
   LogIn, 
   Loader2, 
-  ShieldCheck, 
   ChevronRight, 
-  CheckCircle2, 
   Timer, 
   Flame,
   Zap
@@ -62,31 +60,34 @@ export default function Login() {
           from { opacity: 0; transform: translateY(20px); }
           to { opacity: 1; transform: translateY(0); }
         }
-        @keyframes run-bounce {
-          0%, 100% { transform: translateY(0) rotate(-2deg); }
-          50% { transform: translateY(-10px) rotate(1deg); }
+        /* Aggressive tilt and bounce to mimic a sprint */
+        @keyframes athlete-sprint {
+          0%, 100% { transform: translateY(0) rotate(-1deg) scale(1); }
+          50% { transform: translateY(-12px) rotate(2deg) scale(1.02); }
         }
-        @keyframes trail-slide {
-          0% { transform: translateX(0); opacity: 0.8; }
-          100% { transform: translateX(-150px); opacity: 0; }
+        /* Sharp trailing speed lines */
+        @keyframes speed-line {
+          0% { transform: translateX(0) scaleX(1); opacity: 0.8; }
+          100% { transform: translateX(-300px) scaleX(2.5); opacity: 0; }
         }
         .animate-entrance { animation: entrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .animate-run { animation: run-bounce 0.4s ease-in-out infinite; }
-        .motion-trail { animation: trail-slide 0.6s linear infinite; }
-        .delay-1 { animation-delay: 0.1s; }
-        .delay-2 { animation-delay: 0.2s; }
+        .athlete-vector { animation: athlete-sprint 0.45s ease-in-out infinite; }
+        .speed-shard { 
+          animation: speed-line 0.5s linear infinite;
+          clip-path: polygon(10% 0%, 100% 50%, 10% 100%, 0% 50%); 
+        }
       `}</style>
 
       <div className="bg-white w-full h-screen md:h-auto md:max-w-[1100px] md:rounded-[40px] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.12)] border-0 md:border border-gray-100 flex overflow-hidden">
         
         {/* COLUMN 1: LOGIN FORM */}
-        <div className="w-full md:w-[45%] p-10 md:p-16 flex flex-col justify-between relative z-10 bg-white border-r border-gray-50">
+        <div className="w-full md:w-[45%] p-10 md:p-16 flex flex-col justify-between relative z-10 bg-white">
           <div className="animate-entrance">
             <div className="flex items-center gap-3 mb-10">
               <div className="w-12 h-12 bg-fbOrange rounded-2xl flex items-center justify-center shadow-lg shadow-fbOrange/30">
                 <LogIn className="text-white w-6 h-6" />
               </div>
-              <h2 className="text-fbNavy font-black tracking-tighter text-xl italic uppercase">PATH<span className="text-fbOrange">FIT</span></h2>
+              <h2 className="text-fbNavy font-black tracking-tighter text-xl italic">PATH<span className="text-fbOrange">FIT</span></h2>
             </div>
 
             <h1 className="text-4xl font-black text-fbNavy mb-4 leading-tight">
@@ -147,62 +148,60 @@ export default function Login() {
           </div>
         </div>
 
-        {/* COLUMN 2: HUMAN RUNNER ANIMATION */}
+        {/* COLUMN 2: STYLIZED VECTOR RUNNER (Matches your Image) */}
         <div className="hidden md:flex md:w-[55%] bg-[#0A0F1E] relative items-center justify-center overflow-hidden">
           
-          {/* Animated Background Gradients */}
-          <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-fbOrange/10 rounded-full blur-[120px] animate-pulse" />
-          <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-fbOrange/5 rounded-full blur-[100px]" />
+          {/* Ambient Glow */}
+          <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-fbOrange/15 rounded-full blur-[120px]" />
 
           <div className="relative z-10 flex flex-col items-center">
             
-            <div className="relative">
-              {/* SPRINTING TRAILS */}
-              <div className="absolute top-1/2 left-[-100px] -translate-y-1/2 flex flex-col gap-4">
-                <div className="motion-trail w-32 h-[2px] bg-gradient-to-r from-transparent to-fbOrange" />
-                <div className="motion-trail w-48 h-[1px] bg-gradient-to-r from-transparent to-white/40 delay-75" />
-                <div className="motion-trail w-28 h-[3px] bg-gradient-to-r from-transparent to-fbOrange/50 delay-150" />
+            <div className="relative flex items-center justify-center">
+              {/* SHARP SPEED LINES (Literal high level of trail) */}
+              <div className="absolute left-[-120px] flex flex-col gap-3">
+                <div className="speed-shard w-40 h-1 bg-fbOrange" style={{ animationDelay: '0s' }} />
+                <div className="speed-shard w-60 h-[2px] bg-white/40" style={{ animationDelay: '0.1s' }} />
+                <div className="speed-shard w-32 h-[3px] bg-fbOrange/60" style={{ animationDelay: '0.2s' }} />
+                <div className="speed-shard w-52 h-1 bg-white/20" style={{ animationDelay: '0.15s' }} />
               </div>
 
-              {/* HUMAN RUNNER SVG */}
-              <div className="animate-run">
-                <svg width="220" height="220" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-white drop-shadow-[0_0_30px_rgba(255,107,0,0.4)]">
-                  <path d="M15 5.5C15 6.32843 14.3284 7 13.5 7C12.6716 7 12 6.32843 12 5.5C12 4.67157 12.6716 4 13.5 4C14.3284 4 15 4.67157 15 5.5Z" fill="white"/>
-                  <path d="M12 9L10.5 13L7 12.5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M13.5 8L11 15.5L14 19.5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M11 15.5L7 19" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M13.5 8L17 7.5L19 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M13.5 8C13.5 8 11.5 8.5 10.5 9.5C9.5 10.5 10.5 13 10.5 13" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              {/* VECTOR ATHLETE (Stylized like your reference) */}
+              <div className="athlete-vector drop-shadow-[0_0_40px_rgba(255,107,0,0.5)]">
+                <svg width="280" height="280" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  {/* Head */}
+                  <circle cx="70" cy="25" r="5" fill="#FFB800" />
+                  {/* Torso (Geometric) */}
+                  <path d="M45 35L65 30L55 55L35 60L45 35Z" fill="#FF6B00" />
+                  {/* Arm Forward */}
+                  <path d="M65 30L85 35L80 45" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+                  {/* Arm Backward */}
+                  <path d="M45 35L30 30L25 40" stroke="#FFB800" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                  {/* Leg Forward */}
+                  <path d="M55 55L75 80L65 90" stroke="white" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+                  {/* Leg Backward */}
+                  <path d="M55 55L35 75L15 85" stroke="#FF6B00" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </div>
             </div>
 
-            {/* LIVE DASHBOARD HUD */}
-            <div className="mt-20 flex gap-6 animate-entrance delay-2">
-              <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-5 rounded-[24px] min-w-[140px]">
-                <div className="flex items-center gap-2 mb-2">
-                  <Timer size={14} className="text-fbOrange" />
-                  <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest">Duration</span>
-                </div>
-                <p className="text-white font-bold text-xl uppercase italic">45:12</p>
+            {/* LIVE DATA OVERLAY */}
+            <div className="mt-16 flex gap-6 animate-entrance delay-2">
+              <div className="bg-white/5 backdrop-blur-md border border-white/10 p-5 rounded-[24px] min-w-[140px] text-center">
+                <p className="text-[10px] text-fbOrange font-black uppercase tracking-widest mb-1">Pace</p>
+                <p className="text-white font-bold text-xl tracking-tighter italic uppercase">4'12"/km</p>
               </div>
 
-              <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-5 rounded-[24px] min-w-[140px]">
-                <div className="flex items-center gap-2 mb-2">
-                  <Flame size={14} className="text-fbOrange" />
-                  <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest">Kcal Burned</span>
-                </div>
-                <p className="text-white font-bold text-xl uppercase italic">842</p>
+              <div className="bg-white/5 backdrop-blur-md border border-white/10 p-5 rounded-[24px] min-w-[140px] text-center">
+                <p className="text-[10px] text-fbOrange font-black uppercase tracking-widest mb-1">Calories</p>
+                <p className="text-white font-bold text-xl tracking-tighter italic uppercase">842 KCAL</p>
               </div>
             </div>
             
-            {/* BACKGROUND TEXT */}
-            <h3 className="absolute bottom-[-20px] text-white/5 text-9xl font-black italic uppercase tracking-tighter select-none pointer-events-none">
+            <h3 className="absolute bottom-[-30px] text-white/5 text-9xl font-black italic uppercase tracking-tighter select-none">
               ATHLETE
             </h3>
           </div>
 
-          {/* GRID OVERLAY */}
           <div className="absolute inset-0 opacity-10 [background-image:radial-gradient(#ffffff_1px,transparent_1px)] [background-size:30px_30px]" />
         </div>
       </div>
