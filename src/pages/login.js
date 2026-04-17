@@ -33,10 +33,17 @@ export default function Login() {
     return () => clearTimeout(timer);
   }, [tapCount]);
 
+  // --- UPDATED SECRET TAP WITH SLIDE TRANSITION ---
   const handleSecretTap = () => {
     const nextCount = tapCount + 1;
-    if (nextCount === 3) router.push('/auth/faculty-enroll');
-    else setTapCount(nextCount);
+    if (nextCount === 3) {
+      setIsExiting(true); // Trigger the runner to slide left
+      setTimeout(() => {
+        router.push('/auth/faculty-enroll');
+      }, 800); // Navigate after animation completes
+    } else {
+      setTapCount(nextCount);
+    }
   };
 
   // --- FUNCTION TO SLIDE THEN REDIRECT TO REGISTER.JS ---
@@ -125,7 +132,6 @@ export default function Login() {
           </form>
 
           <div className="animate-entrance delay-2">
-            {/* UPDATED: Calling handleGoToRegister instead of direct router.push */}
             <button type="button" onClick={handleGoToRegister} className="group text-xs font-bold text-gray-400 hover:text-fbOrange transition-all flex items-center gap-2">
               No account? <span className="underline decoration-2 underline-offset-4 group-hover:text-fbOrange">Create here!</span> <ChevronRight size={14} />
             </button>
