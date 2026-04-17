@@ -1,7 +1,7 @@
 // src/pages/module/[type].js
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import Layout from '../../components/Layout';
+// --- LAYOUT REMOVED FROM DIRECT IMPORTS ---
 import ExerciseCard from '../../components/ExerciseCard';
 import RoleGuard from '../../components/RoleGuard'; 
 import { PATHFIT_EXERCISES } from '../../constants/exercises';
@@ -98,20 +98,18 @@ const handleFinalSubmit = async () => {
       router.push('/studprofile/profile');
     }
   };
+
   if (loading || !user) {
     return (
-      <Layout>
-        <div className="flex h-screen flex-col items-center justify-center gap-4">
-          <Loader2 className="h-12 w-12 animate-spin text-fbOrange" />
-          <p className="text-fbNavy font-bold animate-pulse">Syncing fitness profile...</p>
-        </div>
-      </Layout>
+      <div className="flex h-screen flex-col items-center justify-center gap-4">
+        <Loader2 className="h-12 w-12 animate-spin text-fbOrange" />
+        <p className="text-fbNavy font-bold animate-pulse">Syncing fitness profile...</p>
+      </div>
     );
   }
 
   return (
     <RoleGuard allowedRole="student">
-      <Layout>
         <main className="p-4 md:p-10 max-w-7xl mx-auto">
           
           {isLocked && (
@@ -191,7 +189,6 @@ const handleFinalSubmit = async () => {
             ))}
           </div>
         </main>
-      </Layout>
     </RoleGuard>
   );
 }
