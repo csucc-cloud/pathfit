@@ -2,7 +2,19 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
-import { Mail, Lock, LogIn, Loader2, Sparkles, Trophy, Dumbbell, Activity, ShieldCheck, ChevronRight } from 'lucide-react';
+import { 
+  Mail, 
+  Lock, 
+  LogIn, 
+  Loader2, 
+  Sparkles, 
+  Trophy, 
+  Dumbbell, 
+  Activity, 
+  ShieldCheck, 
+  ChevronRight, 
+  CheckCircle2 // Added missing import
+} from 'lucide-react';
 
 export default function Login() {
   const router = useRouter();
@@ -46,7 +58,6 @@ export default function Login() {
 
   return (
     <div className="min-h-screen w-full bg-[#F8F9FD] flex items-center justify-center p-0 md:p-6 overflow-hidden selection:bg-fbOrange/10">
-      {/* GLOBAL CSS ANIMATIONS */}
       <style jsx global>{`
         @keyframes entranceFadeIn {
           from { opacity: 0; transform: translateY(15px); }
@@ -68,15 +79,10 @@ export default function Login() {
         .animate-aura { animation: auraPulse 4s ease-in-out infinite; }
       `}</style>
 
-      {/* SPLIT-SCREEN CONTAINER */}
       <div className="bg-white w-full h-screen md:h-auto md:max-w-[1200px] md:rounded-[40px] shadow-[0_30px_90px_0_rgba(20,30,80,0.1)] border-0 md:border border-gray-100 flex overflow-hidden">
         
-        {/* ==========================================================
-            COLUMN 1: THE LOGIN FORM (WHITE/ORANGE AESTHETIC)
-            ========================================================== */}
+        {/* COLUMN 1: LOGIN FORM */}
         <div className="w-full md:w-[45%] p-10 md:p-16 lg:p-20 flex flex-col justify-between">
-          
-          {/* TOP SECTION: LOGO & WELCOME */}
           <div className="animate-entrance delay-1">
             <div className="relative w-16 h-16 mb-12 group cursor-pointer">
               <div className="absolute inset-0 bg-fbOrange rounded-[20px] rotate-6 group-hover:rotate-0 transition-transform duration-500 shadow-xl shadow-fbOrange/30" />
@@ -95,7 +101,6 @@ export default function Login() {
             </p>
           </div>
 
-          {/* MIDDLE SECTION: FORM */}
           <form onSubmit={handleEmailAuth} className="space-y-4 my-12 animate-entrance delay-2">
             <div className="group relative">
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-fbOrange transition-colors duration-300" />
@@ -103,7 +108,7 @@ export default function Login() {
                 type="email" 
                 placeholder="University Email" 
                 required
-                className="w-full pl-12 pr-4 py-4 rounded-2xl bg-[#F8F9FD] border-2 border-transparent text-fbNavy text-sm font-semibold focus:border-fbOrange/30 focus:bg-white outline-none transition-all duration-300 placeholder:text-gray-400 placeholder:font-medium"
+                className="w-full pl-12 pr-4 py-4 rounded-2xl bg-[#F8F9FD] border-2 border-transparent text-fbNavy text-sm font-semibold focus:border-fbOrange/30 focus:bg-white outline-none transition-all duration-300 placeholder:text-gray-400"
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
@@ -114,7 +119,7 @@ export default function Login() {
                 type="password" 
                 placeholder="Password" 
                 required
-                className="w-full pl-12 pr-4 py-4 rounded-2xl bg-[#F8F9FD] border-2 border-transparent text-fbNavy text-sm font-semibold focus:border-fbOrange/30 focus:bg-white outline-none transition-all duration-300 placeholder:text-gray-400 placeholder:font-medium"
+                className="w-full pl-12 pr-4 py-4 rounded-2xl bg-[#F8F9FD] border-2 border-transparent text-fbNavy text-sm font-semibold focus:border-fbOrange/30 focus:bg-white outline-none transition-all duration-300 placeholder:text-gray-400"
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
@@ -133,7 +138,6 @@ export default function Login() {
             </button>
           </form>
 
-          {/* BOTTOM SECTION: ACTIONS & FOOTER */}
           <div className="text-center space-y-6 animate-entrance delay-3">
             <button 
               onClick={() => router.push('/auth/register')}
@@ -158,53 +162,38 @@ export default function Login() {
           </div>
         </div>
 
-        {/* ==========================================================
-            COLUMN 2: THE FITNESS ILLUSTRATION/ANIMATION
-            ========================================================== */}
+        {/* COLUMN 2: FITNESS ILLUSTRATION */}
         <div className="hidden md:flex md:w-[55%] bg-gradient-to-br from-white to-[#F0F2F9] relative items-center justify-center p-20 border-l border-gray-100 overflow-hidden">
-          
-          {/* HIGH-END AURA/GLOW BACKGROUND ANIMATION */}
           <div className="absolute inset-0 z-0">
             <div className="animate-aura absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-fbOrange/10 rounded-full blur-[100px]" />
             <div className="animate-aura absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-blue-600/5 rounded-full blur-[100px]" style={{ animationDelay: '2s' }} />
           </div>
 
-          {/* ABSTRACT FITNESS SYMBOLS (FLOATING ILLUSTRATION) */}
           <div className="animate-float relative z-10 w-full h-full flex flex-col items-center justify-center">
-            
-            {/* trophy - Centerpiece */}
             <div className="relative group transition-transform duration-700 hover:scale-105">
               <Trophy className="text-fbOrange drop-shadow-[0_20px_40px_rgba(255,107,0,0.3)]" size={160} strokeWidth={1} />
-              <div className="absolute top-[20%] left-[20%] w-[60%] h-[60%] bg-fbOrange/10 rounded-full blur-3xl -z-1" />
             </div>
 
-            {/* Orbiting Elements */}
             <div className="absolute w-[300px] h-[300px] rounded-full border border-gray-100 pointer-events-none">
-              <div className="absolute top-[10%] left-[10%] p-4 bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100 text-fbNavy animate-pulse" style={{ animationDuration: '4s' }}>
+              <div className="absolute top-[10%] left-[10%] p-4 bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 text-fbNavy animate-pulse" style={{ animationDuration: '4s' }}>
                 <Dumbbell size={24} />
               </div>
-              <div className="absolute bottom-[10%] right-[10%] p-4 bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100 text-green-500 animate-pulse" style={{ animationDuration: '3s' }}>
+              <div className="absolute bottom-[10%] right-[10%] p-4 bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 text-green-500 animate-pulse" style={{ animationDuration: '3s' }}>
                 <Activity size={24} />
-              </div>
-              <div className="absolute top-[10%] right-[10%] p-2 bg-fbOrange/5 text-fbOrange rounded-full border border-fbOrange/10 scale-90">
-                <Sparkles size={16} />
               </div>
             </div>
             
-            {/* Status Indicators */}
             <div className="flex gap-4 mt-20 relative z-10">
-              <div className="flex items-center gap-3 bg-white px-5 py-3 rounded-full border border-gray-100 shadow-xl shadow-gray-200/50 hover:-translate-y-1 transition-transform">
+              <div className="flex items-center gap-3 bg-white px-5 py-3 rounded-full border border-gray-100 shadow-xl">
                 <CheckCircle2 className="text-green-500" size={16} />
                 <span className="text-xs font-black text-fbNavy uppercase tracking-widest">Active Progression</span>
               </div>
-              <div className="flex items-center gap-3 bg-white px-5 py-3 rounded-full border border-gray-100 shadow-xl shadow-gray-200/50 hover:-translate-y-1 transition-transform">
-                <Flame className="text-fbOrange" size={16} />
+              <div className="flex items-center gap-3 bg-white px-5 py-3 rounded-full border border-gray-100 shadow-xl">
+                <FlameIcon size={16} className="text-fbOrange" />
                 <span className="text-xs font-black text-fbNavy uppercase tracking-widest">Burned KCAL</span>
               </div>
             </div>
           </div>
-          
-          {/* Subtle Cubes Pattern Over Gradient */}
           <div className="absolute inset-0 opacity-40 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-repeat" />
         </div>
       </div>
@@ -212,20 +201,10 @@ export default function Login() {
   );
 }
 
-// Icons for the illustration panel status indicators
-function Flame({ size = 20, className = "" }) {
+// Custom Icon for the panel
+function FlameIcon({ size = 20, className = "" }) {
   return (
-    <svg 
-      width={size} 
-      height={size} 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round" 
-      className={className}
-    >
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
       <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
     </svg>
   );
