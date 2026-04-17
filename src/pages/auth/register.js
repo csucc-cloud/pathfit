@@ -19,6 +19,7 @@ import {
 export default function Register() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [isExiting, setIsExiting] = useState(false); // Controls the reverse slide
   
   // Kept your exact formData structure
   const [formData, setFormData] = useState({
@@ -32,6 +33,14 @@ export default function Register() {
     college: '', 
     sectionCode: ''
   });
+
+  // NEW: Navigation handler to trigger animation before leaving
+  const handleBackToLogin = () => {
+    setIsExiting(true); // Slide the runner back to the right
+    setTimeout(() => {
+      router.push('/'); // Navigate back to login.js after animation
+    }, 800);
+  };
 
   // Kept your exact registration logic
   const handleRegister = async (e) => {
@@ -99,13 +108,13 @@ export default function Register() {
         .delay-shred-2 { animation-delay: 0.12s; opacity: 0.4; }
       `}</style>
 
-      <div className="bg-white w-full h-screen md:h-auto md:max-w-[1200px] md:rounded-[40px] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.12)] border-0 md:border border-gray-100 flex flex-row-reverse overflow-hidden">
+      <div className="bg-white w-full h-screen md:h-auto md:max-w-[1200px] md:rounded-[40px] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.12)] border-0 md:border border-gray-100 flex flex-row-reverse relative overflow-hidden">
         
         {/* FORM COLUMN */}
-        <div className="w-full md:w-[50%] p-8 md:p-12 flex flex-col justify-between relative z-30 bg-white overflow-y-auto custom-scrollbar">
+        <div className={`w-full md:w-[50%] p-8 md:p-12 flex flex-col justify-between relative z-30 bg-white overflow-y-auto custom-scrollbar transition-all duration-[800ms] ease-[cubic-bezier(0.85,0,0.15,1)] ${isExiting ? 'translate-x-full opacity-0' : 'translate-x-0 opacity-100'}`}>
           <div className="animate-entrance">
             <button 
-              onClick={() => router.push('/')}
+              onClick={handleBackToLogin}
               className="flex items-center gap-2 text-gray-400 hover:text-fbOrange font-bold text-xs mb-6 transition-colors group"
             >
               <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> BACK TO LOGIN
@@ -192,8 +201,10 @@ export default function Register() {
           </form>
         </div>
 
-        {/* ANIMATION COLUMN */}
-        <div className="hidden md:flex md:w-[50%] bg-[#0A0F1E] relative items-center justify-center overflow-hidden">
+        {/* ANIMATION COLUMN (The Runner) */}
+        {/* Starts on the LEFT (left-0) because the login page just pushed it here */}
+        {/* Slides to the RIGHT (left-1/2) only if handleBackToLogin is clicked */}
+        <div className={`hidden md:flex absolute top-0 w-1/2 h-full bg-[#0A0F1E] z-40 items-center justify-center overflow-hidden transition-all duration-[800ms] ease-[cubic-bezier(0.85,0,0.15,1)] ${isExiting ? 'left-1/2' : 'left-0'}`}>
           <div className="absolute w-[80%] h-[80%] bg-fbOrange/10 rounded-full blur-[120px]" />
           <div className="relative z-10 flex flex-col items-center">
             <div className="relative w-[400px] h-[400px]">
