@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
-import { Mail, Lock, LogIn, Loader2 } from 'lucide-react';
+import { Mail, Lock, LogIn, Loader2, Sparkles, ShieldCheck } from 'lucide-react';
 
 export default function Login() {
   const router = useRouter();
@@ -54,7 +54,6 @@ export default function Login() {
         router.push('/admin');
       } else {
         // UPDATED: Teleport to the new Student Dashboard
-        // This ensures students land on the 8-week timeline hub
         router.push('/dashboard'); 
       }
     }
@@ -62,83 +61,122 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-fbGray flex items-center justify-center p-4">
-      {/* Container Card */}
-      <div className="bg-white p-8 rounded-2xl shadow-xl max-w-sm w-full text-center border border-gray-50">
-        
-        {/* Brand Logo - Orange Firebase Aesthetic */}
-        <div className="w-16 h-16 bg-fbOrange rounded-2xl rotate-3 shadow-lg mx-auto mb-6 flex items-center justify-center transition-transform hover:rotate-0">
-          <LogIn className="text-white w-8 h-8" />
-        </div>
+    <div className="relative min-h-screen w-full flex items-center justify-center p-6 overflow-hidden bg-[#0A0F1E]">
+      {/* ANIMATED BACKGROUND LAYER 
+          High-end mesh gradients that move subtly in the background 
+      */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-fbOrange/20 rounded-full blur-[120px] animate-pulse" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-600/10 rounded-full blur-[120px] animate-bounce" style={{ animationDuration: '15s' }} />
+      </div>
 
-        {/* Branding Text */}
-        <h1 className="text-2xl font-extrabold text-fbNavy mb-2 tracking-tight">
-          PATHFit <span className="text-fbOrange">Portal</span>
-        </h1>
-        <p className="text-gray-500 text-sm mb-8 leading-relaxed">
-          Sign in to track your university fitness progress.
-        </p>
-        
-        {/* Email & Password Form */}
-        <form onSubmit={handleEmailAuth} className="space-y-3 mb-4">
-          <div className="relative">
-            <Mail className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
-            <input 
-              type="email" 
-              placeholder="University Email" 
-              required
-              className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-100 bg-fbGray/30 text-sm focus:ring-2 focus:ring-fbOrange outline-none transition-all"
-              onChange={(e) => setEmail(e.target.value)}
-            />
+      {/* CUSTOM KEYFRAME ANIMATIONS */}
+      <style jsx global>{`
+        @keyframes floatIn {
+          from { opacity: 0; transform: translateY(20px) scale(0.98); }
+          to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .animate-float-in {
+          animation: floatIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+      `}</style>
+
+      {/* GLASSMORPHISM CARD */}
+      <div className="animate-float-in relative z-10 w-full max-w-[420px]">
+        <div className="bg-white/5 backdrop-blur-2xl border border-white/10 p-10 rounded-[40px] shadow-[0_22px_70px_4px_rgba(0,0,0,0.56)]">
+          
+          {/* BRAND LOGO - High Transition interaction */}
+          <div className="relative w-20 h-20 mx-auto mb-8 group cursor-pointer">
+            <div className="absolute inset-0 bg-fbOrange rounded-[24px] rotate-6 group-hover:rotate-0 transition-all duration-500 shadow-[0_0_30px_rgba(255,107,0,0.4)]" />
+            <div className="absolute inset-0 bg-white/10 backdrop-blur-md rounded-[24px] border border-white/20 flex items-center justify-center transform group-hover:scale-110 transition-all duration-500">
+              <LogIn className="text-white w-9 h-9" />
+            </div>
+            <Sparkles className="absolute -top-2 -right-2 text-fbOrange animate-pulse" size={20} />
+          </div>
+
+          {/* BRANDING TEXT */}
+          <div className="text-center mb-10">
+            <h1 className="text-3xl font-black text-white tracking-tight italic">
+              PATH<span className="text-fbOrange">FIT</span> <span className="text-xs align-top not-italic font-medium text-white/40">®</span>
+            </h1>
+            <div className="flex items-center justify-center gap-2 mt-2">
+              <span className="h-[1px] w-6 bg-white/10" />
+              <p className="text-gray-400 text-[10px] font-bold uppercase tracking-[0.3em]">Student Portal</p>
+              <span className="h-[1px] w-6 bg-white/10" />
+            </div>
           </div>
           
-          <div className="relative">
-            <Lock className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
-            <input 
-              type="password" 
-              placeholder="Password" 
-              required
-              className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-100 bg-fbGray/30 text-sm focus:ring-2 focus:ring-fbOrange outline-none transition-all"
-              onChange={(e) => setPassword(e.target.value)}
-            />
+          {/* FORM */}
+          <form onSubmit={handleEmailAuth} className="space-y-4">
+            <div className="group relative">
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 group-focus-within:text-fbOrange transition-colors duration-300" />
+              <input 
+                type="email" 
+                placeholder="University Email" 
+                required
+                className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white/5 border border-white/10 text-white text-sm focus:border-fbOrange/50 focus:bg-white/10 outline-none transition-all duration-300 placeholder:text-gray-600"
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+            
+            <div className="group relative">
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 group-focus-within:text-fbOrange transition-colors duration-300" />
+              <input 
+                type="password" 
+                placeholder="Password" 
+                required
+                className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white/5 border border-white/10 text-white text-sm focus:border-fbOrange/50 focus:bg-white/10 outline-none transition-all duration-300 placeholder:text-gray-600"
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+
+            <button 
+              type="submit" 
+              disabled={loading}
+              className="group relative w-full overflow-hidden bg-fbOrange p-[1px] rounded-2xl transition-all active:scale-95 hover:shadow-[0_0_40px_rgba(255,107,0,0.3)] disabled:opacity-50"
+            >
+              <div className="relative bg-[#0A0F1E] group-hover:bg-transparent py-4 rounded-2xl transition-all duration-500 flex items-center justify-center gap-3">
+                {loading ? (
+                  <Loader2 className="w-5 h-5 animate-spin text-fbOrange" />
+                ) : (
+                  <ShieldCheck className="w-5 h-5 text-fbOrange group-hover:text-white transition-colors duration-300" />
+                )}
+                <span className="text-white font-black uppercase tracking-widest text-xs">
+                  {loading ? 'Authenticating...' : 'Secure Login'}
+                </span>
+              </div>
+            </button>
+          </form>
+
+          {/* FOOTER ACTIONS */}
+          <div className="mt-8 text-center space-y-6">
+            <button 
+              onClick={() => router.push('/auth/register')}
+              className="group text-[11px] font-bold text-gray-400 hover:text-white transition-all flex items-center justify-center gap-2 mx-auto uppercase tracking-tighter"
+            >
+              Don't have an account? 
+              <span className="text-fbOrange underline decoration-2 underline-offset-4 group-hover:text-white transition-colors">
+                Register Here
+              </span>
+            </button>
+
+            {/* SECRET TAP AREA */}
+            <div className="pt-6 border-t border-white/5">
+              <div className="flex justify-center items-center gap-4 text-[9px] text-gray-600 font-black uppercase tracking-[0.4em] select-none">
+                <span>V.1.0</span>
+                <span className="w-1 h-1 bg-gray-800 rounded-full" />
+                <button 
+                  type="button" 
+                  onClick={handleSecretTap}
+                  className="hover:text-fbOrange transition-all active:scale-125"
+                >
+                  {tapCount > 0 ? `[${tapCount}]` : '1'}
+                </button>
+                <span className="w-1 h-1 bg-gray-800 rounded-full" />
+                <span>2026</span>
+              </div>
+            </div>
           </div>
-
-          <button 
-            type="submit" 
-            disabled={loading}
-            className="w-full bg-fbNavy text-white py-3 rounded-xl font-bold hover:bg-opacity-90 transition-all active:scale-95 shadow-md disabled:opacity-50 flex items-center justify-center gap-2"
-          >
-            {loading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <LogIn className="w-4 h-4" />
-            )}
-            <span>{loading ? 'Processing...' : 'Login'}</span>
-          </button>
-        </form>
-
-        <div className="flex items-center my-6">
-          <div className="flex-1 border-t border-gray-100"></div>
-        </div>
-
-        {/* Teleport to Register Page */}
-        <button 
-          onClick={() => router.push('/auth/register')}
-          className="text-xs font-bold text-fbOrange hover:underline flex items-center justify-center gap-1 mx-auto"
-        >
-          New student? Create an account
-        </button>
-
-        {/* Footer Note with Triple-Tap '1' Secret */}
-        <div className="mt-8 text-[10px] text-gray-300 uppercase tracking-widest font-black flex justify-center items-center px-1 select-none">
-          <span>Student Portal v1.</span>
-          <button 
-            type="button"
-            onClick={handleSecretTap}
-            className="hover:text-fbOrange transition-colors cursor-default outline-none"
-          >
-            1
-          </button>
         </div>
       </div>
     </div>
