@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import Layout from '../../components/Layout';
+// --- LAYOUT REMOVED FROM WRAPPING PAGES ---
 import RoleGuard from '../../components/RoleGuard';
-// --- NEW IMPORT ---
 import Library from '../../components/dashboard/library';
 import { supabase } from '../../lib/supabaseClient';
 import { PATHFIT_EXERCISES } from '../../constants/exercises';
@@ -22,7 +21,6 @@ import {
   Zap,
   Dumbbell,
   Flame,
-  // --- NEW ICONS ---
   LayoutDashboard,
   BookOpen
 } from 'lucide-react';
@@ -32,7 +30,6 @@ export default function StudentDashboard() {
   const [profile, setProfile] = useState(null);
   const [exerciseLogs, setExerciseLogs] = useState([]);
   const [loading, setLoading] = useState(true);
-  // --- NEW STATE FOR TAB TOGGLING ---
   const [view, setView] = useState('dashboard'); 
 
   useEffect(() => {
@@ -79,25 +76,23 @@ export default function StudentDashboard() {
 
   if (loading) {
     return (
-      <Layout>
-        <main className="min-h-screen bg-fbGray p-4 md:p-10 max-w-6xl mx-auto animate-pulse">
-          <div className="h-12 w-48 bg-gray-200 rounded-xl mb-10" />
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <div className="lg:col-span-7 space-y-6">
-              <div className="h-64 bg-fbNavy/10 rounded-[35px]" />
-              <div className="space-y-3">
-                {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="h-20 bg-white rounded-3xl border-2 border-gray-100" />
-                ))}
-              </div>
-            </div>
-            <div className="lg:col-span-5 space-y-6">
-              <div className="h-32 bg-white rounded-[35px]" />
-              <div className="h-96 bg-white rounded-[40px]" />
+      <main className="min-h-screen bg-fbGray p-4 md:p-10 max-w-6xl mx-auto animate-pulse">
+        <div className="h-12 w-48 bg-gray-200 rounded-xl mb-10" />
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div className="lg:col-span-7 space-y-6">
+            <div className="h-64 bg-fbNavy/10 rounded-[35px]" />
+            <div className="space-y-3">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="h-20 bg-white rounded-3xl border-2 border-gray-100" />
+              ))}
             </div>
           </div>
-        </main>
-      </Layout>
+          <div className="lg:col-span-5 space-y-6">
+            <div className="h-32 bg-white rounded-[35px]" />
+            <div className="h-96 bg-white rounded-[40px]" />
+          </div>
+        </div>
+      </main>
     );
   }
 
@@ -106,7 +101,6 @@ export default function StudentDashboard() {
 
   return (
     <RoleGuard allowedRole="student">
-      <Layout>
         <style dangerouslySetInnerHTML={{ __html: `
           .custom-scrollbar::-webkit-scrollbar { width: 5px; }
           .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
@@ -130,7 +124,6 @@ export default function StudentDashboard() {
                 </h1>
               </div>
               
-              {/* --- UPDATED TAB NAVIGATION --- */}
               <div className="flex bg-white p-1.5 rounded-2xl border border-gray-100 shadow-sm">
                 <button 
                   onClick={() => setView('dashboard')}
@@ -147,7 +140,6 @@ export default function StudentDashboard() {
               </div>
             </header>
 
-            {/* --- CONDITIONAL RENDERING FOR LIBRARY --- */}
             {view === 'library' ? (
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <Library />
@@ -288,7 +280,6 @@ export default function StudentDashboard() {
                     <Dumbbell className="absolute -right-4 -bottom-4 text-white/10 group-hover:scale-110 transition-transform" size={100} />
                     <h4 className="text-lg font-black mb-2 italic">Need Help?</h4>
                     <p className="text-xs text-white/60 mb-6 leading-relaxed">Check the exercise library for tutorials on proper form and techniques.</p>
-                    {/* --- UPDATED TO SWITCH TAB INSTEAD OF EXTERNAL LINK --- */}
                     <button 
                       onClick={() => setView('library')}
                       className="inline-flex items-center gap-2 text-fbOrange text-[10px] font-black uppercase tracking-widest"
@@ -301,7 +292,6 @@ export default function StudentDashboard() {
             )}
           </div>
         </main>
-      </Layout>
     </RoleGuard>
   );
 }
