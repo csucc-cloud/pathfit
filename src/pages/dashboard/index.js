@@ -1,9 +1,10 @@
-// src/pages/dashboard.js
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import Layout from '../../components/Layout';
 import RoleGuard from '../../components/RoleGuard';
+// --- NEW IMPORT ---
+import Library from '../../components/dashboard/library';
 import { supabase } from '../../lib/supabaseClient';
 import { PATHFIT_EXERCISES } from '../../constants/exercises';
 import { 
@@ -20,7 +21,10 @@ import {
   TrendingUp,
   Zap,
   Dumbbell,
-  Flame 
+  Flame,
+  // --- NEW ICONS ---
+  LayoutDashboard,
+  BookOpen
 } from 'lucide-react';
 
 export default function StudentDashboard() {
@@ -28,6 +32,8 @@ export default function StudentDashboard() {
   const [profile, setProfile] = useState(null);
   const [exerciseLogs, setExerciseLogs] = useState([]);
   const [loading, setLoading] = useState(true);
+  // --- NEW STATE FOR TAB TOGGLING ---
+  const [view, setView] = useState('dashboard'); 
 
   useEffect(() => {
     fetchProfile();
@@ -71,7 +77,6 @@ export default function StudentDashboard() {
     return now >= unlockDate;
   };
 
-  // --- SKELETON UI VIEW ---
   if (loading) {
     return (
       <Layout>
@@ -124,152 +129,176 @@ export default function StudentDashboard() {
                   Athlete<br className="hidden sm:block" /> Command
                 </h1>
               </div>
-              <Link href="/profile" className="bg-white text-fbNavy px-5 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest border border-gray-100 shadow-sm hover:bg-fbNavy hover:text-white transition-all">
-                View Full Analytics
-              </Link>
+              
+              {/* --- UPDATED TAB NAVIGATION --- */}
+              <div className="flex bg-white p-1.5 rounded-2xl border border-gray-100 shadow-sm">
+                <button 
+                  onClick={() => setView('dashboard')}
+                  className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${view === 'dashboard' ? 'bg-fbNavy text-white shadow-lg shadow-fbNavy/20' : 'text-gray-400 hover:text-fbNavy'}`}
+                >
+                  <LayoutDashboard size={14} /> Dashboard
+                </button>
+                <button 
+                  onClick={() => setView('library')}
+                  className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${view === 'library' ? 'bg-fbNavy text-white shadow-lg shadow-fbNavy/20' : 'text-gray-400 hover:text-fbNavy'}`}
+                >
+                  <BookOpen size={14} /> Library
+                </button>
+              </div>
             </header>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-              
-              <div className="lg:col-span-7 space-y-6">
-                <div className="relative bg-fbNavy rounded-[35px] p-8 text-white shadow-2xl shadow-fbNavy/25 overflow-hidden">
-                  <div className="absolute -right-12 -top-12 w-56 h-56 rounded-full border-[20px] border-white/5 pointer-events-none" />
-                  <div className="flex justify-between items-start relative z-10">
-                    <div>
-                      <p className="text-white/50 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Weekly Progression</p>
-                      <h3 className="text-2xl font-black">
-                        {isPreTestFinished ? "Curriculum Active" : "Action Required"}
+            {/* --- CONDITIONAL RENDERING FOR LIBRARY --- */}
+            {view === 'library' ? (
+              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <Library />
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-in fade-in duration-500">
+                
+                <div className="lg:col-span-7 space-y-6">
+                  <div className="relative bg-fbNavy rounded-[35px] p-8 text-white shadow-2xl shadow-fbNavy/25 overflow-hidden">
+                    <div className="absolute -right-12 -top-12 w-56 h-56 rounded-full border-[20px] border-white/5 pointer-events-none" />
+                    <div className="flex justify-between items-start relative z-10">
+                      <div>
+                        <p className="text-white/50 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Weekly Progression</p>
+                        <h3 className="text-2xl font-black">
+                          {isPreTestFinished ? "Curriculum Active" : "Action Required"}
+                        </h3>
+                      </div>
+                      {isPreTestFinished && (
+                         <div className="bg-fbOrange px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-fbOrange/20">
+                           {exerciseLogs.length} Logs Filed
+                         </div>
+                      )}
+                    </div>
+                    
+                    <div className="mt-8 flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/10 relative z-10">
+                      <Zap className="text-fbOrange shrink-0" size={20} />
+                      <p className="text-xs font-medium text-white/80">
+                        {isPreTestFinished 
+                          ? "Ensure you complete your weekly workout logs before the 11-day window expires." 
+                          : "Your fitness journey is currently paused. Submit the Pre-test assessment to unlock Week 1."}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-3">
+                    <ModuleCard 
+                      title="Initial Pre-Test" 
+                      subtitle="Mandatory baseline assessment"
+                      href="/module/pre" 
+                      status={isPreTestFinished ? 'COMPLETED' : 'OPEN'} 
+                    />
+
+                    <div className="relative mt-4">
+                      {!isPreTestFinished && (
+                        <div className="absolute inset-x-0 -inset-y-4 z-20 backdrop-blur-md bg-white/40 rounded-3xl flex items-center justify-center p-6 border-2 border-dashed border-fbOrange/30">
+                          <div className="bg-white p-8 rounded-3xl shadow-2xl text-center max-w-sm border border-gray-100">
+                            <ClipboardCheck className="text-fbOrange w-8 h-8 mx-auto mb-4" />
+                            <h3 className="text-lg font-black text-fbNavy mb-2">Modules Locked</h3>
+                            <button onClick={() => router.push('/module/pre')} className="w-full bg-fbNavy text-white px-6 py-3 rounded-xl font-black uppercase tracking-widest text-[10px]">Start Pre-test</button>
+                          </div>
+                        </div>
+                      )}
+
+                      <div className={!isPreTestFinished ? 'opacity-40 grayscale pointer-events-none' : ''}>
+                        <div className="grid gap-3">
+                          {[1, 2, 3, 4, 5, 6, 7, 8].map((week) => (
+                            <ModuleCard 
+                              key={week}
+                              title={`Weekly Log: Week ${week}`}
+                              subtitle={`Cycle tracking for Week ${week}`}
+                              href={`/module/${week}`}
+                              status={getModuleStatus(week)}
+                            />
+                          ))}
+                          <div className="relative mt-4">
+                            {!isPostTestUnlocked() && isPreTestFinished && (
+                              <div className="absolute inset-0 z-10 bg-fbGray/60 backdrop-blur-[1px] rounded-3xl flex items-center justify-center border border-dashed border-gray-300">
+                                 <span className="text-[10px] font-black text-gray-400 uppercase bg-white px-3 py-1 rounded-full shadow-sm">Unlocks after Week 8</span>
+                              </div>
+                            )}
+                            <ModuleCard 
+                              title="Final Post-Test" 
+                              subtitle="End of semester comparison"
+                              href="/module/post" 
+                              status={isPostTestUnlocked() ? 'OPEN' : 'LOCKED'} 
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="lg:col-span-5 space-y-6">
+                  <div className="bg-white p-8 rounded-[35px] border border-gray-100 shadow-xl shadow-gray-200/20 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 bg-fbOrange/10 text-fbOrange rounded-2xl flex items-center justify-center">
+                        <Flame size={28} />
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Total Energy</p>
+                        <h4 className="text-2xl font-black text-fbNavy">{totalCalories.toLocaleString()} <span className="text-xs text-fbOrange">KCAL</span></h4>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white p-8 rounded-[40px] border border-gray-100 shadow-xl shadow-gray-200/20">
+                    <div className="flex items-center justify-between mb-8">
+                      <h3 className="text-xs font-black text-fbNavy uppercase tracking-[0.3em] flex items-center gap-3">
+                        <TrendingUp size={18} className="text-fbOrange" /> Peak Performance
                       </h3>
                     </div>
-                    {isPreTestFinished && (
-                       <div className="bg-fbOrange px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-fbOrange/20">
-                         {exerciseLogs.length} Logs Filed
-                       </div>
-                    )}
-                  </div>
-                  
-                  <div className="mt-8 flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/10 relative z-10">
-                    <Zap className="text-fbOrange shrink-0" size={20} />
-                    <p className="text-xs font-medium text-white/80">
-                      {isPreTestFinished 
-                        ? "Ensure you complete your weekly workout logs before the 11-day window expires." 
-                        : "Your fitness journey is currently paused. Submit the Pre-test assessment to unlock Week 1."}
-                    </p>
-                  </div>
-                </div>
 
-                <div className="grid gap-3">
-                  <ModuleCard 
-                    title="Initial Pre-Test" 
-                    subtitle="Mandatory baseline assessment"
-                    href="/module/pre" 
-                    status={isPreTestFinished ? 'COMPLETED' : 'OPEN'} 
-                  />
-
-                  <div className="relative mt-4">
-                    {!isPreTestFinished && (
-                      <div className="absolute inset-x-0 -inset-y-4 z-20 backdrop-blur-md bg-white/40 rounded-3xl flex items-center justify-center p-6 border-2 border-dashed border-fbOrange/30">
-                        <div className="bg-white p-8 rounded-3xl shadow-2xl text-center max-w-sm border border-gray-100">
-                          <ClipboardCheck className="text-fbOrange w-8 h-8 mx-auto mb-4" />
-                          <h3 className="text-lg font-black text-fbNavy mb-2">Modules Locked</h3>
-                          <button onClick={() => router.push('/module/pre')} className="w-full bg-fbNavy text-white px-6 py-3 rounded-xl font-black uppercase tracking-widest text-[10px]">Start Pre-test</button>
-                        </div>
-                      </div>
-                    )}
-
-                    <div className={!isPreTestFinished ? 'opacity-40 grayscale pointer-events-none' : ''}>
-                      <div className="grid gap-3">
-                        {[1, 2, 3, 4, 5, 6, 7, 8].map((week) => (
-                          <ModuleCard 
-                            key={week}
-                            title={`Weekly Log: Week ${week}`}
-                            subtitle={`Cycle tracking for Week ${week}`}
-                            href={`/module/${week}`}
-                            status={getModuleStatus(week)}
-                          />
-                        ))}
-                        <div className="relative mt-4">
-                          {!isPostTestUnlocked() && isPreTestFinished && (
-                            <div className="absolute inset-0 z-10 bg-fbGray/60 backdrop-blur-[1px] rounded-3xl flex items-center justify-center border border-dashed border-gray-300">
-                               <span className="text-[10px] font-black text-gray-400 uppercase bg-white px-3 py-1 rounded-full shadow-sm">Unlocks after Week 8</span>
-                            </div>
-                          )}
-                          <ModuleCard 
-                            title="Final Post-Test" 
-                            subtitle="End of semester comparison"
-                            href="/module/post" 
-                            status={isPostTestUnlocked() ? 'OPEN' : 'LOCKED'} 
-                          />
-                        </div>
-                      </div>
+                    <div className="overflow-y-auto max-h-[500px] pr-2 custom-scrollbar">
+                      <table className="w-full text-left border-separate border-spacing-0">
+                        <thead className="sticky top-0 bg-white z-10">
+                          <tr className="text-[10px] text-gray-300 uppercase tracking-widest">
+                            <th className="pb-4 font-black border-b border-gray-50">Exercise</th>
+                            <th className="pb-4 font-black text-center border-b border-gray-50">Peak</th>
+                            <th className="pb-4 text-right font-black border-b border-gray-50">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody className="text-sm font-black text-fbNavy">
+                          {PATHFIT_EXERCISES.map((ex) => {
+                            const logs = exerciseLogs.filter(l => l.exercise_id === ex.id);
+                            const peak = logs.length > 0 ? Math.max(...logs.map(l => l.set_1_val || 0)) : 0;
+                            
+                            return (
+                              <tr key={ex.id} className="group transition-colors">
+                                <td className="py-4 text-gray-500 font-bold group-hover:text-fbNavy text-xs">{ex.name}</td>
+                                <td className="py-4 text-center text-fbOrange">{peak || "--"}</td>
+                                <td className="py-4 text-right">
+                                  {peak > 0 ? (
+                                    <CheckCircle2 size={14} className="text-green-500 ml-auto" />
+                                  ) : (
+                                    <Clock size={14} className="text-gray-200 ml-auto" />
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
                     </div>
+                  </div>
+
+                  <div className="bg-gradient-to-br from-fbNavy to-blue-900 p-8 rounded-[35px] text-white relative overflow-hidden group shadow-xl">
+                    <Dumbbell className="absolute -right-4 -bottom-4 text-white/10 group-hover:scale-110 transition-transform" size={100} />
+                    <h4 className="text-lg font-black mb-2 italic">Need Help?</h4>
+                    <p className="text-xs text-white/60 mb-6 leading-relaxed">Check the exercise library for tutorials on proper form and techniques.</p>
+                    {/* --- UPDATED TO SWITCH TAB INSTEAD OF EXTERNAL LINK --- */}
+                    <button 
+                      onClick={() => setView('library')}
+                      className="inline-flex items-center gap-2 text-fbOrange text-[10px] font-black uppercase tracking-widest"
+                    >
+                      Open Library <ChevronRight size={14} />
+                    </button>
                   </div>
                 </div>
               </div>
-
-              <div className="lg:col-span-5 space-y-6">
-                <div className="bg-white p-8 rounded-[35px] border border-gray-100 shadow-xl shadow-gray-200/20 flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 bg-fbOrange/10 text-fbOrange rounded-2xl flex items-center justify-center">
-                      <Flame size={28} />
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Total Energy</p>
-                      <h4 className="text-2xl font-black text-fbNavy">{totalCalories.toLocaleString()} <span className="text-xs text-fbOrange">KCAL</span></h4>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white p-8 rounded-[40px] border border-gray-100 shadow-xl shadow-gray-200/20">
-                  <div className="flex items-center justify-between mb-8">
-                    <h3 className="text-xs font-black text-fbNavy uppercase tracking-[0.3em] flex items-center gap-3">
-                      <TrendingUp size={18} className="text-fbOrange" /> Peak Performance
-                    </h3>
-                  </div>
-
-                  <div className="overflow-y-auto max-h-[500px] pr-2 custom-scrollbar">
-                    <table className="w-full text-left border-separate border-spacing-0">
-                      <thead className="sticky top-0 bg-white z-10">
-                        <tr className="text-[10px] text-gray-300 uppercase tracking-widest">
-                          <th className="pb-4 font-black border-b border-gray-50">Exercise</th>
-                          <th className="pb-4 font-black text-center border-b border-gray-50">Peak</th>
-                          <th className="pb-4 text-right font-black border-b border-gray-50">Status</th>
-                        </tr>
-                      </thead>
-                      <tbody className="text-sm font-black text-fbNavy">
-                        {PATHFIT_EXERCISES.map((ex) => {
-                          const logs = exerciseLogs.filter(l => l.exercise_id === ex.id);
-                          const peak = logs.length > 0 ? Math.max(...logs.map(l => l.set_1_val || 0)) : 0;
-                          
-                          return (
-                            <tr key={ex.id} className="group transition-colors">
-                              <td className="py-4 text-gray-500 font-bold group-hover:text-fbNavy text-xs">{ex.name}</td>
-                              <td className="py-4 text-center text-fbOrange">{peak || "--"}</td>
-                              <td className="py-4 text-right">
-                                {peak > 0 ? (
-                                  <CheckCircle2 size={14} className="text-green-500 ml-auto" />
-                                ) : (
-                                  <Clock size={14} className="text-gray-200 ml-auto" />
-                                )}
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-
-                <div className="bg-gradient-to-br from-fbNavy to-blue-900 p-8 rounded-[35px] text-white relative overflow-hidden group shadow-xl">
-                  <Dumbbell className="absolute -right-4 -bottom-4 text-white/10 group-hover:scale-110 transition-transform" size={100} />
-                  <h4 className="text-lg font-black mb-2 italic">Need Help?</h4>
-                  <p className="text-xs text-white/60 mb-6 leading-relaxed">Check the exercise library for tutorials on proper form and techniques.</p>
-                  <Link href="/library" className="inline-flex items-center gap-2 text-fbOrange text-[10px] font-black uppercase tracking-widest">
-                    Open Library <ChevronRight size={14} />
-                  </Link>
-                </div>
-              </div>
-            </div>
+            )}
           </div>
         </main>
       </Layout>
