@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Layout from '../../components/Layout';
 import RoleGuard from '../../components/RoleGuard';
 import { supabase } from '../../lib/supabaseClient';
-import { PATHFIT_EXERCISES } from '../../constants/exercises'; // Added for Benchmarks
+import { PATHFIT_EXERCISES } from '../../constants/exercises';
 import { 
   Lock, 
   CheckCircle2, 
@@ -16,18 +16,17 @@ import {
   Calendar,
   ChevronRight,
   Activity,
-  Loader2,
   ClipboardCheck,
   TrendingUp,
   Zap,
   Dumbbell,
-  Flame // ADDED THIS: Fixed the client-side exception
+  Flame 
 } from 'lucide-react';
 
 export default function StudentDashboard() {
   const router = useRouter();
   const [profile, setProfile] = useState(null);
-  const [exerciseLogs, setExerciseLogs] = useState([]); // Added for Benchmarks
+  const [exerciseLogs, setExerciseLogs] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -42,11 +41,9 @@ export default function StudentDashboard() {
       return;
     }
     
-    // Fetch Profile
     const { data: profileData } = await supabase.from('profiles').select('*').eq('id', user.id).single();
     setProfile(profileData);
 
-    // Fetch Logs for the summary table
     const { data: logData } = await supabase.from('exercise_logs')
       .select('*')
       .eq('student_id', user.id);
@@ -55,7 +52,6 @@ export default function StudentDashboard() {
     setLoading(false);
   };
 
-  // LOGIC: The 11-day locking and 7-day opening rule
   const getModuleStatus = (weekNum) => {
     if (!profile?.pre_test_submitted_at) return 'LOCKED';
     const start = new Date(profile.pre_test_submitted_at);
@@ -75,33 +71,37 @@ export default function StudentDashboard() {
     return now >= unlockDate;
   };
 
+  // --- SKELETON UI VIEW ---
   if (loading) {
     return (
       <Layout>
-        <div className="flex h-screen flex-col items-center justify-center gap-4 bg-fbGray">
-          <div className="relative">
-            <div className="w-20 h-20 rounded-3xl bg-fbNavy flex items-center justify-center shadow-2xl shadow-fbNavy/30">
-              <Loader2 className="h-9 w-9 animate-spin text-fbOrange" />
+        <main className="min-h-screen bg-fbGray p-4 md:p-10 max-w-6xl mx-auto animate-pulse">
+          <div className="h-12 w-48 bg-gray-200 rounded-xl mb-10" />
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div className="lg:col-span-7 space-y-6">
+              <div className="h-64 bg-fbNavy/10 rounded-[35px]" />
+              <div className="space-y-3">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="h-20 bg-white rounded-3xl border-2 border-gray-100" />
+                ))}
+              </div>
             </div>
-            <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-fbOrange animate-ping" />
+            <div className="lg:col-span-5 space-y-6">
+              <div className="h-32 bg-white rounded-[35px]" />
+              <div className="h-96 bg-white rounded-[40px]" />
+            </div>
           </div>
-          <div className="text-center">
-            <p className="text-fbNavy font-black text-sm uppercase tracking-[0.2em] animate-pulse">Loading Fitness Curriculum</p>
-            <p className="text-gray-400 text-xs mt-1 font-medium">Preparing your journey...</p>
-          </div>
-        </div>
+        </main>
       </Layout>
     );
   }
 
   const isPreTestFinished = !!profile?.pre_test_submitted_at;
-  // SAFETY: Added empty array fallback to prevent .reduce crash
   const totalCalories = (exerciseLogs || []).reduce((sum, log) => sum + (log.calories_burned || 0), 0);
 
   return (
     <RoleGuard allowedRole="student">
       <Layout>
-        {/* Custom Scrollbar Styles */}
         <style dangerouslySetInnerHTML={{ __html: `
           .custom-scrollbar::-webkit-scrollbar { width: 5px; }
           .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
@@ -112,7 +112,6 @@ export default function StudentDashboard() {
         <main className="min-h-screen bg-fbGray">
           <div className="p-4 md:p-10 max-w-6xl mx-auto pb-16">
 
-            {/* Header Section */}
             <header className="mb-10 pt-2 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
               <div>
                 <div className="flex items-center gap-2 mb-3">
@@ -132,7 +131,6 @@ export default function StudentDashboard() {
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
               
-              {/* LEFT COLUMN: Modules & Progress */}
               <div className="lg:col-span-7 space-y-6">
                 <div className="relative bg-fbNavy rounded-[35px] p-8 text-white shadow-2xl shadow-fbNavy/25 overflow-hidden">
                   <div className="absolute -right-12 -top-12 w-56 h-56 rounded-full border-[20px] border-white/5 pointer-events-none" />
@@ -209,10 +207,7 @@ export default function StudentDashboard() {
                 </div>
               </div>
 
-              {/* RIGHT COLUMN: Quick Benchmarks Summary */}
               <div className="lg:col-span-5 space-y-6">
-                
-                {/* ENERGY SCORE CARD */}
                 <div className="bg-white p-8 rounded-[35px] border border-gray-100 shadow-xl shadow-gray-200/20 flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className="w-14 h-14 bg-fbOrange/10 text-fbOrange rounded-2xl flex items-center justify-center">
@@ -225,7 +220,6 @@ export default function StudentDashboard() {
                   </div>
                 </div>
 
-                {/* SCROLLABLE BENCHMARK SUMMARY */}
                 <div className="bg-white p-8 rounded-[40px] border border-gray-100 shadow-xl shadow-gray-200/20">
                   <div className="flex items-center justify-between mb-8">
                     <h3 className="text-xs font-black text-fbNavy uppercase tracking-[0.3em] flex items-center gap-3">
@@ -266,7 +260,6 @@ export default function StudentDashboard() {
                   </div>
                 </div>
 
-                {/* QUICK NAV CARD */}
                 <div className="bg-gradient-to-br from-fbNavy to-blue-900 p-8 rounded-[35px] text-white relative overflow-hidden group shadow-xl">
                   <Dumbbell className="absolute -right-4 -bottom-4 text-white/10 group-hover:scale-110 transition-transform" size={100} />
                   <h4 className="text-lg font-black mb-2 italic">Need Help?</h4>
@@ -275,7 +268,6 @@ export default function StudentDashboard() {
                     Open Library <ChevronRight size={14} />
                   </Link>
                 </div>
-
               </div>
             </div>
           </div>
