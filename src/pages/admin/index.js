@@ -1,6 +1,7 @@
 // src/pages/admin/index.js
 import React, { useState, useEffect, useRef } from 'react';
 import RoleGuard from '../../components/RoleGuard';
+import CreateSectionModal from '../../components/section/create';
 import { useAdminData } from '../../hooks/useAdminData';
 import { supabase } from '../../lib/supabaseClient'; 
 import { downloadCSV } from '../../utils/exportHelper'; 
@@ -9,10 +10,15 @@ import { Users, Search, FileDown, Eye, LayoutDashboard, Loader2, Calendar, User,
 export default function AdminDashboard() {
   const [pId, setPId] = useState(1);
   const { students, loading } = useAdminData(pId);
-  const [searchTerm, setSearchTerm] = useState(""), [announcement, setAnnouncement] = useState(""), [targetSection, setTargetSection] = useState("all"), [sections, setSections] = useState([]), [isPosting, setIsPosting] = useState(false), [file, setFile] = useState(null);
+  const [searchTerm, setSearchTerm] = useState(""), [announcement, setAnnouncement] = useState(""), [targetSection, setTargetSection] = useState("all"), [sections, setSections] = useState([]), [isPosting, setIsPosting] = useState(false), [file, setFile] = useState(null), [isModalOpen, setIsModalOpen] = useState(false);
   const fileInputRef = useRef(null);
 
-  useEffect(() => { async function f() { const { data, error } = await supabase.from('sections').select('*'); if (!error && data) setSections(data); } f(); }, []);
+  const fetchSections = async () => { 
+    const { data, error } = await supabase.from('sections').select('*'); 
+    if (!error && data) setSections(data); 
+  };
+
+  useEffect(() => { fetchSections(); }, []);
 
   const filteredStudents = students.filter(s => s.student_id?.toLowerCase().includes(searchTerm.toLowerCase()) || s.full_name?.toLowerCase().includes(searchTerm.toLowerCase()));
 
@@ -50,7 +56,7 @@ export default function AdminDashboard() {
             </div>
             <p className="text-gray-400 font-bold text-xs uppercase tracking-[0.2em] flex items-center gap-2 ml-1"><Megaphone className="w-3 h-3 text-fbOrange" /> Announcements & Section Hub</p>
           </div>
-          <button className="bg-fbNavy text-white font-black px-6 py-4 rounded-2xl text-xs uppercase tracking-widest hover:bg-fbOrange transition-all flex items-center gap-3 shadow-xl active:scale-95"><Plus className="w-4 h-4" /> Create New Section</button>
+          <button onClick={() => setIsModalOpen(true)} className="bg-fbNavy text-white font-black px-6 py-4 rounded-2xl text-xs uppercase tracking-widest hover:bg-fbOrange transition-all flex items-center gap-3 shadow-xl active:scale-95"><Plus className="w-4 h-4" /> Create New Section</button>
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -147,6 +153,13 @@ export default function AdminDashboard() {
           </div>
         </div>
       </div>
+      
+      {/* SECTION CREATION MODAL */}
+      <CreateSectionModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onRefresh={fetchSections} 
+      />
     </RoleGuard>
   );
 }
