@@ -62,17 +62,32 @@ export default function Login() {
           from { opacity: 0; transform: translateY(20px); }
           to { opacity: 1; transform: translateY(0); }
         }
-        @keyframes run-bounce {
-          0%, 100% { transform: translateY(0) rotate(-2deg); }
-          50% { transform: translateY(-10px) rotate(1deg); }
+        /* Literal Running Motion: Limbs and Body */
+        @keyframes run-cycle {
+          0% { transform: translateY(0) rotate(-2deg); }
+          25% { transform: translateY(-8px) rotate(0deg); }
+          50% { transform: translateY(0) rotate(2deg); }
+          75% { transform: translateY(-8px) rotate(0deg); }
+          100% { transform: translateY(0) rotate(-2deg); }
         }
-        @keyframes trail-slide {
-          0% { transform: translateX(0); opacity: 0.8; }
-          100% { transform: translateX(-150px); opacity: 0; }
+        /* High Level Motion Trail Logic */
+        @keyframes trail-fade {
+          0% { transform: translateX(0) scale(1); opacity: 0.5; }
+          100% { transform: translateX(-200px) scale(0.9); opacity: 0; }
         }
+        /* Limbs Pumping Animation */
+        @keyframes pump {
+          0%, 100% { transform: rotate(-10deg); }
+          50% { transform: rotate(10deg); }
+        }
+        
         .animate-entrance { animation: entrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .animate-run { animation: run-bounce 0.4s ease-in-out infinite; }
-        .motion-trail { animation: trail-slide 0.6s linear infinite; }
+        .runner-body { animation: run-cycle 0.6s ease-in-out infinite; }
+        .ghost-trail { animation: trail-fade 0.8s linear infinite; position: absolute; }
+        .delay-trail-1 { animation-delay: 0.1s; }
+        .delay-trail-2 { animation-delay: 0.2s; }
+        .delay-trail-3 { animation-delay: 0.3s; }
+        
         .delay-1 { animation-delay: 0.1s; }
         .delay-2 { animation-delay: 0.2s; }
       `}</style>
@@ -147,65 +162,118 @@ export default function Login() {
           </div>
         </div>
 
-        {/* COLUMN 2: HUMAN RUNNER ANIMATION */}
+        {/* COLUMN 2: ADVANCED SPRINTING HUMAN ANIMATION */}
         <div className="hidden md:flex md:w-[55%] bg-[#0A0F1E] relative items-center justify-center overflow-hidden">
-          
-          {/* Animated Background Gradients */}
           <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-fbOrange/10 rounded-full blur-[120px] animate-pulse" />
-          <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-fbOrange/5 rounded-full blur-[100px]" />
 
           <div className="relative z-10 flex flex-col items-center">
             
-            <div className="relative">
-              {/* SPRINTING TRAILS */}
-              <div className="absolute top-1/2 left-[-100px] -translate-y-1/2 flex flex-col gap-4">
-                <div className="motion-trail w-32 h-[2px] bg-gradient-to-r from-transparent to-fbOrange" />
-                <div className="motion-trail w-48 h-[1px] bg-gradient-to-r from-transparent to-white/40 delay-75" />
-                <div className="motion-trail w-28 h-[3px] bg-gradient-to-r from-transparent to-fbOrange/50 delay-150" />
+            {/* SPRINTER CONTAINER */}
+            <div className="relative w-[300px] h-[220px] flex items-center justify-center">
+              
+              {/* THE MOTION TRAILS (STAGGERED GHOSTS) */}
+              <div className="ghost-trail delay-trail-3 opacity-10">
+                <RunnerSVG color="#FF6B00" />
+              </div>
+              <div className="ghost-trail delay-trail-2 opacity-20">
+                <RunnerSVG color="#FF6B00" />
+              </div>
+              <div className="ghost-trail delay-trail-1 opacity-30">
+                <RunnerSVG color="#FFFFFF" />
               </div>
 
-              {/* HUMAN RUNNER SVG (CUSTOM ILLUSTRATION) */}
-              <div className="animate-run">
-                <svg width="220" height="220" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-white drop-shadow-[0_0_30px_rgba(255,107,0,0.4)]">
-                  <path d="M15 5.5C15 6.32843 14.3284 7 13.5 7C12.6716 7 12 6.32843 12 5.5C12 4.67157 12.6716 4 13.5 4C14.3284 4 15 4.67157 15 5.5Z" fill="white"/>
-                  <path d="M12 9L10.5 13L7 12.5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M13.5 8L11 15.5L14 19.5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M11 15.5L7 19" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M13.5 8L17 7.5L19 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M13.5 8C13.5 8 11.5 8.5 10.5 9.5C9.5 10.5 10.5 13 10.5 13" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+              {/* THE PRIMARY RUNNER */}
+              <div className="runner-body relative z-20">
+                <RunnerSVG color="#FFFFFF" glow />
               </div>
+
             </div>
 
             {/* LIVE DASHBOARD HUD */}
             <div className="mt-20 flex gap-6 animate-entrance delay-2">
-              <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-5 rounded-[24px] min-w-[140px]">
+              <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-5 rounded-[24px] min-w-[140px] hover:bg-white/10 transition-colors">
                 <div className="flex items-center gap-2 mb-2">
                   <Timer size={14} className="text-fbOrange" />
-                  <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest">Duration</span>
+                  <span className="text-[10px] text-gray-400 font-black uppercase tracking-widest">Duration</span>
                 </div>
                 <p className="text-white font-bold text-xl">45:12</p>
               </div>
 
-              <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-5 rounded-[24px] min-w-[140px]">
+              <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-5 rounded-[24px] min-w-[140px] hover:bg-white/10 transition-colors">
                 <div className="flex items-center gap-2 mb-2">
                   <Flame size={14} className="text-fbOrange" />
-                  <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest">Kcal Burned</span>
+                  <span className="text-[10px] text-gray-400 font-black uppercase tracking-widest">Kcal Burned</span>
                 </div>
                 <p className="text-white font-bold text-xl">842</p>
               </div>
             </div>
             
-            {/* BACKGROUND TEXT */}
             <h3 className="absolute bottom-[-20px] text-white/5 text-9xl font-black italic uppercase tracking-tighter select-none">
               ATHLETE
             </h3>
           </div>
 
-          {/* GRID OVERLAY */}
           <div className="absolute inset-0 opacity-10 [background-image:radial-gradient(#ffffff_1px,transparent_1px)] [background-size:30px_30px]" />
         </div>
       </div>
     </div>
+  );
+}
+
+// Separate Component for the Runner to keep code clean
+function RunnerSVG({ color = "white", glow = false }) {
+  return (
+    <svg 
+      width="180" 
+      height="180" 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      xmlns="http://www.w3.org/2000/svg" 
+      style={{ filter: glow ? `drop-shadow(0 0 20px ${color}66)` : 'none' }}
+    >
+      {/* Head */}
+      <circle cx="15" cy="5" r="2" fill={color} />
+      {/* Torso/Body */}
+      <path 
+        d="M13 7L10 11L11 15" 
+        stroke={color} 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round" 
+      />
+      {/* Front Leg */}
+      <path 
+        d="M10 11L7 14L8 18" 
+        stroke={color} 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round" 
+        style={{ animation: 'pump 0.6s ease-in-out infinite' }}
+      />
+      {/* Back Leg */}
+      <path 
+        d="M10 11L13 14L12 19" 
+        stroke={color} 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round" 
+        style={{ animation: 'pump 0.6s ease-in-out infinite reverse' }}
+      />
+      {/* Arms */}
+      <path 
+        d="M13 8L16 11L14 14" 
+        stroke={color} 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round" 
+      />
+      <path 
+        d="M13 8L10 9L8 11" 
+        stroke={color} 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round" 
+      />
+    </svg>
   );
 }
