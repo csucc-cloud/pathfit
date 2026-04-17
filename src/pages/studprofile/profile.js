@@ -146,7 +146,7 @@ export default function StudentProfile() {
                     {profile?.full_name}
                   </h1>
                   <span className="bg-fbOrange/10 text-fbOrange px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-fbOrange/20">
-                    Verified Athlete
+                    Verified Student
                   </span>
                 </div>
                 <p className="text-gray-400 font-bold flex items-center justify-center md:justify-start gap-2">
@@ -257,7 +257,7 @@ export default function StudentProfile() {
                       </div>
                     </div>
                   </div>
-                ) : <p className="text-xs text-gray-400 italic text-center py-4 bg-fbGray/50 rounded-2xl">Complete measurements in settings.</p>}
+                ) : <p className="text-xs text-gray-400 italic text-center py-4 bg-fbGray/50 rounded-2xl">Complete measurements in the edit profile button.</p>}
               </div>
             </div>
           )}
@@ -288,7 +288,7 @@ export default function StudentProfile() {
                     <Trophy className="absolute -right-8 -bottom-8 opacity-10 group-hover:rotate-12 transition-transform duration-700" size={180} />
                     <div className="flex justify-between items-start mb-10 relative z-10">
                       <div className="p-3 bg-white/10 rounded-2xl backdrop-blur-sm"><Award className="text-fbAmber" size={32} /></div>
-                      <span className="bg-fbOrange px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg shadow-fbOrange/20">Elite Rank</span>
+                      <span className="bg-fbOrange px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg shadow-fbOrange/20">Student</span>
                     </div>
                     <p className="text-white/40 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Body Composition Analysis</p>
                     <h4 className="text-5xl font-black italic tracking-tighter uppercase drop-shadow-md">
@@ -324,7 +324,7 @@ export default function StudentProfile() {
                             <th className="pb-6 font-black italic border-b border-gray-50">Assessment Type</th>
                             <th className="pb-6 font-black text-center border-b border-gray-50">Baseline</th>
                             <th className="pb-6 font-black text-center text-fbOrange border-b border-gray-50">Peak Performance</th>
-                            <th className="pb-6 text-right font-black border-b border-gray-50">Delta</th>
+                            <th className="pb-6 text-right font-black border-b border-gray-50">Final</th>
                           </tr>
                         </thead>
                         <tbody className="text-sm font-black text-fbNavy">
@@ -363,9 +363,9 @@ export default function StudentProfile() {
                           <Dumbbell size={36} />
                         </div>
                         <div>
-                          <h4 className="text-fbNavy font-black text-2xl tracking-tighter uppercase italic leading-none mb-2">Total Energy Expenditure</h4>
+                          <h4 className="text-fbNavy font-black text-2xl tracking-tighter uppercase italic leading-none mb-2">Total Calorie Burned</h4>
                           <p className="text-gray-400 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2">
-                             <Zap size={14} className="text-fbOrange" /> Cumulative Burn Score
+                             <Zap size={14} className="text-fbOrange" /> Cumulative Score
                           </p>
                         </div>
                       </div>
