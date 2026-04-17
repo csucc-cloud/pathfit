@@ -60,7 +60,7 @@ export default function Login() {
           from { opacity: 0; transform: translateY(20px); }
           to { opacity: 1; transform: translateY(0); }
         }
-        /* Aggressive tilt and bounce to mimic a sprint */
+        /* Aggressive tilt and bounce for the main asset */
         @keyframes athlete-sprint {
           0%, 100% { transform: translateY(0) rotate(-1deg) scale(1); }
           50% { transform: translateY(-12px) rotate(2deg) scale(1.02); }
@@ -70,12 +70,30 @@ export default function Login() {
           0% { transform: translateX(0) scaleX(1); opacity: 0.8; }
           100% { transform: translateX(-300px) scaleX(2.5); opacity: 0; }
         }
+        /* Literal High Level of Trail (Ghosting effect) */
+        @keyframes ghost-trail {
+          0% { transform: translateX(0) scale(1); opacity: 0.5; }
+          100% { transform: translateX(-200px) scale(1.1); opacity: 0; }
+        }
+
         .animate-entrance { animation: entrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .athlete-vector { animation: athlete-sprint 0.45s ease-in-out infinite; }
+        .athlete-image-container { animation: athlete-sprint 0.45s ease-in-out infinite; }
+        
         .speed-shard { 
           animation: speed-line 0.5s linear infinite;
           clip-path: polygon(10% 0%, 100% 50%, 10% 100%, 0% 50%); 
         }
+
+        .trail-ghost {
+          position: absolute;
+          top: 0;
+          left: 0;
+          animation: ghost-trail 0.6s linear infinite;
+          pointer-events: none;
+          filter: brightness(1.5) opacity(0.5);
+        }
+        .trail-delay-1 { animation-delay: 0.1s; }
+        .trail-delay-2 { animation-delay: 0.2s; }
       `}</style>
 
       <div className="bg-white w-full h-screen md:h-auto md:max-w-[1100px] md:rounded-[40px] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.12)] border-0 md:border border-gray-100 flex overflow-hidden">
@@ -87,7 +105,7 @@ export default function Login() {
               <div className="w-12 h-12 bg-fbOrange rounded-2xl flex items-center justify-center shadow-lg shadow-fbOrange/30">
                 <LogIn className="text-white w-6 h-6" />
               </div>
-              <h2 className="text-fbNavy font-black tracking-tighter text-xl italic">PATH<span className="text-fbOrange">FIT</span></h2>
+              <h2 className="text-fbNavy font-black tracking-tighter text-xl italic uppercase">PATH<span className="text-fbOrange">FIT</span></h2>
             </div>
 
             <h1 className="text-4xl font-black text-fbNavy mb-4 leading-tight">
@@ -148,16 +166,15 @@ export default function Login() {
           </div>
         </div>
 
-        {/* COLUMN 2: STYLIZED VECTOR RUNNER (Matches your Image) */}
+        {/* COLUMN 2: ANIMATED RUNNER FROM FILE */}
         <div className="hidden md:flex md:w-[55%] bg-[#0A0F1E] relative items-center justify-center overflow-hidden">
           
-          {/* Ambient Glow */}
           <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-fbOrange/15 rounded-full blur-[120px]" />
 
           <div className="relative z-10 flex flex-col items-center">
             
             <div className="relative flex items-center justify-center">
-              {/* SHARP SPEED LINES (Literal high level of trail) */}
+              {/* SPEED SHARDS (Geometric lines) */}
               <div className="absolute left-[-120px] flex flex-col gap-3">
                 <div className="speed-shard w-40 h-1 bg-fbOrange" style={{ animationDelay: '0s' }} />
                 <div className="speed-shard w-60 h-[2px] bg-white/40" style={{ animationDelay: '0.1s' }} />
@@ -165,22 +182,18 @@ export default function Login() {
                 <div className="speed-shard w-52 h-1 bg-white/20" style={{ animationDelay: '0.15s' }} />
               </div>
 
-              {/* VECTOR ATHLETE (Stylized like your reference) */}
-              <div className="athlete-vector drop-shadow-[0_0_40px_rgba(255,107,0,0.5)]">
-                <svg width="280" height="280" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  {/* Head */}
-                  <circle cx="70" cy="25" r="5" fill="#FFB800" />
-                  {/* Torso (Geometric) */}
-                  <path d="M45 35L65 30L55 55L35 60L45 35Z" fill="#FF6B00" />
-                  {/* Arm Forward */}
-                  <path d="M65 30L85 35L80 45" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
-                  {/* Arm Backward */}
-                  <path d="M45 35L30 30L25 40" stroke="#FFB800" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-                  {/* Leg Forward */}
-                  <path d="M55 55L75 80L65 90" stroke="white" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
-                  {/* Leg Backward */}
-                  <path d="M55 55L35 75L15 85" stroke="#FF6B00" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
+              {/* RUNNER IMAGE WITH GHOST TRAILS */}
+              <div className="athlete-image-container relative w-[320px] h-[320px]">
+                {/* Ghost Trails of the actual PNG */}
+                <img src="/components/runner.png" className="trail-ghost trail-delay-1 w-full h-full object-contain" alt="" />
+                <img src="/components/runner.png" className="trail-ghost trail-delay-2 w-full h-full object-contain" alt="" />
+                
+                {/* Main Image */}
+                <img 
+                  src="/components/runner.png" 
+                  className="relative z-10 w-full h-full object-contain drop-shadow-[0_0_40px_rgba(255,107,0,0.6)]" 
+                  alt="Runner" 
+                />
               </div>
             </div>
 
