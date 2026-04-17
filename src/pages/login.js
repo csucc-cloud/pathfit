@@ -7,13 +7,12 @@ import {
   Lock, 
   LogIn, 
   Loader2, 
-  Sparkles, 
   ShieldCheck, 
   ChevronRight, 
   CheckCircle2, 
   Timer, 
   Flame,
-  Activity // Fixed: Explicitly added Activity to imports
+  Zap
 } from 'lucide-react';
 
 export default function Login() {
@@ -57,26 +56,25 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#F8F9FD] flex items-center justify-center p-0 md:p-6 overflow-hidden selection:bg-fbOrange/20">
+    <div className="min-h-screen w-full bg-[#F8F9FD] flex items-center justify-center p-0 md:p-6 overflow-hidden selection:bg-fbOrange/20 font-sans">
       <style jsx global>{`
         @keyframes entrance {
-          from { opacity: 0; transform: translateY(15px); }
+          from { opacity: 0; transform: translateY(20px); }
           to { opacity: 1; transform: translateY(0); }
         }
-        @keyframes sprint {
-          0% { transform: translate(0, 0) rotate(-2deg); }
-          50% { transform: translate(15px, -8px) rotate(0deg); }
-          100% { transform: translate(0, 0) rotate(-2deg); }
+        @keyframes run-bounce {
+          0%, 100% { transform: translateY(0) rotate(-2deg); }
+          50% { transform: translateY(-10px) rotate(1deg); }
         }
-        @keyframes trail {
-          0% { opacity: 0.6; transform: translateX(0) scaleX(1); }
-          100% { opacity: 0; transform: translateX(-120px) scaleX(2); }
+        @keyframes trail-slide {
+          0% { transform: translateX(0); opacity: 0.8; }
+          100% { transform: translateX(-150px); opacity: 0; }
         }
         .animate-entrance { animation: entrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .animate-sprint { animation: sprint 0.5s ease-in-out infinite; }
-        .motion-trail { animation: trail 0.8s linear infinite; }
-        .delay-1 { animation-delay: 0.2s; }
-        .delay-2 { animation-delay: 0.4s; }
+        .animate-run { animation: run-bounce 0.4s ease-in-out infinite; }
+        .motion-trail { animation: trail-slide 0.6s linear infinite; }
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
       `}</style>
 
       <div className="bg-white w-full h-screen md:h-auto md:max-w-[1100px] md:rounded-[40px] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.12)] border-0 md:border border-gray-100 flex overflow-hidden">
@@ -92,11 +90,11 @@ export default function Login() {
             </div>
 
             <h1 className="text-4xl font-black text-fbNavy mb-4 leading-tight">
-              Start Your <br />
-              <span className="text-fbOrange uppercase tracking-tighter">Sprint.</span>
+              Push Your <br />
+              <span className="text-fbOrange uppercase tracking-tighter italic">Limits.</span>
             </h1>
             <p className="text-gray-400 text-sm font-medium max-w-xs">
-              Log in to track your university fitness metrics and curriculum progress.
+              Sign in to track your exercises, calories, and university fitness milestones.
             </p>
           </div>
 
@@ -128,8 +126,8 @@ export default function Login() {
               disabled={loading}
               className="w-full bg-fbNavy text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-fbOrange transition-all active:scale-95 shadow-xl shadow-fbNavy/10 hover:shadow-fbOrange/30 flex items-center justify-center gap-3"
             >
-              {loading ? <Loader2 className="animate-spin" /> : <ShieldCheck size={18} />}
-              {loading ? 'Verifying...' : 'Unlock Dashboard'}
+              {loading ? <Loader2 className="animate-spin" /> : <Zap size={18} className="text-fbOrange group-hover:text-white" />}
+              {loading ? 'Processing...' : 'Start Session'}
             </button>
           </form>
 
@@ -138,69 +136,74 @@ export default function Login() {
               onClick={() => router.push('/auth/register')}
               className="group text-xs font-bold text-gray-400 hover:text-fbOrange transition-all flex items-center gap-2"
             >
-              Need an account? <span className="underline decoration-2 underline-offset-4 group-hover:text-fbOrange">Register as Student</span> <ChevronRight size={14} />
+              No account? <span className="underline decoration-2 underline-offset-4 group-hover:text-fbOrange">Create here!</span> <ChevronRight size={14} />
             </button>
             
             <div className="mt-8 flex items-center gap-4 text-[10px] text-gray-300 font-bold uppercase tracking-widest">
-              <span>PATHFIT v1.0</span>
+              <span>PORTAL V1.0</span>
               <span className="w-1 h-1 bg-gray-200 rounded-full" />
               <button onClick={handleSecretTap} className="hover:text-fbOrange transition-colors">{tapCount > 0 ? `[${tapCount}]` : '1'}</button>
             </div>
           </div>
         </div>
 
-        {/* COLUMN 2: ANIMATED RUNNER ILLUSTRATION */}
+        {/* COLUMN 2: HUMAN RUNNER ANIMATION */}
         <div className="hidden md:flex md:w-[55%] bg-[#0A0F1E] relative items-center justify-center overflow-hidden">
-          {/* Background Aura */}
-          <div className="absolute w-[400px] h-[400px] bg-fbOrange/10 rounded-full blur-[100px] animate-pulse" />
           
+          {/* Animated Background Gradients */}
+          <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-fbOrange/10 rounded-full blur-[120px] animate-pulse" />
+          <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-fbOrange/5 rounded-full blur-[100px]" />
+
           <div className="relative z-10 flex flex-col items-center">
             
-            {/* The Runner with Dynamic Trails */}
             <div className="relative">
-              {/* Motion Trails behind the runner */}
-              <div className="absolute top-1/2 left-0 -translate-x-full flex flex-col gap-6">
-                <div className="motion-trail w-40 h-[3px] bg-gradient-to-r from-transparent to-fbOrange" />
-                <div className="motion-trail w-60 h-[2px] bg-gradient-to-r from-transparent to-white/30 delay-100" />
-                <div className="motion-trail w-32 h-[4px] bg-gradient-to-r from-transparent to-fbOrange/50 delay-200" />
+              {/* SPRINTING TRAILS */}
+              <div className="absolute top-1/2 left-[-100px] -translate-y-1/2 flex flex-col gap-4">
+                <div className="motion-trail w-32 h-[2px] bg-gradient-to-r from-transparent to-fbOrange" />
+                <div className="motion-trail w-48 h-[1px] bg-gradient-to-r from-transparent to-white/40 delay-75" />
+                <div className="motion-trail w-28 h-[3px] bg-gradient-to-r from-transparent to-fbOrange/50 delay-150" />
               </div>
 
-              {/* Runner Icon */}
-              <div className="animate-sprint relative z-20">
-                <Activity size={200} strokeWidth={1} className="text-white drop-shadow-[0_0_25px_rgba(255,255,255,0.2)]" />
+              {/* HUMAN RUNNER SVG (CUSTOM ILLUSTRATION) */}
+              <div className="animate-run">
+                <svg width="220" height="220" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-white drop-shadow-[0_0_30px_rgba(255,107,0,0.4)]">
+                  <path d="M15 5.5C15 6.32843 14.3284 7 13.5 7C12.6716 7 12 6.32843 12 5.5C12 4.67157 12.6716 4 13.5 4C14.3284 4 15 4.67157 15 5.5Z" fill="white"/>
+                  <path d="M12 9L10.5 13L7 12.5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M13.5 8L11 15.5L14 19.5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M11 15.5L7 19" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M13.5 8L17 7.5L19 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M13.5 8C13.5 8 11.5 8.5 10.5 9.5C9.5 10.5 10.5 13 10.5 13" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
               </div>
             </div>
 
-            {/* Performance Overlay */}
-            <div className="mt-20 flex gap-6">
-              <div className="bg-white/5 backdrop-blur-md border border-white/10 p-5 rounded-[24px] flex items-center gap-4">
-                <div className="w-10 h-10 bg-fbOrange/20 rounded-xl flex items-center justify-center text-fbOrange">
-                  <Flame size={20} />
+            {/* LIVE DASHBOARD HUD */}
+            <div className="mt-20 flex gap-6 animate-entrance delay-2">
+              <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-5 rounded-[24px] min-w-[140px]">
+                <div className="flex items-center gap-2 mb-2">
+                  <Timer size={14} className="text-fbOrange" />
+                  <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest">Duration</span>
                 </div>
-                <div>
-                  <p className="text-[10px] text-gray-500 font-black tracking-widest uppercase">Intensity</p>
-                  <p className="text-white font-bold text-lg">High</p>
-                </div>
+                <p className="text-white font-bold text-xl">45:12</p>
               </div>
 
-              <div className="bg-white/5 backdrop-blur-md border border-white/10 p-5 rounded-[24px] flex items-center gap-4">
-                <div className="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center text-blue-400">
-                  <Timer size={20} />
+              <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-5 rounded-[24px] min-w-[140px]">
+                <div className="flex items-center gap-2 mb-2">
+                  <Flame size={14} className="text-fbOrange" />
+                  <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest">Kcal Burned</span>
                 </div>
-                <div>
-                  <p className="text-[10px] text-gray-500 font-black tracking-widest uppercase">Target</p>
-                  <p className="text-white font-bold text-lg">100%</p>
-                </div>
+                <p className="text-white font-bold text-xl">842</p>
               </div>
             </div>
             
-            <span className="absolute bottom-[-40px] text-white/5 text-8xl font-black italic uppercase tracking-tighter select-none">
-              Endurance
-            </span>
+            {/* BACKGROUND TEXT */}
+            <h3 className="absolute bottom-[-20px] text-white/5 text-9xl font-black italic uppercase tracking-tighter select-none">
+              ATHLETE
+            </h3>
           </div>
 
-          {/* Grid Background Overlay */}
-          <div className="absolute inset-0 opacity-20 [background-image:linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] [background-size:30px_30px]" />
+          {/* GRID OVERLAY */}
+          <div className="absolute inset-0 opacity-10 [background-image:radial-gradient(#ffffff_1px,transparent_1px)] [background-size:30px_30px]" />
         </div>
       </div>
     </div>
