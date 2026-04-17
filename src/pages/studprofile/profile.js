@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Layout from '../../components/Layout';
+// --- LAYOUT IMPORT REMOVED ---
 import EditProfileModal from '../../components/EditProfileModal'; 
 import FitnessLogTab from '../../components/FitnessLogTab'; 
 import { supabase } from '../../lib/supabaseClient';
@@ -98,7 +98,7 @@ export default function StudentProfile() {
   const bmiResult = calculateBMI();
 
   return (
-    <Layout>
+    <>
       <style dangerouslySetInnerHTML={{ __html: `
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #F8F9FD; border-radius: 10px; }
@@ -393,6 +393,6 @@ export default function StudentProfile() {
         </div>
       </main>
       <EditProfileModal profile={profile} isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} onRefresh={fetchData} />
-    </Layout>
+    </>
   );
 }
