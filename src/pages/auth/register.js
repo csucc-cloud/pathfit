@@ -21,6 +21,10 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [isExiting, setIsExiting] = useState(false); // Controls the reverse slide
   
+  // NEW: State for real sections from DB
+  const [availableSections, setAvailableSections] = useState([]);
+  const [fetchingSections, setFetchingSections] = useState(true);
+
   // Kept your exact formData structure
   const [formData, setFormData] = useState({
     studentId: '',
@@ -34,6 +38,21 @@ export default function Register() {
     sectionCode: ''
   });
 
+  // NEW: Fetch real sections on load
+  useEffect(() => {
+    async function getSections() {
+      const { data, error } = await supabase
+        .from('sections')
+        .select('section_code, course_name');
+      
+      if (!error && data) {
+        setAvailableSections(data);
+      }
+      setFetchingSections(false);
+    }
+    getSections();
+  }, []);
+
   // NEW: Navigation handler to trigger animation before leaving
   const handleBackToLogin = () => {
     setIsExiting(true); // Slide the runner back to the right
@@ -46,6 +65,12 @@ export default function Register() {
   const handleRegister = async (e) => {
     e.preventDefault();
     setLoading(true);
+
+    if (!formData.sectionCode) {
+      alert("Please select a valid section.");
+      setLoading(false);
+      return;
+    }
     
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: formData.email,
@@ -151,16 +176,29 @@ export default function Register() {
               <input type="number" placeholder="Age" className="w-full px-4 py-3.5 rounded-xl bg-fbGray/10 border-2 border-transparent focus:border-fbOrange/20 outline-none font-semibold text-fbNavy text-sm" 
                 onChange={(e) => setFormData({...formData, age: e.target.value})} />
               
-              <select className="w-full px-4 py-3.5 rounded-xl bg-fbGray/10 border-2 border-transparent focus:border-fbOrange/20 outline-none font-bold text-fbNavy text-sm appearance-none"
+              <select className="w-full px-4 py-3.5 rounded-xl bg-fbGray/10 border-2 border-transparent focus:border-fbOrange/20 outline-none font-bold text-fbNavy text-sm appearance-none cursor-pointer"
                 onChange={(e) => setFormData({...formData, sex: e.target.value})}>
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
               </select>
 
+              {/* Updated: Section Dropdown (Previously Input) */}
               <div className="relative group">
-                <Hash className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 group-focus-within:text-fbOrange" />
-                <input type="text" placeholder="Section" className="w-full pl-9 pr-4 py-3.5 rounded-xl bg-fbGray/10 border-2 border-transparent focus:border-fbOrange/20 outline-none font-semibold text-fbNavy text-sm" 
-                  onChange={(e) => setFormData({...formData, sectionCode: e.target.value})} />
+                <Hash className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 group-focus-within:text-fbOrange pointer-events-none" />
+                <select 
+                  required
+                  className="w-full pl-9 pr-4 py-3.5 rounded-xl bg-fbGray/10 border-2 border-transparent focus:border-fbOrange/20 outline-none font-bold text-fbNavy text-sm appearance-none cursor-pointer disabled:opacity-50"
+                  onChange={(e) => setFormData({...formData, sectionCode: e.target.value})}
+                  value={formData.sectionCode}
+                  disabled={fetchingSections}
+                >
+                  <option value="">{fetchingSections ? 'Loading...' : 'Section'}</option>
+                  {availableSections.map((sec) => (
+                    <option key={sec.section_code} value={sec.section_code}>
+                      {sec.section_code}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 
@@ -202,8 +240,6 @@ export default function Register() {
         </div>
 
         {/* ANIMATION COLUMN (The Runner) */}
-        {/* Starts on the LEFT (left-0) because the login page just pushed it here */}
-        {/* Slides to the RIGHT (left-1/2) only if handleBackToLogin is clicked */}
         <div className={`hidden md:flex absolute top-0 w-1/2 h-full bg-[#0A0F1E] z-40 items-center justify-center overflow-hidden transition-all duration-[800ms] ease-[cubic-bezier(0.85,0,0.15,1)] ${isExiting ? 'left-1/2' : 'left-0'}`}>
           <div className="absolute w-[80%] h-[80%] bg-fbOrange/10 rounded-full blur-[120px]" />
           <div className="relative z-10 flex flex-col items-center">
