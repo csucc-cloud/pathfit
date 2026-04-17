@@ -60,46 +60,46 @@ export default function Login() {
           from { opacity: 0; transform: translateY(20px); }
           to { opacity: 1; transform: translateY(0); }
         }
-        /* Aggressive tilt and bounce for the main asset */
-        @keyframes athlete-sprint {
-          0%, 100% { transform: translateY(0) rotate(-1deg) scale(1); }
-          50% { transform: translateY(-12px) rotate(2deg) scale(1.02); }
+        
+        /* Aggressive vibrating sprint - looks like high-speed friction */
+        @keyframes friction-shake {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          25% { transform: translate(2px, -2px) scale(1.01); }
+          75% { transform: translate(-2px, 2px) scale(0.99); }
         }
-        /* Sharp trailing speed lines */
-        @keyframes speed-line {
-          0% { transform: translateX(0) scaleX(1); opacity: 0.8; }
-          100% { transform: translateX(-300px) scaleX(2.5); opacity: 0; }
-        }
-        /* Literal High Level of Trail (Ghosting effect) */
-        @keyframes ghost-trail {
-          0% { transform: translateX(0) scale(1); opacity: 0.5; }
-          100% { transform: translateX(-200px) scale(1.1); opacity: 0; }
+
+        /* The Shredded Ghost Trail */
+        @keyframes shred-trail {
+          0% { transform: translateX(0) skewX(-15deg) scaleX(1); opacity: 0.7; filter: blur(0px); }
+          100% { transform: translateX(-400px) skewX(-25deg) scaleX(2.5); opacity: 0; filter: blur(8px); }
         }
 
         .animate-entrance { animation: entrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .athlete-image-container { animation: athlete-sprint 0.45s ease-in-out infinite; }
         
-        .speed-shard { 
-          animation: speed-line 0.5s linear infinite;
-          clip-path: polygon(10% 0%, 100% 50%, 10% 100%, 0% 50%); 
+        .athlete-core { 
+          animation: friction-shake 0.1s linear infinite; 
+          position: relative;
+          z-index: 20;
         }
 
-        .trail-ghost {
+        .shred-layer {
           position: absolute;
           top: 0;
           left: 0;
-          animation: ghost-trail 0.6s linear infinite;
+          animation: shred-trail 0.4s linear infinite;
           pointer-events: none;
-          filter: brightness(1.5) opacity(0.5);
+          z-index: 10;
         }
-        .trail-delay-1 { animation-delay: 0.1s; }
-        .trail-delay-2 { animation-delay: 0.2s; }
+        
+        .delay-shred-1 { animation-delay: 0.05s; }
+        .delay-shred-2 { animation-delay: 0.12s; opacity: 0.4; }
+        .delay-shred-3 { animation-delay: 0.2s; opacity: 0.2; }
       `}</style>
 
       <div className="bg-white w-full h-screen md:h-auto md:max-w-[1100px] md:rounded-[40px] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.12)] border-0 md:border border-gray-100 flex overflow-hidden">
         
-        {/* COLUMN 1: LOGIN FORM */}
-        <div className="w-full md:w-[45%] p-10 md:p-16 flex flex-col justify-between relative z-10 bg-white">
+        {/* FORM COLUMN */}
+        <div className="w-full md:w-[45%] p-10 md:p-16 flex flex-col justify-between relative z-30 bg-white">
           <div className="animate-entrance">
             <div className="flex items-center gap-3 mb-10">
               <div className="w-12 h-12 bg-fbOrange rounded-2xl flex items-center justify-center shadow-lg shadow-fbOrange/30">
@@ -120,104 +120,75 @@ export default function Login() {
           <form onSubmit={handleEmailAuth} className="space-y-4 my-10 animate-entrance delay-1">
             <div className="relative group">
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300 group-focus-within:text-fbOrange transition-colors" />
-              <input 
-                type="email" 
-                placeholder="University Email" 
-                required
-                className="w-full pl-12 pr-4 py-4 rounded-2xl bg-fbGray/10 border-2 border-transparent focus:border-fbOrange/20 focus:bg-white outline-none transition-all font-semibold text-fbNavy text-sm"
-                onChange={(e) => setEmail(e.target.value)}
-              />
+              <input type="email" placeholder="University Email" required className="w-full pl-12 pr-4 py-4 rounded-2xl bg-fbGray/10 border-2 border-transparent focus:border-fbOrange/20 focus:bg-white outline-none transition-all font-semibold text-fbNavy text-sm" onChange={(e) => setEmail(e.target.value)} />
             </div>
             
             <div className="relative group">
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300 group-focus-within:text-fbOrange transition-colors" />
-              <input 
-                type="password" 
-                placeholder="Password" 
-                required
-                className="w-full pl-12 pr-4 py-4 rounded-2xl bg-fbGray/10 border-2 border-transparent focus:border-fbOrange/20 focus:bg-white outline-none transition-all font-semibold text-fbNavy text-sm"
-                onChange={(e) => setPassword(e.target.value)}
-              />
+              <input type="password" placeholder="Password" required className="w-full pl-12 pr-4 py-4 rounded-2xl bg-fbGray/10 border-2 border-transparent focus:border-fbOrange/20 focus:bg-white outline-none transition-all font-semibold text-fbNavy text-sm" onChange={(e) => setPassword(e.target.value)} />
             </div>
 
-            <button 
-              type="submit" 
-              disabled={loading}
-              className="w-full bg-fbNavy text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-fbOrange transition-all active:scale-95 shadow-xl shadow-fbNavy/10 hover:shadow-fbOrange/30 flex items-center justify-center gap-3"
-            >
+            <button type="submit" disabled={loading} className="w-full bg-fbNavy text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-fbOrange transition-all active:scale-95 shadow-xl shadow-fbNavy/10 hover:shadow-fbOrange/30 flex items-center justify-center gap-3">
               {loading ? <Loader2 className="animate-spin" /> : <Zap size={18} className="text-fbOrange group-hover:text-white" />}
               {loading ? 'Processing...' : 'Start Session'}
             </button>
           </form>
 
           <div className="animate-entrance delay-2">
-            <button 
-              onClick={() => router.push('/auth/register')}
-              className="group text-xs font-bold text-gray-400 hover:text-fbOrange transition-all flex items-center gap-2"
-            >
+            <button onClick={() => router.push('/auth/register')} className="group text-xs font-bold text-gray-400 hover:text-fbOrange transition-all flex items-center gap-2">
               No account? <span className="underline decoration-2 underline-offset-4 group-hover:text-fbOrange">Create here!</span> <ChevronRight size={14} />
             </button>
-            
             <div className="mt-8 flex items-center gap-4 text-[10px] text-gray-300 font-bold uppercase tracking-widest">
               <span>PORTAL V1.0</span>
-              <span className="w-1 h-1 bg-gray-200 rounded-full" />
               <button onClick={handleSecretTap} className="hover:text-fbOrange transition-colors">{tapCount > 0 ? `[${tapCount}]` : '1'}</button>
             </div>
           </div>
         </div>
 
-        {/* COLUMN 2: ANIMATED RUNNER FROM FILE */}
+        {/* HIGH-SPEED ANIMATION COLUMN */}
         <div className="hidden md:flex md:w-[55%] bg-[#0A0F1E] relative items-center justify-center overflow-hidden">
           
-          <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-fbOrange/15 rounded-full blur-[120px]" />
+          {/* Visual Glow behind athlete */}
+          <div className="absolute w-[80%] h-[80%] bg-fbOrange/10 rounded-full blur-[120px]" />
 
           <div className="relative z-10 flex flex-col items-center">
             
-            <div className="relative flex items-center justify-center">
-              {/* SPEED SHARDS (Geometric lines) */}
-              <div className="absolute left-[-120px] flex flex-col gap-3">
-                <div className="speed-shard w-40 h-1 bg-fbOrange" style={{ animationDelay: '0s' }} />
-                <div className="speed-shard w-60 h-[2px] bg-white/40" style={{ animationDelay: '0.1s' }} />
-                <div className="speed-shard w-32 h-[3px] bg-fbOrange/60" style={{ animationDelay: '0.2s' }} />
-                <div className="speed-shard w-52 h-1 bg-white/20" style={{ animationDelay: '0.15s' }} />
-              </div>
+            {/* THE ATHLETE WRAPPER */}
+            <div className="relative w-[380px] h-[380px]">
+              
+              {/* THE GHOST SHREDS (Trailing versions of your image) */}
+              <img src="/components/runner.png" className="shred-layer delay-shred-1 w-full h-full object-contain mix-blend-screen" alt="" />
+              <img src="/components/runner.png" className="shred-layer delay-shred-2 w-full h-full object-contain mix-blend-screen" alt="" />
+              <img src="/components/runner.png" className="shred-layer delay-shred-3 w-full h-full object-contain mix-blend-screen" alt="" />
 
-              {/* RUNNER IMAGE WITH GHOST TRAILS */}
-              <div className="athlete-image-container relative w-[320px] h-[320px]">
-                {/* Ghost Trails of the actual PNG */}
-                <img src="/components/runner.png" className="trail-ghost trail-delay-1 w-full h-full object-contain" alt="" />
-                <img src="/components/runner.png" className="trail-ghost trail-delay-2 w-full h-full object-contain" alt="" />
-                
-                {/* Main Image */}
-                <img 
-                  src="/components/runner.png" 
-                  className="relative z-10 w-full h-full object-contain drop-shadow-[0_0_40px_rgba(255,107,0,0.6)]" 
-                  alt="Runner" 
-                />
-              </div>
+              {/* THE ACTUAL ATHLETE */}
+              <img 
+                src="/components/runner.png" 
+                className="athlete-core w-full h-full object-contain drop-shadow-[0_0_60px_rgba(255,107,0,0.5)]" 
+                alt="Runner" 
+              />
             </div>
 
-            {/* LIVE DATA OVERLAY */}
-            <div className="mt-16 flex gap-6 animate-entrance delay-2">
-              <div className="bg-white/5 backdrop-blur-md border border-white/10 p-5 rounded-[24px] min-w-[140px] text-center">
-                <p className="text-[10px] text-fbOrange font-black uppercase tracking-widest mb-1">Pace</p>
-                <p className="text-white font-bold text-xl tracking-tighter italic uppercase">4'12"/km</p>
+            {/* DASHBOARD HUD */}
+            <div className="mt-8 flex gap-6 animate-entrance delay-2">
+              <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-5 rounded-[24px] min-w-[140px] text-center">
+                <p className="text-[10px] text-fbOrange font-black uppercase mb-1">PACE</p>
+                <p className="text-white font-bold text-xl italic uppercase">4'12"/KM</p>
               </div>
-
-              <div className="bg-white/5 backdrop-blur-md border border-white/10 p-5 rounded-[24px] min-w-[140px] text-center">
-                <p className="text-[10px] text-fbOrange font-black uppercase tracking-widest mb-1">Calories</p>
-                <p className="text-white font-bold text-xl tracking-tighter italic uppercase">842 KCAL</p>
+              <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-5 rounded-[24px] min-w-[140px] text-center">
+                <p className="text-[10px] text-fbOrange font-black uppercase mb-1">CALORIES</p>
+                <p className="text-white font-bold text-xl italic uppercase">842 KCAL</p>
               </div>
             </div>
             
-            <h3 className="absolute bottom-[-30px] text-white/5 text-9xl font-black italic uppercase tracking-tighter select-none">
+            <h3 className="absolute bottom-[-20px] text-white/[0.03] text-[150px] font-black italic uppercase tracking-tighter select-none pointer-events-none">
               ATHLETE
             </h3>
           </div>
 
-          <div className="absolute inset-0 opacity-10 [background-image:radial-gradient(#ffffff_1px,transparent_1px)] [background-size:30px_30px]" />
+          <div className="absolute inset-0 opacity-5 [background-image:radial-gradient(#ffffff_1px,transparent_1px)] [background-size:30px_30px]" />
         </div>
       </div>
     </div>
   );
-}
+                                            }
