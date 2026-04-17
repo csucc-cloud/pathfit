@@ -1,10 +1,9 @@
 // src/pages/admin/index.js
 import React, { useState } from 'react';
-import Layout from '../../components/Layout';
-import RoleGuard from '../../components/RoleGuard'; // Added the security guard
+import InstructorLayout from '../../components/layouts/InstructorLayout'; // Updated to use the new side-nav layout
+import RoleGuard from '../../components/RoleGuard';
 import { useAdminData } from '../../hooks/useAdminData';
 import { downloadCSV } from '../../utils/exportHelper'; 
-// Importing Lucide icons for high-volume management UI
 import { 
   Users, 
   Search, 
@@ -13,7 +12,9 @@ import {
   LayoutDashboard, 
   Loader2,
   Calendar,
-  User // Added User icon for the name column
+  User,
+  Activity,
+  ChevronRight
 } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -21,7 +22,6 @@ export default function AdminDashboard() {
   const { students, loading } = useAdminData(pId);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // UPDATED: Filter students based on Student ID OR Full Name search without mutating original data
   const filteredStudents = students.filter(s => 
     s.student_id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     s.full_name?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -29,8 +29,8 @@ export default function AdminDashboard() {
 
   const handleExport = () => {
     const exportData = filteredStudents.map(s => ({
-      StudentID: s.student_id, // Using student_id for export
-      FullName: s.full_name,   // Added Full Name to export
+      StudentID: s.student_id,
+      FullName: s.full_name,
       ExercisesCompleted: s.exercises,
       Progress: `${Math.round((s.exercises / 15) * 100)}%`,
       LastActive: new Date(s.lastActive).toLocaleDateString(),
@@ -39,119 +39,126 @@ export default function AdminDashboard() {
   };
 
   return (
-    /* Wrap the entire page in the RoleGuard */
     <RoleGuard allowedRole="instructor">
-      <Layout>
-        <main className="p-8">
-          <header className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
+      <InstructorLayout>
+        <div className="animate-entrance">
+          {/* HEADER SECTION */}
+          <header className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-6">
             <div>
-              <div className="flex items-center gap-2 mb-1">
-                <LayoutDashboard className="w-5 h-5 text-fbOrange" />
-                <h1 className="text-3xl font-black text-fbNavy">Instructor View</h1>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="bg-fbOrange p-2 rounded-lg shadow-lg shadow-fbOrange/20">
+                  <LayoutDashboard className="w-5 h-5 text-white" />
+                </div>
+                <h1 className="text-4xl font-black text-fbNavy uppercase italic tracking-tighter">
+                  Instructor <span className="text-fbOrange">View</span>
+                </h1>
               </div>
-              <p className="text-gray-500 font-medium flex items-center gap-2">
-                <Users className="w-4 h-4" />
-                Monitor Student Records
+              <p className="text-gray-400 font-bold text-xs uppercase tracking-[0.2em] flex items-center gap-2 ml-1">
+                <Users className="w-3 h-3 text-fbOrange" /> Monitor Student Records
               </p>
             </div>
             
-            <div className="flex flex-wrap items-center gap-3">
-              {/* Search Input with Lucide Search Icon - Now searches ID and Name */}
-              <div className="relative">
-                <Search className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
+            <div className="flex flex-wrap items-center gap-4">
+              {/* SEARCH BOX */}
+              <div className="relative group">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-fbOrange transition-colors" />
                 <input 
                   type="text"
                   placeholder="Search ID or Name..."
-                  className="pl-10 pr-4 py-2 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-fbOrange outline-none w-64 shadow-sm"
+                  className="pl-12 pr-6 py-4 rounded-2xl bg-white border border-gray-100 text-sm font-bold text-fbNavy focus:ring-4 focus:ring-fbOrange/5 outline-none w-72 shadow-sm transition-all"
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
 
-              {/* Export Action with FileDown Icon */}
-              <button 
-                onClick={handleExport}
-                className="bg-white border border-gray-200 text-fbNavy font-bold px-4 py-2 rounded-xl text-sm hover:bg-fbGray transition-all flex items-center gap-2 shadow-sm"
-              >
-                <FileDown className="w-4 h-4 text-fbOrange" />
-                Export
-              </button>
+              {/* ACTION BUTTONS */}
+              <div className="flex gap-2">
+                <button 
+                  onClick={handleExport}
+                  className="bg-fbNavy text-white font-black px-6 py-4 rounded-2xl text-xs uppercase tracking-widest hover:bg-fbOrange transition-all flex items-center gap-3 shadow-xl shadow-fbNavy/10 active:scale-95"
+                >
+                  <FileDown className="w-4 h-4" />
+                  Export
+                </button>
 
-              {/* Your Original Practicum Toggle */}
-              <div className="flex gap-2 bg-white p-1 rounded-xl border border-gray-200 shadow-sm">
-                {[1, 2].map((num) => (
-                  <button
-                    key={num}
-                    onClick={() => setPId(num)}
-                    className={`px-6 py-2 rounded-lg font-bold text-sm transition-all ${
-                      pId === num ? 'bg-fbOrange text-white shadow-md' : 'text-gray-400 hover:bg-fbGray'
-                    }`}
-                  >
-                    Practicum {num}
-                  </button>
-                ))}
+                <div className="flex gap-1 bg-white p-1.5 rounded-2xl border border-gray-100 shadow-sm">
+                  {[1, 2].map((num) => (
+                    <button
+                      key={num}
+                      onClick={() => setPId(num)}
+                      className={`px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${
+                        pId === num ? 'bg-fbGray text-fbNavy' : 'text-gray-300 hover:text-fbNavy hover:bg-fbGray/30'
+                      }`}
+                    >
+                      Practicum {num}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </header>
 
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          {/* TABLE CONTAINER */}
+          <div className="bg-white rounded-[40px] border border-gray-100 shadow-sm overflow-hidden">
             <table className="w-full text-left border-collapse">
-              <thead className="bg-fbGray border-b border-gray-100">
+              <thead className="bg-fbGray/5 border-b border-gray-100">
                 <tr>
-                  <th className="p-4 text-[10px] font-black uppercase text-gray-400">
-                    <div className="flex items-center gap-2">Student ID</div>
+                  <th className="p-6 text-[10px] font-black uppercase text-gray-400 tracking-widest">Student ID</th>
+                  <th className="p-6 text-[10px] font-black uppercase text-gray-400 tracking-widest">
+                    <div className="flex items-center gap-2"><User className="w-3 h-3 text-fbOrange" /> Name</div>
                   </th>
-                  {/* NEW COLUMN: Student Name */}
-                  <th className="p-4 text-[10px] font-black uppercase text-gray-400">
-                    <div className="flex items-center gap-2">
-                      <User className="w-3 h-3 text-fbOrange" /> Name
-                    </div>
+                  <th className="p-6 text-[10px] font-black uppercase text-gray-400 tracking-widest">Completion</th>
+                  <th className="p-6 text-[10px] font-black uppercase text-gray-400 tracking-widest text-center">
+                     <div className="flex items-center justify-center gap-2"><Calendar className="w-3 h-3 text-fbOrange" /> Activity</div>
                   </th>
-                  <th className="p-4 text-[10px] font-black uppercase text-gray-400">Completion</th>
-                  <th className="p-4 text-[10px] font-black uppercase text-gray-400">
-                     <div className="flex items-center gap-2">
-                      <Calendar className="w-3 h-3 text-fbOrange" /> Last Activity
-                     </div>
-                  </th>
-                  <th className="p-4 text-[10px] font-black uppercase text-gray-400 text-right">Action</th>
+                  <th className="p-6 text-[10px] font-black uppercase text-gray-400 tracking-widest text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {loading ? (
                   <tr>
-                    <td colSpan="5" className="p-10 text-center text-gray-400">
-                      <div className="flex flex-col items-center gap-2">
-                        <Loader2 className="w-8 h-8 animate-spin text-fbOrange" />
-                        <p className="animate-pulse">Loading master records...</p>
+                    <td colSpan="5" className="p-20 text-center">
+                      <div className="flex flex-col items-center gap-4">
+                        <Loader2 className="w-10 h-10 animate-spin text-fbOrange" />
+                        <p className="text-fbNavy font-black italic uppercase tracking-widest text-xs animate-pulse">Synchronizing Records...</p>
                       </div>
                     </td>
                   </tr>
                 ) : filteredStudents.map((s) => (
-                  <tr key={s.id} className="hover:bg-fbGray/50 transition-colors group">
-                    <td className="p-4 font-bold text-sm text-fbNavy font-mono uppercase tracking-tight">
-                      {/* Showing student_id instead of internal UUID */}
-                      {s.student_id || "PENDING"}
+                  <tr key={s.id} className="hover:bg-fbGray/10 transition-all group">
+                    <td className="p-6">
+                      <span className="font-black text-xs text-fbNavy bg-fbGray/20 px-3 py-1.5 rounded-lg tracking-tighter">
+                        {s.student_id || "PENDING"}
+                      </span>
                     </td>
-                    {/* DISPLAY: Full Name */}
-                    <td className="p-4 text-sm font-semibold text-fbNavy capitalize">
-                      {s.full_name || "Unknown Student"}
-                    </td>
-                    <td className="p-4">
+                    <td className="p-6">
                       <div className="flex items-center gap-3">
-                        <div className="flex-1 h-1.5 bg-gray-100 rounded-full max-w-[100px]">
+                        <div className="w-8 h-8 rounded-full bg-fbNavy text-white flex items-center justify-center text-[10px] font-black italic">
+                          {s.full_name?.substring(0,2).toUpperCase() || "??"}
+                        </div>
+                        <span className="text-sm font-black text-fbNavy uppercase italic tracking-tight group-hover:text-fbOrange transition-colors">
+                          {s.full_name || "Unknown Student"}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="p-6">
+                      <div className="flex items-center gap-4">
+                        <div className="flex-1 h-2 bg-fbGray/30 rounded-full max-w-[120px] overflow-hidden">
                           <div 
-                            className="h-full bg-fbOrange rounded-full shadow-[0_0_8px_rgba(245,124,0,0.4)] transition-all duration-700" 
+                            className="h-full bg-fbOrange rounded-full shadow-[0_0_12px_rgba(245,124,0,0.3)] transition-all duration-1000 ease-out" 
                             style={{ width: `${(s.exercises / 15) * 100}%` }}
                           ></div>
                         </div>
-                        <span className="text-xs font-bold text-fbNavy">{s.exercises}/15</span>
+                        <span className="text-[10px] font-black text-fbNavy italic">{s.exercises}<span className="text-gray-300">/15</span></span>
                       </div>
                     </td>
-                    <td className="p-4 text-xs text-gray-500 font-medium">
-                      {new Date(s.lastActive).toLocaleDateString()}
+                    <td className="p-6 text-center">
+                      <span className="text-[10px] font-bold text-gray-400 uppercase">
+                        {new Date(s.lastActive).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </span>
                     </td>
-                    <td className="p-4 text-right">
-                      <button className="text-fbOrange font-bold text-xs hover:underline flex items-center gap-1 justify-end ml-auto group-hover:translate-x-[-4px] transition-transform">
-                        <Eye className="w-3 h-3" />
+                    <td className="p-6 text-right">
+                      <button className="bg-white border border-gray-100 text-fbNavy font-black text-[10px] px-4 py-2 rounded-xl uppercase tracking-widest hover:bg-fbNavy hover:text-white transition-all shadow-sm flex items-center gap-2 ml-auto group/btn">
+                        <Eye className="w-3 h-3 text-fbOrange group-hover/btn:text-white" />
                         View Full Log
                       </button>
                     </td>
@@ -159,11 +166,10 @@ export default function AdminDashboard() {
                 ))}
                 {!loading && filteredStudents.length === 0 && (
                   <tr>
-                    <td colSpan="5" className="p-10 text-center text-gray-400">
-                      <div className="flex flex-col items-center gap-2">
-                        <Search className="w-8 h-8 opacity-20" />
-                        <p className="font-bold">No student records found.</p>
-                        <span className="text-xs opacity-60">Try searching for a different ID or Name</span>
+                    <td colSpan="5" className="p-20 text-center">
+                      <div className="flex flex-col items-center gap-3 opacity-30">
+                        <Search className="w-12 h-12" />
+                        <p className="font-black italic uppercase tracking-[0.3em] text-xs">No records matching search</p>
                       </div>
                     </td>
                   </tr>
@@ -171,8 +177,8 @@ export default function AdminDashboard() {
               </tbody>
             </table>
           </div>
-        </main>
-      </Layout>
+        </div>
+      </InstructorLayout>
     </RoleGuard>
   );
 }
