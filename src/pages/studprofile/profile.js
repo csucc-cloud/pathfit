@@ -3,7 +3,6 @@ import Layout from '../../components/Layout';
 import EditProfileModal from '../../components/EditProfileModal'; 
 import FitnessLogTab from '../../components/FitnessLogTab'; 
 import { supabase } from '../../lib/supabaseClient';
-// Updated import to match your constant name
 import { PATHFIT_EXERCISES } from '../../constants/exercises';
 import { 
   Camera, 
@@ -44,6 +43,7 @@ export default function StudentProfile() {
   const fetchData = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
+      // 1. Fetch Profile
       const { data: profileData } = await supabase
         .from('profiles')
         .select('*')
@@ -53,14 +53,16 @@ export default function StudentProfile() {
       setProfile(profileData);
       setBio(profileData?.bio || "Welcome to my PATHFit profile!");
 
+      // 2. Fetch Logs (Updated to use student_id and week_number)
       const { data: logData } = await supabase
         .from('exercise_logs')
         .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+        .eq('student_id', user.id) // Fixed: changed from user_id to student_id
+        .order('week_number', { ascending: true }); // Fixed: Order by week for comparison
 
       setExerciseLogs(logData || []);
 
+      // 3. Fetch Course Progress
       const { data: progressData } = await supabase
         .from('course_progress')
         .select('*')
@@ -78,18 +80,12 @@ export default function StudentProfile() {
 
   const totalCalories = exerciseLogs.reduce((sum, log) => sum + (log.calories_burned || 0), 0);
 
-  const assessments = exerciseLogs
-    .filter(log => log.log_type === 'assessment')
-    .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-  
-  const preTest = assessments.find(l => l.test_name?.toLowerCase().includes('pre')) || null;
-  const postTest = assessments.find(l => l.test_name?.toLowerCase().includes('post')) || null;
+  // FIX: Updated logic to find Pre/Post tests based on the fixed week_number values (0 and 9)
+  const preTestLogs = exerciseLogs.filter(l => l.log_type === 'assessment' && l.week_number === 0);
+  const postTestLogs = exerciseLogs.filter(l => l.log_type === 'assessment' && l.week_number === 9);
 
   const getStreak = () => {
-    const uniqueWeeks = new Set(exerciseLogs.map(log => {
-      const d = new Date(log.created_at);
-      return `${d.getFullYear()}-${Math.ceil(d.getDate() / 7)}`;
-    }));
+    const uniqueWeeks = new Set(exerciseLogs.filter(l => l.log_type === 'workout').map(log => log.week_number));
     return uniqueWeeks.size;
   };
 
@@ -290,7 +286,7 @@ export default function StudentProfile() {
                     <div className="relative flex justify-between items-center px-2">
                       <MilestoneStep 
                         label="Pre-Test" 
-                        isDone={exerciseLogs.some(l => l.log_type === 'assessment' && l.test_name?.toLowerCase().includes('pre'))} 
+                        isDone={exerciseLogs.some(l => l.log_type === 'assessment' && l.week_number === 0)} 
                         icon={<Activity size={16} />} 
                       />
                       {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
@@ -302,7 +298,7 @@ export default function StudentProfile() {
                       ))}
                       <MilestoneStep 
                         label="Post-Test" 
-                        isDone={exerciseLogs.some(l => l.log_type === 'assessment' && l.test_name?.toLowerCase().includes('post'))} 
+                        isDone={exerciseLogs.some(l => l.log_type === 'assessment' && l.week_number === 9)} 
                         icon={<Trophy size={16} />} 
                       />
                       <div className="absolute top-4 md:top-5 left-0 w-full h-[2px] bg-gray-100 -z-0"></div>
@@ -347,13 +343,16 @@ export default function StudentProfile() {
                             </tr>
                           </thead>
                           <tbody className="text-sm font-bold text-fbNavy">
-                            {/* Updated to PATHFIT_EXERCISES and adjusted property keys */}
                             {PATHFIT_EXERCISES.map((ex) => {
-                              const preVal = preTest?.metrics?.[ex.id] || 0;
+                              // FIXED: Fetching from the new set_1_val column structure
+                              const preEntry = preTestLogs.find(l => l.exercise_id === ex.id);
+                              const preVal = preEntry ? preEntry.set_1_val : 0;
+                              
                               const currVal = exerciseLogs.reduce((max, log) => {
-                                const val = log.metrics?.[ex.id] || 0;
+                                const val = log.exercise_id === ex.id ? (log.set_1_val || 0) : 0;
                                 return val > max ? val : max;
                               }, 0);
+                              
                               const diff = currVal - preVal;
 
                               return (
