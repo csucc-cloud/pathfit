@@ -20,7 +20,8 @@ import {
   ClipboardCheck,
   TrendingUp,
   Zap,
-  Dumbbell
+  Dumbbell,
+  Flame // ADDED THIS: Fixed the client-side exception
 } from 'lucide-react';
 
 export default function StudentDashboard() {
@@ -94,7 +95,8 @@ export default function StudentDashboard() {
   }
 
   const isPreTestFinished = !!profile?.pre_test_submitted_at;
-  const totalCalories = exerciseLogs.reduce((sum, log) => sum + (log.calories_burned || 0), 0);
+  // SAFETY: Added empty array fallback to prevent .reduce crash
+  const totalCalories = (exerciseLogs || []).reduce((sum, log) => sum + (log.calories_burned || 0), 0);
 
   return (
     <RoleGuard allowedRole="student">
@@ -207,7 +209,7 @@ export default function StudentDashboard() {
                 </div>
               </div>
 
-              {/* RIGHT COLUMN: Quick Benchmarks Summary (UNIQUE TO DASHBOARD) */}
+              {/* RIGHT COLUMN: Quick Benchmarks Summary */}
               <div className="lg:col-span-5 space-y-6">
                 
                 {/* ENERGY SCORE CARD */}
