@@ -88,17 +88,23 @@ const Layout = ({ children }) => {
     }
   };
 
+  // --- UPDATED NAVIGATION LOGIC ---
   useEffect(() => {
     setMounted(true);
     setIsMobileMenuOpen(false);
     
-    // Smooth transition between routes using skeleton
-    setIsPageLoading(true);
+    // Only show skeleton on first mount, not on every route change
+    // This prevents the "automatic refresh" feel when clicking sidebar items
     const timer = setTimeout(() => {
       setIsPageLoading(false);
-    }, 450); // Faster, snappy transition
+    }, 450); 
 
     return () => clearTimeout(timer);
+  }, []); // Empty dependency array means it only runs once on load
+
+  // Handle closing mobile menu on route change without triggering skeleton
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
   }, [router.asPath]);
 
   if (!mounted) return null;
@@ -164,6 +170,8 @@ const Layout = ({ children }) => {
                 href={itemLocked ? '#' : item.path}
                 onClick={(e) => itemLocked && e.preventDefault()}
                 className="block"
+                {/* Prevent scrolling to top for hash links like #logs */}
+                scroll={item.path.includes('#') ? false : true}
               >
                 <div className={`flex items-center gap-4 p-3.5 rounded-2xl transition-all duration-300 group relative ${
                   isActive 
