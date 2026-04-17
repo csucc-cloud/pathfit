@@ -1,7 +1,8 @@
 // src/pages/admin/index.js
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import RoleGuard from '../../components/RoleGuard';
 import { useAdminData } from '../../hooks/useAdminData';
+import { supabase } from '../../lib/supabaseClient'; 
 import { downloadCSV } from '../../utils/exportHelper'; 
 import { 
   Users, 
@@ -18,20 +19,36 @@ import {
   Megaphone,
   Send,
   Clock,
-  ChevronRight
+  ChevronRight,
+  Paperclip,
+  X,
+  FileText,
+  Image as ImageIcon
 } from 'lucide-react';
 
 export default function AdminDashboard() {
   const [pId, setPId] = useState(1);
   const { students, loading } = useAdminData(pId);
   const [searchTerm, setSearchTerm] = useState("");
+  
+  // NEW: State for real data and file handling
   const [announcement, setAnnouncement] = useState("");
+  const [targetSection, setTargetSection] = useState("all");
+  const [sections, setSections] = useState([]);
+  const [isPosting, setIsPosting] = useState(false);
+  const [file, setFile] = useState(null);
+  const fileInputRef = useRef(null);
 
-  // Mocked Section Logic for the Overview feel
-  const sections = [
-    { id: 'SEC-A', name: 'PATHFIT 1', schedule: 'MW 8:00AM-10:00AM', studentsCount: filteredStudentsCount(students), progress: 75 },
-    { id: 'SEC-B', name: 'PATHFIT 1', schedule: 'TTH 1:00PM-3:00PM', studentsCount: 0, progress: 0 },
-  ];
+  // FETCH: Get real sections from Supabase
+  useEffect(() => {
+    async function fetchSections() {
+      const { data, error } = await supabase
+        .from('sections')
+        .select('*');
+      if (!error && data) setSections(data);
+    }
+    fetchSections();
+  }, []);
 
   function filteredStudentsCount(data) {
     return data.filter(s => 
@@ -56,9 +73,53 @@ export default function AdminDashboard() {
     downloadCSV(exportData, `PATHFit_Practicum_${pId}_Grades`);
   };
 
-  const handlePostAnnouncement = () => {
-    console.log("Announcement Posted:", announcement);
-    setAnnouncement("");
+  // UPDATED: Post Announcement with Section Select & File Upload
+  const handlePostAnnouncement = async () => {
+    if (!announcement.trim() && !file) return;
+    setIsPosting(true);
+
+    try {
+      let fileUrl = null;
+      let fileType = null;
+
+      // Handle File Upload to Storage if a file exists
+      if (file) {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random()}.${fileExt}`;
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('announcement-attachments')
+          .upload(fileName, file);
+
+        if (uploadError) throw uploadError;
+        
+        const { data: publicUrl } = supabase.storage
+          .from('announcement-attachments')
+          .getPublicUrl(fileName);
+        
+        fileUrl = publicUrl.publicUrl;
+        fileType = fileExt;
+      }
+
+      // Insert to Database
+      const { error } = await supabase.from('announcements').insert([{
+        content: announcement,
+        target_section: targetSection === 'all' ? null : targetSection,
+        is_global: targetSection === 'all',
+        instructor_id: (await supabase.auth.getUser()).data.user?.id,
+        file_url: fileUrl,
+        file_type: fileType
+      }]);
+
+      if (error) throw error;
+
+      alert("Broadcast sent successfully!");
+      setAnnouncement("");
+      setFile(null);
+    } catch (err) {
+      alert("Error: " + err.message);
+    } finally {
+      setIsPosting(false);
+    }
   };
 
   return (
@@ -89,53 +150,97 @@ export default function AdminDashboard() {
         {/* TOP HUB: ANNOUNCEMENTS & SECTIONS */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
-          {/* ANNOUNCEMENT COMPOSER */}
-          <div className="lg:col-span-2 bg-white rounded-[40px] p-8 border border-gray-100 shadow-sm flex flex-col justify-between">
+          {/* ANNOUNCEMENT COMPOSER WITH SECTION SELECT & FILE ATTACH */}
+          <div className="lg:col-span-2 bg-white rounded-[40px] p-8 border border-gray-100 shadow-sm flex flex-col justify-between overflow-hidden relative">
             <div>
-              <div className="flex items-center gap-3 mb-6">
-                <div className="bg-fbGray/20 p-2 rounded-xl text-fbNavy">
-                  <Megaphone size={18} />
+              <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="bg-fbGray/20 p-2 rounded-xl text-fbNavy">
+                    <Megaphone size={18} />
+                  </div>
+                  <h2 className="font-black text-fbNavy uppercase italic text-sm tracking-widest">Broadcast Announcement</h2>
                 </div>
-                <h2 className="font-black text-fbNavy uppercase italic text-sm tracking-widest">Broadcast Announcement</h2>
+
+                {/* Section Selector Dropdown */}
+                <select 
+                  value={targetSection}
+                  onChange={(e) => setTargetSection(e.target.value)}
+                  className="bg-fbGray/10 border-none rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest text-fbNavy outline-none focus:ring-2 focus:ring-fbOrange/20 cursor-pointer"
+                >
+                  <option value="all">Broadcast to All</option>
+                  {sections.map(sec => (
+                    <option key={sec.id} value={sec.section_code}>{sec.section_code}</option>
+                  ))}
+                </select>
               </div>
+
               <textarea 
                 value={announcement}
                 onChange={(e) => setAnnouncement(e.target.value)}
-                placeholder="Message all sections (deadlines, workout tips, or reminders)..."
+                placeholder="Message your students (deadlines, workout tips, or reminders)..."
                 className="w-full bg-fbGray/10 rounded-[25px] p-6 text-sm font-medium outline-none focus:ring-2 focus:ring-fbOrange/20 min-h-[120px] transition-all"
               />
+
+              {/* File Preview UI */}
+              {file && (
+                <div className="mt-4 flex items-center justify-between bg-fbGray/10 p-3 rounded-2xl border border-fbOrange/20 animate-entrance">
+                  <div className="flex items-center gap-3">
+                    {file.type.includes('image') ? <ImageIcon className="text-fbOrange" size={18} /> : <FileText className="text-fbNavy" size={18} />}
+                    <span className="text-[10px] font-bold text-fbNavy truncate max-w-[200px]">{file.name}</span>
+                  </div>
+                  <button onClick={() => setFile(null)} className="text-gray-400 hover:text-red-500 transition-colors"><X size={16} /></button>
+                </div>
+              )}
             </div>
-            <div className="flex justify-between items-center mt-4">
-              <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest italic">* This will be visible to all enrolled students</p>
+
+            <div className="flex justify-between items-center mt-6">
+              <div className="flex items-center gap-2">
+                <input type="file" ref={fileInputRef} onChange={(e) => setFile(e.target.files[0])} className="hidden" accept=".jpg,.png,.pdf,.docx,.xlsx,.xls" />
+                <button 
+                  onClick={() => fileInputRef.current.click()}
+                  className="p-4 rounded-2xl bg-fbGray/10 text-fbNavy hover:bg-fbOrange/10 hover:text-fbOrange transition-all"
+                  title="Attach Files"
+                >
+                  <Paperclip size={20} />
+                </button>
+                <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest hidden md:block">Attach Photos, PDF, Excel, or Word</p>
+              </div>
+              
               <button 
                 onClick={handlePostAnnouncement}
-                className="bg-fbNavy text-white p-4 rounded-2xl hover:bg-fbOrange transition-all shadow-lg active:scale-95 flex items-center gap-2"
+                disabled={isPosting}
+                className="bg-fbNavy text-white px-8 py-4 rounded-2xl hover:bg-fbOrange transition-all shadow-lg active:scale-95 flex items-center gap-2 disabled:bg-gray-400"
               >
-                <Send size={18} />
+                {isPosting ? <Loader2 className="animate-spin" size={18} /> : <Send size={18} />}
+                <span className="text-xs font-black uppercase tracking-widest">{isPosting ? 'Sending...' : 'Send Broadcast'}</span>
               </button>
             </div>
           </div>
 
-          {/* QUICK SECTIONS LIST */}
+          {/* QUICK SECTIONS LIST (Now using Live Data) */}
           <div className="space-y-4">
             <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] px-2">Active Sections</h2>
-            {sections.map((section) => (
+            {sections.length > 0 ? sections.map((section) => (
               <div key={section.id} className="bg-white p-5 rounded-[30px] border border-gray-100 shadow-sm hover:shadow-xl transition-all group cursor-pointer">
                 <div className="flex justify-between items-start mb-2">
-                  <h4 className="font-black text-fbNavy italic uppercase text-sm group-hover:text-fbOrange transition-colors">{section.id}</h4>
+                  <h4 className="font-black text-fbNavy italic uppercase text-sm group-hover:text-fbOrange transition-colors">{section.section_code}</h4>
                   <ChevronRight size={16} className="text-gray-200 group-hover:text-fbOrange group-hover:translate-x-1 transition-all" />
                 </div>
                 <div className="flex items-center justify-between">
                   <p className="text-[9px] font-bold text-gray-400 uppercase tracking-tighter flex items-center gap-1">
-                    <Clock size={12} className="text-fbOrange" /> {section.schedule}
+                    <Clock size={12} className="text-fbOrange" /> {section.schedule || "TBA"}
                   </p>
                   <div className="flex items-center gap-1.5">
                     <Users size={12} className="text-fbNavy" />
-                    <span className="text-[10px] font-black text-fbNavy italic">{section.studentsCount}</span>
+                    <span className="text-[10px] font-black text-fbNavy italic">ACTIVE</span>
                   </div>
                 </div>
               </div>
-            ))}
+            )) : (
+              <div className="bg-white p-8 rounded-[30px] border border-dashed border-gray-200 text-center">
+                <p className="text-[9px] font-bold text-gray-300 uppercase">No sections found</p>
+              </div>
+            )}
             <div className="bg-fbGray/10 p-4 rounded-[25px] border border-dashed border-gray-200 text-center">
               <p className="text-[9px] font-black text-gray-400 uppercase italic">Semester Week 08/18</p>
             </div>
