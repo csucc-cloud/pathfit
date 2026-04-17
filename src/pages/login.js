@@ -130,7 +130,7 @@ export default function Login() {
 
             <button type="submit" disabled={loading} className="w-full bg-fbNavy text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-fbOrange transition-all active:scale-95 shadow-xl shadow-fbNavy/10 hover:shadow-fbOrange/30 flex items-center justify-center gap-3">
               {loading ? <Loader2 className="animate-spin" /> : <Zap size={18} className="text-fbOrange group-hover:text-white" />}
-              {loading ? 'Processing...' : 'Start Session'}
+              {loading ? 'Processing...' : 'Log In'}
             </button>
           </form>
 
