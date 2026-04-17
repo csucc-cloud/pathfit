@@ -10,14 +10,14 @@ import {
   Mail, 
   Lock, 
   User, 
-  IdCard, 
+  Contact, // Replaced IdCard with Contact to fix the build error
   Briefcase 
 } from 'lucide-react';
 
 export default function InstructorRegister() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [isExiting, setIsExiting] = useState(false); // For transition out
+  const [isExiting, setIsExiting] = useState(false); 
   
   const [formData, setFormData] = useState({
     employeeId: '',
@@ -27,7 +27,6 @@ export default function InstructorRegister() {
     department: 'PE Department',
   });
 
-  // Handle navigation back to login with animation
   const handleBackToLogin = () => {
     setIsExiting(true);
     setTimeout(() => {
@@ -95,8 +94,7 @@ export default function InstructorRegister() {
 
       <div className="bg-white w-full h-screen md:h-auto md:max-w-[1100px] md:rounded-[40px] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.12)] border-0 md:border border-gray-100 flex relative overflow-hidden">
         
-        {/* ANIMATION COLUMN (The Runner) */}
-        {/* Since we come from Login, the runner starts on the LEFT (left-0) */}
+        {/* ANIMATION COLUMN */}
         <div className={`hidden md:flex absolute top-0 w-1/2 h-full bg-[#0A0F1E] z-40 items-center justify-center overflow-hidden transition-all duration-[800ms] ease-[cubic-bezier(0.85,0,0.15,1)] ${isExiting ? 'left-1/2' : 'left-0'}`}>
           <div className="absolute w-[80%] h-[80%] bg-fbOrange/10 rounded-full blur-[120px]" />
           <div className="relative z-10 flex flex-col items-center">
@@ -136,7 +134,7 @@ export default function InstructorRegister() {
 
           <form onSubmit={handleRegister} className="space-y-4 animate-entrance delay-1">
             <div className="relative group">
-              <IdCard className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 group-focus-within:text-fbOrange" />
+              <Contact className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 group-focus-within:text-fbOrange" />
               <input type="text" placeholder="Employee ID (e.g. EMP-2026)" className="w-full pl-11 pr-4 py-4 bg-fbGray/10 rounded-2xl outline-none font-bold text-sm focus:ring-2 focus:ring-fbOrange/20 transition-all text-fbNavy" 
                 onChange={(e) => setFormData({...formData, employeeId: e.target.value})} required />
             </div>
@@ -152,8 +150,8 @@ export default function InstructorRegister() {
               <select className="w-full pl-11 pr-4 py-4 bg-fbGray/10 rounded-2xl outline-none font-bold text-sm text-fbNavy focus:ring-2 focus:ring-fbOrange/20 transition-all appearance-none"
                 onChange={(e) => setFormData({...formData, department: e.target.value})}>
                 <option value="PE Department">PE Department</option>
-                <option value="College of Sports Science">Recreation Office</option>
-                <option value="Athletics Office">Sports Office</option>
+                <option value="College of Sports Science">College of Sports Science</option>
+                <option value="Athletics Office">Athletics Office</option>
               </select>
             </div>
 
