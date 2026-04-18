@@ -1,5 +1,6 @@
 // src/pages/classes/index.js (or equivalent path)
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/router'; // Added for navigation
 import { supabase } from '../../lib/supabaseClient';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -15,7 +16,7 @@ import {
   LayoutGrid,
   Sparkles,
   ArrowRightCircle,
-  LayoutDashboard // Added to match the Hub icon
+  LayoutDashboard 
 } from 'lucide-react';
 
 // Animation Variants
@@ -38,6 +39,7 @@ const cardVariants = {
 };
 
 export default function ClassesPage() {
+  const router = useRouter(); // Initialize router
   const [sections, setSections] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -71,7 +73,6 @@ export default function ClassesPage() {
           students:profiles(count)
         `)
         .eq('instructor_id', user.id)
-        .eq('profiles.status', 'active') 
         .order('created_at', { ascending: false });
 
       if (dbError) throw dbError;
@@ -184,7 +185,7 @@ export default function ClassesPage() {
           className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-12 pb-20"
         >
           {filteredSections.map((section) => (
-            <SectionCard key={section.id} section={section} />
+            <SectionCard key={section.id} section={section} router={router} />
           ))}
         </motion.div>
       )}
@@ -192,7 +193,7 @@ export default function ClassesPage() {
   );
 }
 
-function SectionCard({ section }) {
+function SectionCard({ section, router }) {
   const studentCount = section.students?.[0]?.count || 0;
 
   return (
@@ -246,6 +247,7 @@ function SectionCard({ section }) {
       <motion.button 
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
+        onClick={() => router.push(`/admin/class-record/${section.section_code}`)}
         className="relative z-10 w-full py-6 bg-fbNavy text-white rounded-[32px] text-[13px] font-black uppercase tracking-[0.25em] transition-all flex items-center justify-center gap-4 overflow-hidden group/btn shadow-2xl shadow-fbNavy/20"
       >
         <span className="relative z-10">Access Roster</span>
