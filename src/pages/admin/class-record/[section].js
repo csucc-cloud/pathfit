@@ -33,20 +33,23 @@ export default function ClassRecord() {
   const fetchData = async () => {
     setLoading(true);
     try {
+      // Clean the section code to ensure it's treated as a string for the text column
+      const sectionKey = String(section).trim();
+
       // 1. Fetch Students: Profiles table contains the section_code
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
-        .eq('section_code', section);
+        .eq('section_code', sectionKey);
 
       if (profileError) throw profileError;
 
       // 2. Fetch Logs: Using the same section_code for consistency
-      let logQuery = supabase.from('exercise_logs').select('*').eq('section_code', section);
+      let logQuery = supabase.from('exercise_logs').select('*').eq('section_code', sectionKey);
 
       // Consolidate activity filtering: use test_name for tests, week_number for weeks
-      // Logic adjusted to match the exact string "Pre-Test" or "Post-test" as in your activities array
       if (selectedActivity === 'Pre-Test' || selectedActivity === 'Post-test') {
+        // Matches the exact casing in your DB
         logQuery = logQuery.eq('test_name', selectedActivity);
       } else {
         const weekNum = parseInt(selectedActivity.split(' ')[1]);
@@ -102,7 +105,9 @@ export default function ClassRecord() {
             <h1 className="text-3xl font-black text-fbNavy uppercase italic leading-none">
               SECTION <span className="text-fbOrange">{section || '...'}</span>
             </h1>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2">Active Class Record</p>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2">
+               {students.length} Operatives Enrolled
+            </p>
           </div>
         </div>
 
