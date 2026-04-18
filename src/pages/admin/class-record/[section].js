@@ -69,12 +69,12 @@ export default function ClassRecord() {
   };
 
   // Logic to calculate average across set_1_val, set_2_val, and set_3_val
-  const getAvgScore = (studentId, exerciseName) => {
-    const exerciseDef = PATHFIT_EXERCISES.find(ex => ex.name === exerciseName);
-    const expectedSets = exerciseDef?.sets || 3; 
+  const getAvgScore = (studentId, exercise) => {
+    const expectedSets = exercise?.sets || 3; 
 
+    // FIX: Match against 'exercise_id' (e.g., 'ex1') as seen in your Table Editor screenshot
     const logs = exerciseLogs.filter(
-      l => l.student_id === studentId && (l.exercise_id === exerciseName || l.test_name === exerciseName)
+      l => l.student_id === studentId && (l.exercise_id === exercise.id || l.test_name === exercise.name)
     );
     
     if (logs.length === 0) return 0;
@@ -159,7 +159,7 @@ export default function ClassRecord() {
                   students.map(s => {
                     let rowTotal = 0;
                     const scores = PATHFIT_EXERCISES.map(ex => {
-                      const avg = getAvgScore(s.student_id, ex.name);
+                      const avg = getAvgScore(s.student_id, ex);
                       rowTotal += avg;
                       return avg;
                     });
