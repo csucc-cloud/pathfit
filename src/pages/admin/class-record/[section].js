@@ -21,6 +21,7 @@ export default function ClassRecord() {
   ];
 
   useEffect(() => {
+    // router.isReady ensures 'section' is actually available from the URL
     if (router.isReady && section) {
       fetchData();
     }
@@ -30,19 +31,24 @@ export default function ClassRecord() {
     setLoading(true);
     try {
       const sectionKey = String(section).trim();
+      console.log("Fetching data for Section:", sectionKey);
 
-      // 1. Get the students first (The part we just proved works)
+      // 1. Get the students first
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('id, full_name, student_id_number')
         .eq('section_code', sectionKey);
 
       if (profileError) throw profileError;
-      setStudents(profileData || []);
+      
+      // Update students state immediately
+      const foundStudents = profileData || [];
+      setStudents(foundStudents);
+      console.log(`Found ${foundStudents.length} students.`);
 
-      if (profileData && profileData.length > 0) {
+      if (foundStudents.length > 0) {
         // 2. Get the IDs of the students found
-        const studentIds = profileData.map(s => s.id);
+        const studentIds = foundStudents.map(s => s.id);
 
         // 3. Fetch logs linked to these specific student IDs
         let logQuery = supabase
@@ -55,12 +61,18 @@ export default function ClassRecord() {
           logQuery = logQuery.eq('test_name', selectedActivity);
         } else {
           const weekNum = parseInt(selectedActivity.split(' ')[1]);
-          logQuery = logQuery.eq('week_number', weekNum);
+          if (!isNaN(weekNum)) {
+            logQuery = logQuery.eq('week_number', weekNum);
+          }
         }
 
         const { data: logData, error: logError } = await logQuery;
         if (logError) throw logError;
+        
         setExerciseLogs(logData || []);
+        console.log(`Found ${logData?.length || 0} exercise logs.`);
+      } else {
+        setExerciseLogs([]);
       }
     } catch (err) {
       console.error("Fetch Error:", err.message);
@@ -134,26 +146,40 @@ export default function ClassRecord() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {students.map(s => {
-                  let rowTotal = 0;
-                  const scores = PATHFIT_EXERCISES.map(ex => {
-                    const avg = getAvgScore(s.id, ex);
-                    rowTotal += avg;
-                    return avg;
-                  });
+                {loading ? (
+                  <tr>
+                    <td colSpan={PATHFIT_EXERCISES.length + 2} className="p-20 text-center">
+                      <Loader2 className="animate-spin mx-auto text-[#FF6B00]" size={32} />
+                    </td>
+                  </tr>
+                ) : students.length > 0 ? (
+                  students.map(s => {
+                    let rowTotal = 0;
+                    const scores = PATHFIT_EXERCISES.map(ex => {
+                      const avg = getAvgScore(s.id, ex);
+                      rowTotal += avg;
+                      return avg;
+                    });
 
-                  return (
-                    <tr key={s.id} className="hover:bg-slate-50">
-                      <td className="p-8 sticky left-0 bg-white font-black text-xs text-[#001529] border-r uppercase">{s.full_name}</td>
-                      {scores.map((score, i) => (
-                        <td key={i} className="p-4 text-center text-xs font-bold text-slate-500">
-                          {score > 0 ? score.toFixed(1) : '-'}
-                        </td>
-                      ))}
-                      <td className="p-6 text-center text-sm font-black text-[#001529] bg-slate-50/50">{rowTotal.toFixed(1)}</td>
-                    </tr>
-                  );
-                })}
+                    return (
+                      <tr key={s.id} className="hover:bg-slate-50">
+                        <td className="p-8 sticky left-0 bg-white font-black text-xs text-[#001529] border-r uppercase">{s.full_name}</td>
+                        {scores.map((score, i) => (
+                          <td key={i} className="p-4 text-center text-xs font-bold text-slate-500">
+                            {score > 0 ? score.toFixed(1) : '-'}
+                          </td>
+                        ))}
+                        <td className="p-6 text-center text-sm font-black text-[#001529] bg-slate-50/50">{rowTotal.toFixed(1)}</td>
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan={PATHFIT_EXERCISES.length + 2} className="p-20 text-center text-gray-400 font-bold uppercase text-xs">
+                      No Operatives found in this section
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
