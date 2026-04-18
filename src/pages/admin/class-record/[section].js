@@ -1,161 +1,207 @@
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/router'; // Using Next.js router
+import { useRouter } from 'next/router';
 import { supabase } from '../../../lib/supabaseClient';
+// Import your constants here
+import { EXERCISES } from '../../../constants/exercises'; 
 import { 
-  ArrowLeft, 
-  User, 
-  Download,
-  CheckCircle2,
-  Circle,
-  Loader2,
-  LayoutGrid
+  ArrowLeft, User, ChevronDown, Activity, 
+  ClipboardCheck, Loader2, Award
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function ClassRecord() {
   const router = useRouter();
-  const { section } = router.query; // Pulls the section ID from the URL
-  
+  const { section } = router.query;
+
   const [loading, setLoading] = useState(true);
+  const [selectedActivity, setSelectedActivity] = useState('Pre-test');
   const [students, setStudents] = useState([]);
-  
-  const milestones = [
+  const [exerciseLogs, setExerciseLogs] = useState([]);
+
+  const activities = [
     'Pre-test', 'Week 1', 'Week 2', 'Week 3', 'Week 4', 
     'Week 5', 'Week 6', 'Week 7', 'Week 8', 'Post-test'
   ];
 
   useEffect(() => {
-    if (section) fetchRoster();
-  }, [section]);
+    if (section) fetchData();
+  }, [section, selectedActivity]);
 
-  const fetchRoster = async () => {
+  const fetchData = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      // Fetching from your specific instructor-managed tables
-      const { data, error } = await supabase
+      // 1. Fetch Students
+      const { data: enrollmentData } = await supabase
         .from('enrollments')
-        .select(`
-          id,
-          profiles:student_id (
-            full_name,
-            avatar_url,
-            student_id_number
-          ),
-          progress:student_progress (
-            milestone_name,
-            status
-          )
-        `)
-        .eq('section_id', section);
+        .select(`id, student_id, profiles:student_id(full_name, avatar_url, student_id_number)`)
+        .eq('section_code', section);
 
-      if (error) throw error;
-      setStudents(data || []);
+      // 2. Fetch Logs for the specific activity
+      const { data: logData } = await supabase
+        .from('exercise_logs')
+        .select('*')
+        .eq('section_code', section)
+        .eq('activity_type', selectedActivity);
+
+      setStudents(enrollmentData || []);
+      setExerciseLogs(logData || []);
     } catch (err) {
-      console.error("Access Denied:", err.message);
+      console.error("Fetch Error:", err);
     } finally {
       setLoading(false);
     }
   };
 
+  // Logic to calculate the average score for a student per exercise
+  const getAvgScore = (studentId, exerciseName) => {
+    const logs = exerciseLogs.filter(
+      l => l.student_id === studentId && l.exercise_name === exerciseName
+    );
+    if (logs.length === 0) return 0;
+    const sum = logs.reduce((acc, curr) => acc + curr.score, 0);
+    return (sum / logs.length);
+  };
+
   return (
-    <div className="min-h-screen bg-[#FBFBFB] pt-12 pb-20 px-6 md:px-10">
+    <div className="min-h-screen bg-[#F8FAFC] p-6 lg:p-10 pb-32">
       
-      {/* MATRIX HEADER */}
-      <motion.div 
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="max-w-[1600px] mx-auto mb-12 flex flex-col md:flex-row justify-between items-end gap-6"
-      >
+      {/* MATRIX CONTROLS */}
+      <div className="max-w-[1700px] mx-auto flex flex-col md:flex-row justify-between items-center mb-12 gap-6">
         <div className="flex items-center gap-6">
           <button 
-            onClick={() => router.back()}
-            className="p-4 bg-white rounded-3xl shadow-sm border border-gray-100 hover:bg-fbNavy hover:text-white transition-all group"
+            onClick={() => router.back()} 
+            className="p-4 bg-white rounded-3xl shadow-sm hover:bg-fbNavy hover:text-white transition-all group"
           >
-            <ArrowLeft size={24} className="group-active:-translate-x-2 transition-transform" />
+            <ArrowLeft size={24} className="group-hover:-translate-x-1 transition-transform" />
           </button>
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <LayoutGrid size={14} className="text-fbOrange" />
-              <span className="text-[10px] font-black text-fbOrange uppercase tracking-[0.3em]">Live Roster</span>
-            </div>
-            <h1 className="text-4xl font-black text-fbNavy uppercase italic leading-none">
-              Section <span className="text-fbOrange">{section}</span>
+            <h1 className="text-3xl font-black text-fbNavy uppercase italic leading-none">
+              Vault <span className="text-fbOrange">{section}</span>
             </h1>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2">Active Class Record</p>
           </div>
         </div>
 
-        <button className="bg-fbNavy text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center gap-3 hover:bg-fbOrange transition-all shadow-xl shadow-fbNavy/10">
-          <Download size={18} /> Export Protocol
-        </button>
-      </motion.div>
+        <div className="relative group">
+          <label className="absolute -top-3 left-4 bg-[#F8FAFC] px-2 text-[9px] font-black text-fbOrange uppercase tracking-widest z-10">
+            Select Protocol
+          </label>
+          <select 
+            value={selectedActivity}
+            onChange={(e) => setSelectedActivity(e.target.value)}
+            className="appearance-none bg-white text-fbNavy px-8 py-5 rounded-[24px] font-black text-[12px] uppercase tracking-[0.1em] outline-none cursor-pointer border border-gray-100 shadow-xl shadow-fbNavy/5 min-w-[280px]"
+          >
+            {activities.map(act => <option key={act} value={act}>{act}</option>)}
+          </select>
+          <ChevronDown className="absolute right-6 top-1/2 -translate-y-1/2 text-fbNavy pointer-events-none" size={18} />
+        </div>
+      </div>
 
-      {/* ROSTER DATA MATRIX */}
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.98 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="max-w-[1600px] mx-auto bg-white rounded-[45px] shadow-2xl shadow-fbNavy/5 border border-white overflow-hidden"
-      >
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="bg-fbNavy text-white">
-                <th className="p-8 text-[11px] font-black uppercase tracking-widest text-left sticky left-0 bg-fbNavy z-10">Student Identity</th>
-                {milestones.map((m) => (
-                  <th key={m} className="p-6 text-[10px] font-black uppercase tracking-widest text-center border-l border-white/5">{m}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
-              {loading ? (
-                <tr>
-                  <td colSpan={11} className="p-32 text-center">
-                    <Loader2 className="animate-spin mx-auto text-fbOrange mb-4" size={48} />
-                    <p className="text-[10px] font-black text-fbNavy uppercase tracking-[0.4em]">Syncing Student Matrix...</p>
-                  </td>
+      <div className="max-w-[1700px] mx-auto space-y-16">
+        
+        {/* --- TABLE 1: EXERCISE PERFORMANCE MATRIX --- */}
+        <section className="bg-white rounded-[50px] shadow-2xl shadow-fbNavy/5 border border-white overflow-hidden">
+          <div className="p-10 border-b border-gray-50 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+               <div className="p-3 bg-fbOrange/10 rounded-2xl"><Activity className="text-fbOrange" size={28} /></div>
+               <div>
+                  <h2 className="font-black text-fbNavy uppercase italic text-xl">{selectedActivity} Mean Scores</h2>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Calculated per 15-exercise set</p>
+               </div>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50">
+                  <th className="p-8 text-[11px] font-black uppercase text-fbNavy sticky left-0 bg-slate-50 z-20 border-r border-gray-100"> Operative Name</th>
+                  {EXERCISES.map((ex) => (
+                    <th key={ex.id || ex.name} className="p-4 text-[9px] font-black uppercase text-center text-gray-400 min-w-[100px]">
+                      {ex.name}
+                    </th>
+                  ))}
+                  <th className="p-6 text-[11px] font-black uppercase text-center bg-fbNavy text-white">Total</th>
+                  <th className="p-6 text-[11px] font-black uppercase text-center bg-fbOrange text-white">Avg</th>
                 </tr>
-              ) : students.length > 0 ? (
-                students.map((student) => (
-                  <tr key={student.id} className="hover:bg-fbGray/20 transition-all group">
-                    <td className="p-8 sticky left-0 bg-white group-hover:bg-gray-50 z-10 shadow-[10px_0_15px_-10px_rgba(0,0,0,0.05)]">
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {students.map(s => {
+                  let rowTotal = 0;
+                  const scores = EXERCISES.map(ex => {
+                    const avg = getAvgScore(s.student_id, ex.name);
+                    rowTotal += avg;
+                    return avg;
+                  });
+                  const rowAvg = (rowTotal / EXERCISES.length).toFixed(1);
+
+                  return (
+                    <tr key={s.id} className="hover:bg-fbGray/10 transition-colors group">
+                      <td className="p-8 sticky left-0 bg-white group-hover:bg-gray-50 font-black text-xs text-fbNavy z-10 border-r border-gray-50 italic uppercase">
+                        {s.profiles.full_name}
+                      </td>
+                      {scores.map((score, i) => (
+                        <td key={i} className="p-4 text-center text-xs font-bold text-slate-500">
+                          {score > 0 ? score.toFixed(1) : '-'}
+                        </td>
+                      ))}
+                      <td className="p-6 text-center text-sm font-black text-fbNavy bg-slate-50/50">{rowTotal.toFixed(1)}</td>
+                      <td className="p-6 text-center text-sm font-black text-fbOrange bg-fbOrange/5">{rowAvg}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        {/* --- TABLE 2: OVERALL WEEKLY PROGRESS --- */}
+        <section className="bg-white rounded-[50px] shadow-2xl shadow-fbNavy/5 border border-white overflow-hidden">
+          <div className="p-10 border-b border-gray-50 flex items-center gap-4">
+             <div className="p-3 bg-fbNavy/10 rounded-2xl"><ClipboardCheck className="text-fbNavy" size={28} /></div>
+             <h2 className="font-black text-fbNavy uppercase italic text-xl">Cumulative Summary</h2>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-fbNavy text-white">
+                <tr>
+                  <th className="p-8 text-[11px] font-black uppercase text-left">Student Profile</th>
+                  {activities.map(act => <th key={act} className="p-4 text-[9px] font-black uppercase text-center opacity-70">{act}</th>)}
+                  <th className="p-4 text-[11px] font-black uppercase text-center bg-fbOrange/90">W1-W8 Total</th>
+                  <th className="p-4 text-[11px] font-black uppercase text-center bg-fbOrange">Grand Total</th>
+                  <th className="p-4 text-[11px] font-black uppercase text-center bg-fbOrange">Total Avg</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {students.map(s => (
+                  <tr key={s.id} className="hover:bg-slate-50 transition-colors">
+                    <td className="p-8">
                       <div className="flex items-center gap-5">
                         <div className="w-12 h-12 rounded-2xl bg-fbGray overflow-hidden border-2 border-white shadow-md">
-                          {student.profiles?.avatar_url ? (
-                            <img src={student.profiles.avatar_url} className="w-full h-full object-cover" alt="" />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-gray-300"><User size={24} /></div>
-                          )}
+                          <img src={s.profiles.avatar_url || '/api/placeholder/48/48'} className="w-full h-full object-cover" />
                         </div>
                         <div>
-                          <p className="text-xs font-black text-fbNavy uppercase italic leading-none">{student.profiles?.full_name}</p>
-                          <p className="text-[9px] font-bold text-fbOrange mt-1 uppercase tracking-widest">{student.profiles?.student_id_number}</p>
+                          <p className="text-xs font-black text-fbNavy uppercase italic">{s.profiles.full_name}</p>
+                          <p className="text-[9px] font-bold text-gray-400 mt-1 uppercase tracking-widest">{s.profiles.student_id_number}</p>
                         </div>
                       </div>
                     </td>
-
-                    {/* Milestone Progress Mapping */}
-                    {milestones.map((m) => (
-                      <td key={m} className="p-6 text-center border-l border-gray-50">
-                        <div className="flex justify-center">
-                           {/* Replace logic here with your actual progress comparison */}
-                           {Math.random() > 0.5 ? (
-                             <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}><CheckCircle2 size={20} className="text-green-500" /></motion.div>
-                           ) : (
-                             <Circle size={20} className="text-gray-100" />
-                           )}
-                        </div>
+                    {activities.map(act => (
+                      <td key={act} className="p-4 text-center">
+                        <div className="w-4 h-4 rounded-full bg-green-500/20 border-2 border-green-500 mx-auto" />
                       </td>
                     ))}
+                    {/* Placeholder Logic for totals */}
+                    <td className="p-4 text-center font-black text-fbNavy text-xs">0.0</td>
+                    <td className="p-4 text-center font-black text-fbNavy text-xs">0.0</td>
+                    <td className="p-4 text-center font-black text-fbOrange text-xs italic">0.0</td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={11} className="p-20 text-center text-[10px] font-black text-gray-400 uppercase tracking-widest">No operatives found in this sector.</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </motion.div>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
     </div>
   );
 }
