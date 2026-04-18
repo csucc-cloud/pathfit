@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import RoleGuard from '../../components/RoleGuard';
 import CreateSectionModal from '../../components/section/create';
-import PostCard from './PostCard'; // Imported the new component
+import PostCard from '../../components/admin/PostCard';
 import { supabase } from '../../lib/supabaseClient'; 
 import { downloadCSV } from '../../utils/exportHelper'; 
 import { motion, AnimatePresence } from 'framer-motion';
