@@ -97,7 +97,7 @@ export default function AdminDashboard() {
           <div className="flex items-center gap-4">
             <h1 className="text-xl font-black text-fbNavy tracking-tighter flex items-center gap-2">
                 <div className="p-2 bg-fbNavy rounded-xl text-white shadow-lg shadow-fbNavy/20"><Terminal size={20}/></div>
-                PORTAL <span className="text-fbOrange">HUB</span>
+                ANnOUNCEMENT <span className="text-fbOrange">PORTAL</span>
             </h1>
             <div className="h-6 w-[1px] bg-slate-200 hidden md:block" />
             <div className="hidden md:flex items-center gap-2 px-3 py-1 bg-slate-100 rounded-full">
@@ -109,7 +109,7 @@ export default function AdminDashboard() {
           <div className="flex items-center gap-3">
              <div className="text-right hidden sm:block">
                 <p className="text-[12px] font-extrabold text-slate-900 leading-none">{instructor?.full_name}</p>
-                <p className="text-[9px] font-black text-fbOrange uppercase tracking-tighter">Academic Lead</p>
+                <p className="text-[9px] font-black text-fbOrange uppercase tracking-tighter">Instructor</p>
              </div>
              <div className="w-10 h-10 rounded-xl bg-slate-200 overflow-hidden border-2 border-white shadow-sm hover:border-fbOrange transition-all cursor-pointer">
                 {instructor?.avatar_url ? <img src={instructor.avatar_url} className="w-full h-full object-cover" alt="avatar"/> : <div className="w-full h-full flex items-center justify-center font-bold bg-fbNavy text-white">{instructor?.full_name?.[0]}</div>}
@@ -134,7 +134,7 @@ export default function AdminDashboard() {
                         value={announcement} 
                         onChange={(e)=>setAnnouncement(e.target.value)} 
                         className="w-full p-4 bg-slate-50/50 rounded-2xl text-sm border border-transparent focus:border-fbNavy/10 focus:bg-white focus:ring-4 focus:ring-fbNavy/5 transition-all outline-none resize-none min-h-[80px]" 
-                        placeholder={`What's on your mind, ${instructor?.full_name?.split(' ')[0]}?`} 
+                        placeholder={`Make your announcement here, ${instructor?.full_name?.split(' ')[0]}!`} 
                     />
                 </div>
               </div>
