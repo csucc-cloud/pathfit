@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Users, Search, FileDown, Eye, Loader2, Plus, Send, ChevronRight, 
   X, FileText, Image as ImageIcon, Layers, MessageSquare, 
-  Globe, ShieldCheck, Activity, Terminal, Hash
+  Globe, ShieldCheck, Activity, Terminal, Hash, Paperclip
 } from 'lucide-react';
 
 const v = { hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } };
