@@ -132,13 +132,13 @@ export default function InstructorLayout({ children }) {
         </div>
       </aside>
 
-      {/* MAIN CONTENT AREA (High-Fidelity Animations) */}
+      {/* MAIN CONTENT AREA: UPDATED SPACING TO SOLVE OVERLAP */}
       <main className={`
         flex-1 min-h-screen transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]
-        lg:ml-72 pt-28 lg:pt-12 px-6 md:px-12 pb-12 w-full
+        lg:ml-72 pt-28 lg:pt-10 px-6 md:px-12 pb-12 w-full flex flex-col
       `}>
         {/* Dynamic Page Wrapper with Entrance Motion */}
-        <div className="max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-6 duration-1000 fill-mode-both">
+        <div className="max-w-7xl w-full mx-auto animate-in fade-in slide-in-from-bottom-6 duration-1000 fill-mode-both">
           {children}
         </div>
       </main>
