@@ -1,3 +1,4 @@
+// src/pages/waiting-room.js
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
@@ -32,7 +33,7 @@ export default function WaitingRoom() {
       .single();
 
     if (data?.status === 'active') {
-      router.push('/student/dashboard'); // Or wherever students go
+      router.push('/dashboard'); 
     } else {
       setProfile(data);
       setLoading(false);
@@ -49,8 +50,11 @@ export default function WaitingRoom() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F9FD] flex flex-col items-center justify-center p-6">
-      <div className="max-w-md w-full bg-white rounded-[60px] p-12 shadow-[0_40px_100px_-20px_rgba(26,42,74,0.1)] border border-slate-100 text-center relative overflow-hidden">
+    /* Note: We are not wrapping this in any Layout component 
+       to ensure the sidebar and topbar are completely hidden.
+    */
+    <div className="min-h-screen w-full bg-[#F8F9FD] flex flex-col items-center justify-center p-6 font-sans">
+      <div className="max-w-md w-full bg-white rounded-[60px] p-12 shadow-[0_40px_100px_-20px_rgba(26,42,74,0.1)] border border-slate-100 text-center relative overflow-hidden animate-entrance">
         
         {/* Background Decorative Element */}
         <div className="absolute -top-24 -right-24 w-64 h-64 bg-fbOrange/5 rounded-full blur-3xl" />
@@ -71,20 +75,20 @@ export default function WaitingRoom() {
         </h1>
         
         <p className="text-slate-400 font-bold text-[11px] uppercase tracking-[0.2em] mb-8 leading-relaxed">
-          Identity established. Your credentials are currently being verified by the <span className="text-fbNavy">PATHFIT Instructor</span>.
+          Identity established. Your credentials are currently being verified by the <span className="text-fbNavy font-black">PATHFIT Instructor</span>.
         </p>
 
         {/* Status Card */}
-        <div className="bg-slate-50 rounded-[32px] p-6 border border-slate-100 mb-10">
+        <div className="bg-slate-50 rounded-[32px] p-6 border border-slate-100 mb-10 text-left">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">Protocol Status</span>
+            <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest font-sans">Protocol Status</span>
             <div className="flex items-center gap-2 px-3 py-1 bg-fbOrange/10 rounded-full">
                <div className="w-1.5 h-1.5 rounded-full bg-fbOrange animate-pulse" />
                <span className="text-[10px] font-black text-fbOrange uppercase italic">Verifying</span>
             </div>
           </div>
-          <div className="flex items-center gap-4 text-left">
-            <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center border border-slate-50">
                <Clock size={20} className="text-fbNavy" />
             </div>
             <div>
@@ -126,6 +130,16 @@ export default function WaitingRoom() {
           </p>
         </div>
       </div>
+
+      <style jsx>{`
+        @keyframes entrance {
+          from { opacity: 0; transform: scale(0.95); }
+          to { opacity: 1; transform: scale(1); }
+        }
+        .animate-entrance {
+          animation: entrance 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+      `}</style>
     </div>
   );
 }
