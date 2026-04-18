@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { supabase } from '../../../lib/supabaseClient';
-// Import your constants here
-import { EXERCISES } from '../../../constants/exercises'; 
+// Updated import to use PATHFIT_EXERCISES
+import { PATHFIT_EXERCISES } from '../../../constants/exercises'; 
 import { 
   ArrowLeft, User, ChevronDown, Activity, 
   ClipboardCheck, Loader2, Award
@@ -116,7 +116,8 @@ export default function ClassRecord() {
               <thead>
                 <tr className="bg-slate-50">
                   <th className="p-8 text-[11px] font-black uppercase text-fbNavy sticky left-0 bg-slate-50 z-20 border-r border-gray-100"> Operative Name</th>
-                  {EXERCISES.map((ex) => (
+                  {/* Updated to PATHFIT_EXERCISES */}
+                  {PATHFIT_EXERCISES.map((ex) => (
                     <th key={ex.id || ex.name} className="p-4 text-[9px] font-black uppercase text-center text-gray-400 min-w-[100px]">
                       {ex.name}
                     </th>
@@ -128,12 +129,13 @@ export default function ClassRecord() {
               <tbody className="divide-y divide-gray-50">
                 {students.map(s => {
                   let rowTotal = 0;
-                  const scores = EXERCISES.map(ex => {
+                  // Updated to PATHFIT_EXERCISES
+                  const scores = PATHFIT_EXERCISES.map(ex => {
                     const avg = getAvgScore(s.student_id, ex.name);
                     rowTotal += avg;
                     return avg;
                   });
-                  const rowAvg = (rowTotal / EXERCISES.length).toFixed(1);
+                  const rowAvg = (rowTotal / PATHFIT_EXERCISES.length).toFixed(1);
 
                   return (
                     <tr key={s.id} className="hover:bg-fbGray/10 transition-colors group">
