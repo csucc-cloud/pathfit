@@ -1,3 +1,4 @@
+// src/pages/admin/classes.js
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import { 
@@ -44,13 +45,15 @@ export default function ClassesPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Authentication required");
 
+      // UPDATED QUERY: Filter the nested student count to only include 'active' status
       const { data, error: dbError } = await supabase
         .from('sections')
         .select(`
           *,
           students:profiles(count)
         `)
-        .eq('instructor_id', user.id) 
+        .eq('instructor_id', user.id)
+        .eq('profiles.status', 'active') // ONLY count students who are approved
         .order('created_at', { ascending: false });
 
       if (dbError) throw dbError;
@@ -64,9 +67,6 @@ export default function ClassesPage() {
   };
 
   return (
-    /* FIXED: Reduced pt-28 to pt-12 (on mobile) and lg:pt-8 (on desktop).
-       This removes the excessive white space shown in your edited-image.png.
-    */
     <div className="min-h-screen pt-12 lg:pt-8 pb-20 px-6 md:px-10 lg:pl-12 max-w-[1600px] mx-auto">
       
       {/* HEADER AREA: Professional & Dynamic */}
@@ -145,6 +145,7 @@ export default function ClassesPage() {
 }
 
 function SectionCard({ section }) {
+  // Supabase returns an array for counts when using this join syntax
   const studentCount = section.students?.[0]?.count || 0;
 
   return (
