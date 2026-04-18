@@ -7,7 +7,7 @@ import { downloadCSV } from '../../utils/exportHelper';
 import { 
   Users, Search, FileDown, Eye, LayoutDashboard, Loader2, Plus, 
   Megaphone, Send, Clock, ChevronRight, Paperclip, X, FileText, 
-  Image as ImageIcon, Filter, GraduationCap, Layers, Activity
+  Image as ImageIcon, Filter, GraduationCap, Layers, Activity // Added Activity here
 } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -127,10 +127,10 @@ export default function AdminDashboard() {
           </div>
         </header>
 
-        {/* BENTO GRID TOP: Announcement & Quick Stats */}
+        {/* BENTO GRID TOP */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           
-          {/* BROADCAST BOX (8 Cols) */}
+          {/* BROADCAST BOX */}
           <div className="lg:col-span-8 bg-white rounded-[40px] p-8 border border-gray-100 shadow-xl shadow-gray-200/40 flex flex-col justify-between relative overflow-hidden group">
             <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
               <Send size={120} className="-rotate-12 text-fbNavy" />
@@ -199,10 +199,8 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* STATS & SECTIONS (4 Cols) */}
+          {/* STATS & SECTIONS */}
           <div className="lg:col-span-4 space-y-6">
-            
-            {/* KPI CARD */}
             <div className="bg-fbNavy p-8 rounded-[40px] shadow-xl flex items-center gap-6 relative overflow-hidden group">
                <div className="absolute -right-4 -bottom-4 opacity-10 group-hover:scale-110 transition-transform">
                 <Users size={120} className="text-white" />
@@ -216,7 +214,6 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {/* SECTIONS LIST */}
             <div className="space-y-4">
               <div className="flex items-center justify-between px-2">
                 <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">Manage Sections</h2>
@@ -256,7 +253,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* STUDENT REGISTRY SECTION */}
+        {/* STUDENT REGISTRY */}
         <div className="space-y-6 pt-4">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 px-2">
             <div>
@@ -349,16 +346,6 @@ export default function AdminDashboard() {
                       </td>
                     </tr>
                   ))}
-                  {!loading && filteredStudents.length === 0 && (
-                    <tr>
-                      <td colSpan="4" className="p-24 text-center">
-                        <div className="flex flex-col items-center gap-4 opacity-30 grayscale">
-                          <Users className="w-16 h-16 text-fbNavy" />
-                          <p className="font-black italic uppercase tracking-[0.4em] text-[10px]">No matches found in your sections</p>
-                        </div>
-                      </td>
-                    </tr>
-                  )}
                 </tbody>
               </table>
             </div>
