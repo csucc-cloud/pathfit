@@ -10,7 +10,7 @@ import {
   Send, ChevronRight, Paperclip, X, FileText, 
   Image as ImageIcon, GraduationCap, Layers, 
   MoreHorizontal, MessageSquare, Share2, Globe, ShieldCheck, 
-  Trophy, TrendingUp, Bell
+  Trophy, TrendingUp, Bell, Activity, Cpu, Zap
 } from 'lucide-react';
 
 const containerVariants = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.05 } } };
@@ -77,240 +77,288 @@ export default function AdminDashboard() {
 
   return (
     <RoleGuard allowedRole="instructor">
-      <motion.div initial="hidden" animate="visible" variants={containerVariants} className="bg-[#F4F7FE] min-h-screen p-4 lg:p-10 font-sans text-slate-900">
+      {/* MESH GRADIENT BACKGROUND */}
+      <div className="fixed inset-0 -z-10 bg-[#F4F7FE] overflow-hidden">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-fbOrange/5 blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-fbNavy/5 blur-[120px]" />
+      </div>
+
+      <motion.div initial="hidden" animate="visible" variants={containerVariants} className="min-h-screen p-4 md:p-6 lg:p-10 font-sans text-slate-900 max-w-[1600px] mx-auto">
         
-        {/* --- TOP BAR --- */}
-        <motion.nav variants={itemVariants} className="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
-          <div>
-            <h1 className="text-2xl font-black text-fbNavy uppercase tracking-tight">Management <span className="text-fbOrange">Console</span></h1>
-            <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Academic Year 2024-2025</p>
+        {/* --- TOP BAR (RESPONSIVE) --- */}
+        <motion.nav variants={itemVariants} className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-6">
+          <div className="text-center sm:text-left">
+            <h1 className="text-2xl md:text-3xl font-black text-fbNavy uppercase tracking-tighter flex items-center gap-3">
+              <Zap className="text-fbOrange fill-fbOrange animate-pulse" />
+              FACULTY <span className="text-fbOrange">NODE</span>
+            </h1>
+            <div className="flex items-center justify-center sm:justify-start gap-2 mt-1">
+              <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+              <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">Operational Status: Optimal</p>
+            </div>
           </div>
           
-          <div className="flex items-center gap-3 bg-white p-2 rounded-[24px] shadow-sm border border-slate-100">
+          <div className="flex items-center gap-3 bg-white/60 backdrop-blur-md p-2 rounded-3xl border border-white shadow-xl">
             <div className="flex items-center gap-3 px-4 py-2 border-r border-slate-100">
-              <div className="w-10 h-10 rounded-full bg-fbNavy flex items-center justify-center text-white font-bold overflow-hidden shadow-inner">
+              <div className="w-10 h-10 rounded-2xl bg-fbNavy flex items-center justify-center text-white font-bold overflow-hidden shadow-lg transform rotate-3">
                  {instructorProfile?.avatar_url ? <img src={instructorProfile.avatar_url} className="object-cover w-full h-full" /> : instructorProfile?.full_name?.charAt(0)}
               </div>
-              <div className="hidden sm:block">
-                <p className="text-[12px] font-black text-fbNavy leading-none">{instructorProfile?.full_name || 'Instructor'}</p>
-                <p className="text-[10px] font-bold text-fbOrange uppercase">Faculty Member</p>
+              <div className="hidden lg:block">
+                <p className="text-[12px] font-black text-fbNavy leading-none uppercase italic">{instructorProfile?.full_name || 'Instructor'}</p>
+                <p className="text-[9px] font-bold text-slate-400 uppercase mt-1 tracking-tighter">Authorized Personnel</p>
               </div>
             </div>
-            <button className="p-2 text-slate-400 hover:text-fbNavy transition-colors"><Bell size={20}/></button>
+            <button className="p-2 text-slate-400 hover:text-fbOrange transition-all"><Bell size={20}/></button>
           </div>
         </motion.nav>
 
-        {/* --- STATS BENTO GRID --- */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+        {/* --- BENTO SYSTEM DIAGNOSTICS GRID --- */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {[
-            { label: 'Total Students', val: students.length, icon: Users, color: 'bg-blue-500', trend: '+12% this month' },
-            { label: 'Active Sections', val: sections.length, icon: Layers, color: 'bg-emerald-500', trend: 'Full capacity' },
-            { label: 'Announcements', val: announcements.length, icon: Send, color: 'bg-fbOrange', trend: '4 today' },
-            { label: 'Engagement Rate', val: '94%', icon: TrendingUp, color: 'bg-purple-500', trend: 'High activity' },
+            { label: 'Network Population', val: students.length, icon: Users, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+            { label: 'Cluster Segments', val: sections.length, icon: Layers, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+            { label: 'Data Broadcasts', val: announcements.length, icon: Send, color: 'text-fbOrange', bg: 'bg-fbOrange/10' },
+            { label: 'Sync Velocity', val: '98.2%', icon: Activity, color: 'text-purple-500', bg: 'bg-purple-500/10' },
           ].map((stat, i) => (
-            <motion.div key={i} variants={itemVariants} className="bg-white p-6 rounded-[32px] shadow-sm border border-white flex items-center gap-5 group hover:shadow-xl transition-all">
-              <div className={`${stat.color} p-4 rounded-2xl text-white shadow-lg shadow-opacity-20`}><stat.icon size={24}/></div>
-              <div>
-                <p className="text-slate-400 text-[11px] font-black uppercase tracking-wider">{stat.label}</p>
-                <h3 className="text-2xl font-black text-fbNavy">{stat.val}</h3>
-                <p className="text-[9px] font-bold text-emerald-500 mt-1 uppercase">{stat.trend}</p>
-              </div>
+            <motion.div key={i} variants={itemVariants} whileHover={{ y: -5 }} className="bg-white/80 backdrop-blur-md p-6 rounded-[32px] border border-white shadow-sm flex flex-col justify-between relative overflow-hidden">
+               {/* SVG Micro-interaction Background */}
+               <svg className="absolute right-[-10px] bottom-[-10px] opacity-5 w-24 h-24" viewBox="0 0 100 100">
+                  <path d="M10 50 Q 25 25 50 50 T 90 50" fill="none" stroke="currentColor" strokeWidth="2" className={stat.color} />
+               </svg>
+               
+               <div className={`${stat.bg} ${stat.color} w-12 h-12 rounded-2xl flex items-center justify-center mb-4`}>
+                 <stat.icon size={22}/>
+               </div>
+               <div>
+                 <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">{stat.label}</p>
+                 <h3 className="text-3xl font-black text-fbNavy mt-1 italic">{stat.val}</h3>
+               </div>
             </motion.div>
           ))}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-          {/* --- MAIN FEED (CENTER) --- */}
-          <div className="lg:col-span-8 space-y-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          
+          {/* --- LEFT: BROADCAST & FEED --- */}
+          <div className="lg:col-span-8 space-y-6">
             
-            {/* POST BOX */}
-            <motion.div variants={itemVariants} className="bg-white rounded-[40px] p-8 shadow-sm border border-white">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-sm font-black text-fbNavy uppercase flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-fbOrange animate-ping"/> Create Broadcast
-                </h2>
-                <div className="relative">
-                    <select value={targetSection} onChange={(e) => setTargetSection(e.target.value)} className="appearance-none bg-slate-50 rounded-xl pl-10 pr-10 py-2.5 outline-none cursor-pointer font-black text-[10px] uppercase text-fbNavy border border-slate-100">
-                      <option value="all">Global Broadcast</option>
-                      {sections.map(s => <option key={s.id} value={s.section_code}>{s.section_code}</option>)}
+            {/* POST BOX (BENTO STYLE) */}
+            <motion.div variants={itemVariants} className="bg-white rounded-[40px] p-6 md:p-8 shadow-xl border border-white relative overflow-hidden group">
+              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                <Cpu size={80} className="text-fbNavy" />
+              </div>
+              
+              <div className="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4">
+                <div className="flex items-center gap-3">
+                   <div className="p-3 bg-fbNavy rounded-2xl text-white shadow-lg shadow-fbNavy/20"><MessageSquare size={20}/></div>
+                   <h2 className="text-sm font-black text-fbNavy uppercase italic">Data Uplink</h2>
+                </div>
+                <div className="relative w-full sm:w-auto">
+                    <select value={targetSection} onChange={(e) => setTargetSection(e.target.value)} className="w-full sm:w-auto appearance-none bg-slate-50 rounded-2xl pl-10 pr-10 py-3 outline-none cursor-pointer font-black text-[10px] uppercase text-fbNavy border border-slate-100 focus:ring-2 ring-fbOrange/20 transition-all">
+                      <option value="all">Broadcast: Global</option>
+                      {sections.map(s => <option key={s.id} value={s.section_code}>Channel: {s.section_code}</option>)}
                     </select>
                     <Globe size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-fbOrange" />
                 </div>
               </div>
               
-              <div className="relative mb-6">
-                <textarea 
-                  value={announcement} 
-                  onChange={(e) => setAnnouncement(e.target.value)} 
-                  placeholder={`What's happening in your classes?`} 
-                  className="w-full bg-slate-50 rounded-3xl p-6 text-sm font-medium text-fbNavy outline-none focus:ring-4 focus:ring-fbOrange/5 transition-all resize-none min-h-[140px] border border-transparent focus:border-fbOrange/20" 
-                />
-              </div>
+              <textarea 
+                value={announcement} 
+                onChange={(e) => setAnnouncement(e.target.value)} 
+                placeholder={`Initialize broadcast sequence...`} 
+                className="w-full bg-slate-50/50 rounded-[32px] p-6 text-sm font-medium text-fbNavy outline-none focus:bg-white transition-all resize-none min-h-[120px] border border-slate-100 focus:border-fbOrange/30 shadow-inner" 
+              />
 
               <AnimatePresence>
                 {file && (
-                  <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="mb-6 bg-slate-900 text-white p-4 rounded-2xl flex items-center justify-between shadow-lg">
+                  <motion.div initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: 20, opacity: 0 }} className="mt-4 bg-fbNavy text-white p-4 rounded-2xl flex items-center justify-between shadow-2xl border-l-4 border-fbOrange">
                     <div className="flex items-center gap-3"><FileText size={18} className="text-fbOrange"/><span className="text-[10px] font-bold uppercase truncate max-w-[200px]">{file.name}</span></div>
-                    <button onClick={() => setFile(null)} className="hover:text-fbOrange"><X size={18}/></button>
+                    <button onClick={() => setFile(null)} className="hover:rotate-90 transition-transform"><X size={18}/></button>
                   </motion.div>
                 )}
               </AnimatePresence>
 
-              <div className="flex items-center justify-between">
-                <button onClick={() => fileInputRef.current.click()} className="p-4 bg-slate-50 text-slate-500 rounded-2xl hover:bg-slate-100 transition-all flex items-center gap-2 text-[10px] font-black uppercase">
-                  <ImageIcon size={18} className="text-blue-500"/> Add Media
+              <div className="flex flex-col sm:flex-row items-center justify-between mt-8 gap-4">
+                <button onClick={() => fileInputRef.current.click()} className="w-full sm:w-auto p-4 bg-slate-100/50 hover:bg-fbNavy hover:text-white transition-all rounded-2xl flex items-center justify-center gap-2 text-[10px] font-black uppercase">
+                  <ImageIcon size={18} className="text-fbOrange"/> Attach Resource
                 </button>
                 <motion.button 
-                  whileTap={{ scale: 0.95 }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={handlePostAnnouncement} 
                   disabled={isPosting} 
-                  className="bg-fbNavy text-white px-8 py-4 rounded-2xl font-black text-[12px] uppercase shadow-lg shadow-fbNavy/20 disabled:opacity-50 flex items-center gap-3"
+                  className="w-full sm:w-auto bg-fbOrange text-white px-10 py-4 rounded-2xl font-black text-[12px] uppercase shadow-xl shadow-fbOrange/20 disabled:opacity-50 flex items-center justify-center gap-3"
                 >
-                  {isPosting ? <Loader2 className="animate-spin" size={16}/> : <Send size={16}/>} Broadcast Post
+                  {isPosting ? <Loader2 className="animate-spin" size={16}/> : <Send size={16}/>} Transmit
                 </motion.button>
               </div>
               <input type="file" ref={fileInputRef} onChange={(e) => setFile(e.target.files[0])} className="hidden" />
             </motion.div>
 
             {/* FEED */}
-            <div className="space-y-6">
-              <div className="flex items-center justify-between px-4">
-                <h3 className="text-[12px] font-black text-slate-400 uppercase tracking-[0.2em]">Recent Activity</h3>
-                <button className="text-[10px] font-black text-fbOrange uppercase border-b-2 border-fbOrange/20">View All Archive</button>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between px-4 py-2 bg-fbNavy/5 rounded-2xl">
+                <div className="flex items-center gap-2">
+                   <Activity size={14} className="text-fbNavy" />
+                   <h3 className="text-[10px] font-black text-fbNavy uppercase tracking-[0.3em]">Temporal Logs</h3>
+                </div>
+                <div className="h-[1px] flex-1 mx-4 bg-fbNavy/10 hidden md:block" />
+                <button className="text-[9px] font-black text-fbOrange uppercase hover:tracking-widest transition-all">Audit Archive</button>
               </div>
 
               <AnimatePresence mode='popLayout'>
                 {announcements.map((post) => (
-                  <motion.div layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} key={post.id} className="bg-white rounded-[32px] p-8 shadow-sm border border-white hover:border-slate-100 transition-all">
-                    <div className="flex items-start justify-between mb-6">
+                  <motion.div layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} key={post.id} className="bg-white rounded-[32px] p-6 shadow-sm border border-slate-50 hover:shadow-xl transition-all border-l-4 border-l-fbNavy">
+                    <div className="flex items-start justify-between mb-4">
                       <div className="flex gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center shadow-inner border border-slate-100 overflow-hidden">
-                           {instructorProfile?.avatar_url ? <img src={instructorProfile.avatar_url} className="object-cover w-full h-full" /> : <User size={20} className="text-slate-300"/>}
+                        <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center overflow-hidden border border-slate-200">
+                           {instructorProfile?.avatar_url ? <img src={instructorProfile.avatar_url} className="object-cover w-full h-full" /> : <ShieldCheck size={18} className="text-fbNavy"/>}
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
-                            <h4 className="text-[13px] font-black text-fbNavy uppercase tracking-tight">{instructorProfile?.full_name}</h4>
-                            <ShieldCheck size={14} className="text-blue-500"/>
+                            <h4 className="text-[12px] font-black text-fbNavy uppercase italic leading-none">{instructorProfile?.full_name}</h4>
+                            <div className="px-2 py-0.5 bg-fbOrange/10 text-fbOrange rounded-md text-[8px] font-bold">VERIFIED</div>
                           </div>
-                          <p className="text-[10px] font-bold text-slate-400 uppercase mt-0.5">
-                            {post.target_section ? `Pinned to ${post.target_section}` : 'Global Post'} • {new Date(post.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          <p className="text-[9px] font-bold text-slate-400 uppercase mt-1">
+                            {post.target_section ? `Seg: ${post.target_section}` : 'GLOBAL BROADCAST'} • {new Date(post.created_at).toLocaleDateString()}
                           </p>
                         </div>
                       </div>
-                      <button className="p-2 hover:bg-slate-50 rounded-xl transition-colors"><MoreHorizontal size={18} className="text-slate-300"/></button>
+                      <MoreHorizontal size={18} className="text-slate-300"/>
                     </div>
                     
-                    <p className="text-[15px] font-medium text-slate-600 leading-relaxed mb-6">{post.content}</p>
+                    <p className="text-[14px] font-medium text-slate-600 leading-relaxed mb-4 whitespace-pre-wrap">{post.content}</p>
                     
                     {post.file_url && (
-                      <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 flex items-center justify-between mb-6">
-                        <div className="flex items-center gap-3">
-                          <div className="bg-white p-2 rounded-lg shadow-sm"><FileText size={18} className="text-fbNavy"/></div>
-                          <span className="text-[10px] font-black text-fbNavy uppercase">Course_Attachment.pdf</span>
+                      <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 flex items-center justify-between">
+                        <div className="flex items-center gap-3 truncate">
+                          <FileText size={16} className="text-fbNavy shrink-0"/>
+                          <span className="text-[9px] font-black text-fbNavy uppercase truncate">Payload Detected</span>
                         </div>
-                        <a href={post.file_url} target="_blank" className="text-fbOrange font-black text-[10px] uppercase underline underline-offset-4">Download</a>
+                        <a href={post.file_url} target="_blank" className="text-fbOrange font-black text-[9px] uppercase hover:underline">Access</a>
                       </div>
                     )}
-
-                    <div className="flex items-center gap-6 pt-6 border-t border-slate-50">
-                      <button className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase hover:text-fbNavy"><MessageSquare size={14}/> 0 Comments</button>
-                      <button className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase hover:text-fbNavy"><Share2 size={14}/> Share</button>
-                    </div>
                   </motion.div>
                 ))}
               </AnimatePresence>
             </div>
           </div>
 
-          {/* --- SIDEBAR (RIGHT) --- */}
-          <div className="lg:col-span-4 space-y-8">
-            {/* QUICK SEARCH */}
-            <motion.div variants={itemVariants} className="bg-white p-8 rounded-[40px] shadow-sm border border-white">
-              <h3 className="text-xs font-black text-fbNavy uppercase mb-6 flex items-center gap-2"><Search size={16} className="text-fbOrange"/> Registry Finder</h3>
-              <div className="relative mb-4">
-                <input 
-                  type="text" 
-                  placeholder="Student name or ID..." 
-                  onChange={(e) => setSearchTerm(e.target.value)} 
-                  className="w-full bg-slate-50 border-none rounded-2xl py-4 pl-12 pr-6 text-xs font-bold outline-none ring-2 ring-transparent focus:ring-fbOrange/10" 
-                />
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={16}/>
+          {/* --- RIGHT: SYSTEM DIAGNOSTICS & SECTIONS --- */}
+          <div className="lg:col-span-4 space-y-6">
+            
+            {/* SYSTEM DIAGNOSTICS (REPLACED REGISTRY FINDER) */}
+            <motion.div variants={itemVariants} className="bg-fbNavy p-8 rounded-[40px] shadow-2xl text-white relative overflow-hidden group">
+              <div className="absolute -right-4 -top-4 w-24 h-24 bg-fbOrange/20 rounded-full blur-2xl group-hover:bg-fbOrange/40 transition-colors" />
+              
+              <div className="flex items-center gap-3 mb-6">
+                <Cpu className="text-fbOrange" size={24}/>
+                <h3 className="text-xs font-black uppercase tracking-widest italic">System Diagnostics</h3>
               </div>
-              <button onClick={handleExport} className="w-full py-4 bg-fbNavy text-white rounded-2xl font-black text-[10px] uppercase flex items-center justify-center gap-2 shadow-lg shadow-fbNavy/20 hover:bg-fbOrange transition-all">
-                <FileDown size={16}/> Export Student Data
+
+              <div className="space-y-4 mb-6">
+                 <div className="relative">
+                    <input 
+                      type="text" 
+                      placeholder="SCAN ID / NAME..." 
+                      onChange={(e) => setSearchTerm(e.target.value)} 
+                      className="w-full bg-white/10 border border-white/10 rounded-2xl py-4 pl-12 pr-6 text-xs font-black uppercase placeholder:text-white/30 outline-none focus:ring-2 ring-fbOrange/50 transition-all" 
+                    />
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-fbOrange" size={16}/>
+                 </div>
+                 
+                 <div className="grid grid-cols-2 gap-2">
+                    <div className="bg-white/5 p-3 rounded-xl border border-white/5">
+                       <p className="text-[8px] font-bold text-fbOrange uppercase">CPU Load</p>
+                       <p className="text-xs font-black italic">LOW</p>
+                    </div>
+                    <div className="bg-white/5 p-3 rounded-xl border border-white/5">
+                       <p className="text-[8px] font-bold text-fbOrange uppercase">Mem Sync</p>
+                       <p className="text-xs font-black italic">STABLE</p>
+                    </div>
+                 </div>
+              </div>
+
+              <button onClick={handleExport} className="w-full py-4 bg-fbOrange text-white rounded-2xl font-black text-[10px] uppercase flex items-center justify-center gap-2 shadow-xl hover:translate-y-[-2px] transition-all">
+                <FileDown size={16}/> Extract Core Data
               </button>
             </motion.div>
 
-            {/* SECTION LIST */}
-            <motion.div variants={itemVariants} className="bg-white p-8 rounded-[40px] shadow-sm border border-white overflow-hidden">
+            {/* SECTIONS (BENTO STYLE) */}
+            <motion.div variants={itemVariants} className="bg-white p-8 rounded-[40px] shadow-sm border border-slate-100">
               <div className="flex items-center justify-between mb-8">
-                <h3 className="text-xs font-black text-fbNavy uppercase flex items-center gap-2"><Layers size={16} className="text-fbOrange"/> Your Sections</h3>
-                <button onClick={() => setIsModalOpen(true)} className="p-2 bg-fbOrange/10 text-fbOrange rounded-xl hover:bg-fbOrange hover:text-white transition-all"><Plus size={16}/></button>
+                <h3 className="text-xs font-black text-fbNavy uppercase italic">Active Nodes</h3>
+                <motion.button 
+                  whileHover={{ rotate: 90 }}
+                  onClick={() => setIsModalOpen(true)} 
+                  className="p-3 bg-fbNavy text-white rounded-xl shadow-lg"
+                >
+                  <Plus size={16}/>
+                </motion.button>
               </div>
               <div className="space-y-3">
                 {sections.map(sec => (
-                  <div key={sec.id} className="group p-4 rounded-2xl bg-slate-50 flex items-center justify-between border border-transparent hover:border-fbOrange/20 hover:bg-white hover:shadow-xl transition-all">
+                  <div key={sec.id} className="p-4 rounded-2xl bg-slate-50 flex items-center justify-between hover:bg-white hover:shadow-lg transition-all border border-transparent hover:border-slate-100">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center font-black text-[10px] text-fbNavy group-hover:bg-fbNavy group-hover:text-white transition-all uppercase">{sec.section_code.substring(0,2)}</div>
+                      <div className="w-10 h-10 rounded-xl bg-fbNavy text-white flex items-center justify-center font-black text-[10px] uppercase italic">{sec.section_code.substring(0,2)}</div>
                       <div>
-                        <p className="text-[11px] font-black text-fbNavy uppercase leading-none">{sec.section_code}</p>
-                        <p className="text-[9px] font-bold text-slate-400 mt-1 uppercase">{sec.schedule || 'TBA'}</p>
+                        <p className="text-[11px] font-black text-fbNavy uppercase leading-none tracking-tighter">{sec.section_code}</p>
+                        <p className="text-[9px] font-bold text-slate-400 mt-1 uppercase italic">{sec.schedule || 'PENDING SYNC'}</p>
                       </div>
                     </div>
-                    <ChevronRight size={14} className="text-slate-300 group-hover:text-fbOrange" />
+                    <ChevronRight size={14} className="text-fbOrange" />
                   </div>
                 ))}
               </div>
             </motion.div>
-
-            {/* TOP PERFORMERS OR RECENT LOGS */}
-            <motion.div variants={itemVariants} className="bg-fbNavy p-8 rounded-[40px] shadow-2xl relative overflow-hidden group">
-               <Trophy className="absolute -right-4 -bottom-4 text-white/5 w-32 h-32 rotate-12" />
-               <p className="text-[10px] font-black text-fbOrange uppercase tracking-[0.2em] mb-2">Academic Achievement</p>
-               <h3 className="text-white font-black text-xl italic uppercase tracking-tighter mb-4">Top Performing <br/>Section</h3>
-               <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10">
-                  <div className="text-2xl font-black text-white">#1</div>
-                  <div className="text-[10px] font-bold text-white uppercase">Section PF-A1 <br/> <span className="text-fbOrange">98% Completion</span></div>
-               </div>
-            </motion.div>
           </div>
         </div>
 
-        {/* --- GRID LIST (STUDENTS) --- */}
+        {/* --- DYNAMIC STUDENT GRID (SYSTEM ENTITIES) --- */}
         <motion.section variants={itemVariants} className="mt-16">
-          <div className="flex items-center justify-between mb-10 px-4">
-             <div>
-                <h2 className="text-3xl font-black text-fbNavy uppercase tracking-tighter">Student <span className="text-fbOrange">Registry</span></h2>
-                <div className="h-1 w-20 bg-fbOrange mt-1 rounded-full"/>
+          <div className="flex flex-col md:flex-row items-center justify-between mb-10 gap-4">
+             <div className="text-center md:text-left">
+                <h2 className="text-3xl font-black text-fbNavy uppercase tracking-tighter italic">Entity <span className="text-fbOrange">Registry</span></h2>
+                <div className="h-1.5 w-24 bg-fbNavy mt-2 rounded-full relative overflow-hidden">
+                   <div className="absolute inset-0 bg-fbOrange w-1/2 animate-shimmer" style={{ background: 'linear-gradient(90deg, transparent, #FF8C00, transparent)', backgroundSize: '200% 100%' }} />
+                </div>
+             </div>
+             <div className="px-4 py-2 bg-white rounded-full border border-slate-100 text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                Displaying {filteredStudents.length} Active Records
              </div>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">
-            <AnimatePresence>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <AnimatePresence mode='popLayout'>
               {filteredStudents.map((s) => (
-                <motion.div layout initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} key={s.id} className="bg-white p-8 rounded-[40px] border border-white shadow-sm hover:shadow-2xl transition-all group relative">
-                  <div className="absolute top-6 right-6 text-fbOrange opacity-0 group-hover:opacity-100 transition-opacity"><ShieldCheck size={20}/></div>
+                <motion.div layout initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} key={s.id} className="bg-white/70 backdrop-blur-md p-8 rounded-[48px] border border-white shadow-sm hover:shadow-2xl transition-all group overflow-hidden">
                   <div className="flex flex-col items-center text-center">
-                    <div className="w-24 h-24 rounded-[32px] bg-slate-50 border-[6px] border-white shadow-xl flex items-center justify-center overflow-hidden mb-6 group-hover:scale-105 transition-transform">
-                      {s.avatar_url ? <img src={s.avatar_url} className="w-full h-full object-cover" /> : <div className="w-full h-full bg-fbNavy flex items-center justify-center text-white font-black text-3xl">{s.full_name?.charAt(0)}</div>}
+                    <div className="relative mb-6">
+                      <div className="w-24 h-24 rounded-[32px] bg-slate-100 border-4 border-white shadow-xl flex items-center justify-center overflow-hidden group-hover:rotate-6 transition-transform">
+                        {s.avatar_url ? <img src={s.avatar_url} className="w-full h-full object-cover" /> : <div className="w-full h-full bg-fbNavy flex items-center justify-center text-white font-black text-3xl italic">{s.full_name?.charAt(0)}</div>}
+                      </div>
+                      <div className="absolute -bottom-2 -right-2 p-2 bg-white rounded-xl shadow-lg border border-slate-50 scale-0 group-hover:scale-100 transition-transform">
+                        <ShieldCheck className="text-emerald-500" size={16}/>
+                      </div>
                     </div>
-                    <h4 className="font-black text-fbNavy uppercase italic text-lg leading-tight group-hover:text-fbOrange transition-colors">{s.full_name || "New Student"}</h4>
-                    <p className="text-[10px] font-black text-slate-300 uppercase mt-1 tracking-widest">{s.student_id || "No ID"}</p>
+                    
+                    <h4 className="font-black text-fbNavy uppercase italic text-lg leading-tight tracking-tighter group-hover:text-fbOrange transition-colors">{s.full_name || "UNIDENTIFIED"}</h4>
+                    <p className="text-[9px] font-black text-slate-300 uppercase mt-2 tracking-[0.3em]">{s.student_id || "ID_PENDING"}</p>
                   </div>
                   
-                  <div className="mt-8 grid grid-cols-2 gap-2">
-                    <div className="bg-slate-50 p-3 rounded-2xl text-center">
-                      <span className="text-[9px] font-black text-slate-400 uppercase block mb-1">Section</span>
-                      <span className="text-[11px] font-black text-fbNavy uppercase">{s.section_code || "—"}</span>
+                  <div className="mt-8 flex gap-2">
+                    <div className="flex-1 bg-slate-50/50 p-4 rounded-[24px] border border-slate-100 text-center">
+                      <span className="text-[8px] font-black text-slate-300 uppercase block mb-1 tracking-widest">Seg. Code</span>
+                      <span className="text-[11px] font-black text-fbNavy uppercase italic">{s.section_code || "N/A"}</span>
                     </div>
-                    <div className="bg-slate-50 p-3 rounded-2xl text-center">
-                      <span className="text-[9px] font-black text-slate-400 uppercase block mb-1">Status</span>
-                      <span className="text-[11px] font-black text-emerald-500 uppercase">Active</span>
+                    <div className="flex-1 bg-slate-50/50 p-4 rounded-[24px] border border-slate-100 text-center">
+                      <span className="text-[8px] font-black text-slate-300 uppercase block mb-1 tracking-widest">Class</span>
+                      <span className="text-[11px] font-black text-fbOrange uppercase italic">P.FIT</span>
                     </div>
                   </div>
 
-                  <button className="w-full mt-6 py-4 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase hover:bg-fbOrange transition-all flex items-center justify-center gap-2">
-                    <Eye size={16}/> Details
+                  <button className="w-full mt-6 py-5 bg-fbNavy text-white rounded-[24px] text-[10px] font-black uppercase hover:bg-fbOrange transition-all flex items-center justify-center gap-2 group-hover:gap-4 shadow-lg shadow-fbNavy/10">
+                    <Eye size={16}/> Analyze Profile
                   </button>
                 </motion.div>
               ))}
