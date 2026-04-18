@@ -23,18 +23,21 @@ export default function ClassRecord() {
     'Week 5', 'Week 6', 'Week 7', 'Week 8', 'Post-test'
   ];
 
+  // Critical Fix: Only fetch when the router is fully ready and the section exists
   useEffect(() => {
-    if (section) fetchData();
-  }, [section, selectedActivity]);
+    if (router.isReady && section) {
+      fetchData();
+    }
+  }, [router.isReady, section, selectedActivity]);
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      // 1. Fetch Students directly from profiles table where section_code matches
-      // Your schema shows section_code is a column in the profiles table
+      // 1. Fetch Students directly from profiles table
+      // Using .select('*') to ensure no column mismatches
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
-        .select(`id, student_id, full_name, avatar_url, section_code`)
+        .select('*')
         .eq('section_code', section);
 
       if (profileError) throw profileError;
@@ -43,7 +46,7 @@ export default function ClassRecord() {
       let logQuery = supabase.from('exercise_logs').select('*').eq('section_code', section);
 
       // Consolidate activity filtering: use test_name for tests, week_number for weeks
-      if (selectedActivity === 'Pre-Test' || selectedActivity === 'Post-Test') {
+      if (selectedActivity === 'Pre-Test' || selectedActivity === 'Post-test') {
         logQuery = logQuery.eq('test_name', selectedActivity.toLowerCase().replace('-', ''));
       } else {
         const weekNum = parseInt(selectedActivity.split(' ')[1]);
@@ -53,7 +56,6 @@ export default function ClassRecord() {
       const { data: logData, error: logError } = await logQuery;
       if (logError) throw logError;
 
-      // Map profiles to the student state
       setStudents(profileData || []);
       setExerciseLogs(logData || []);
     } catch (err) {
@@ -65,7 +67,6 @@ export default function ClassRecord() {
 
   // Logic to calculate average across set_1_val, set_2_val, and set_3_val
   const getAvgScore = (studentId, exerciseName) => {
-    // Dynamically determine if we divide by 2 or 3 based on constants/exercises.js
     const exerciseDef = PATHFIT_EXERCISES.find(ex => ex.name === exerciseName);
     const expectedSets = exerciseDef?.sets || 3; 
 
@@ -76,12 +77,10 @@ export default function ClassRecord() {
     if (logs.length === 0) return 0;
     
     const totalSetSum = logs.reduce((acc, curr) => {
-      // Only include set_3_val if the exercise definition expects 3 sets
       const setSum = (curr.set_1_val || 0) + (curr.set_2_val || 0) + (expectedSets === 3 ? (curr.set_3_val || 0) : 0);
       return acc + setSum;
     }, 0);
     
-    // Divide by the specific number of sets defined for this exercise
     const totalSetsCount = logs.length * expectedSets;
     return (totalSetSum / totalSetsCount);
   };
@@ -178,7 +177,12 @@ export default function ClassRecord() {
                 ) : (
                   <tr>
                     <td colSpan={PATHFIT_EXERCISES.length + 3} className="p-20 text-center text-gray-400 font-bold uppercase tracking-widest text-xs">
-                      {loading ? 'Initializing Matrix...' : 'No Operatives found in this section'}
+                      {loading ? (
+                        <div className="flex flex-col items-center gap-3">
+                          <Loader2 className="animate-spin text-fbOrange" size={32} />
+                          <span>Syncing with Class Vault...</span>
+                        </div>
+                      ) : 'No Operatives found in this section'}
                     </td>
                   </tr>
                 )}
