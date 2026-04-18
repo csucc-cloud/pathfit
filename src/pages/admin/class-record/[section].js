@@ -19,7 +19,7 @@ export default function ClassRecord() {
   const [exerciseLogs, setExerciseLogs] = useState([]);
 
   const activities = [
-    'Pre-test', 'Week 1', 'Week 2', 'Week 3', 'Week 4', 
+    'Pre-Test', 'Week 1', 'Week 2', 'Week 3', 'Week 4', 
     'Week 5', 'Week 6', 'Week 7', 'Week 8', 'Post-test'
   ];
 
@@ -34,7 +34,7 @@ export default function ClassRecord() {
       // Your schema shows section_code is a column in the profiles table
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
-        .select(`id, student_id, full_name, avatar_url, student_id_number, section_code`)
+        .select(`id, student_id, full_name, avatar_url, section_code`)
         .eq('section_code', section);
 
       if (profileError) throw profileError;
@@ -43,7 +43,7 @@ export default function ClassRecord() {
       let logQuery = supabase.from('exercise_logs').select('*').eq('section_code', section);
 
       // Consolidate activity filtering: use test_name for tests, week_number for weeks
-      if (selectedActivity === 'Pre-test' || selectedActivity === 'Post-test') {
+      if (selectedActivity === 'Pre-Test' || selectedActivity === 'Post-Test') {
         logQuery = logQuery.eq('test_name', selectedActivity.toLowerCase().replace('-', ''));
       } else {
         const weekNum = parseInt(selectedActivity.split(' ')[1]);
