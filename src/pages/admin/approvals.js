@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabaseClient';
-import InstructorLayout from '../../components/layouts/InstructorLayout';
 import { 
   CheckCircle2, 
   XCircle, 
@@ -68,7 +67,7 @@ export default function ApprovalsPage() {
   };
 
   return (
-    <InstructorLayout>
+    <>
       {/* HEADER SECTION */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-12">
         <div>
@@ -162,6 +161,6 @@ export default function ApprovalsPage() {
           ))
         )}
       </div>
-    </InstructorLayout>
+    </>
   );
 }
