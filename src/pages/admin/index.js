@@ -68,10 +68,9 @@ export default function AdminDashboard() {
     <RoleGuard allowedRole="instructor">
       <div className="fixed inset-0 -z-10 bg-[#F0F2F5]" /> 
       
-      {/* Container is fixed to viewport height to ensure two-column scrolling */}
-      <motion.div initial="hidden" animate="visible" variants={{visible:{transition:{staggerChildren:0.05}}}} className="max-w-[1600px] mx-auto p-4 md:p-6 space-y-6 font-sans h-screen flex flex-col overflow-hidden">
+      <motion.div initial="hidden" animate="visible" variants={{visible:{transition:{staggerChildren:0.05}}}} className="max-w-[1500px] mx-auto p-4 md:p-6 space-y-6 font-sans h-screen flex flex-col overflow-hidden">
         
-        {/* HEADER / TOP NAV */}
+        {/* HEADER */}
         <header className="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-slate-200 z-50 shrink-0">
           <h1 className="text-xl font-black text-fbNavy tracking-tighter flex items-center gap-2">
             <div className="p-1.5 bg-fbNavy rounded-lg text-white"><Terminal size={18}/></div>
@@ -88,11 +87,11 @@ export default function AdminDashboard() {
           </div>
         </header>
 
-        {/* 2 COLUMN GRID (Force strict 12/16 and 4/16 split) */}
-        <div className="flex-1 grid grid-cols-16 gap-6 overflow-hidden min-h-0">
+        {/* 2 COLUMN GRID */}
+        <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 overflow-hidden min-h-0">
           
-          {/* LEFT COLUMN (12/16): FB STYLE FEED */}
-          <div className="col-span-12 flex flex-col space-y-5 overflow-hidden min-h-0">
+          {/* FEED COLUMN */}
+          <div className="lg:col-span-9 flex flex-col space-y-5 overflow-hidden min-h-0">
             
             {/* POST COMPOSER */}
             <motion.div variants={v} className="bg-white rounded-xl p-4 shadow-sm border border-slate-200 shrink-0">
@@ -100,7 +99,7 @@ export default function AdminDashboard() {
                 <div className="w-10 h-10 rounded-full bg-slate-100 shrink-0 overflow-hidden">
                   {instructor?.avatar_url ? <img src={instructor.avatar_url} className="w-full h-full object-cover" alt="user"/> : <div className="w-full h-full flex items-center justify-center">{instructor?.full_name?.[0]}</div>}
                 </div>
-                <div className="flex-1 space-y-3">
+                <div className="flex-1">
                     <textarea 
                         value={announcement} 
                         onChange={(e)=>setAnnouncement(e.target.value)} 
@@ -125,8 +124,8 @@ export default function AdminDashboard() {
               {file && <div className="mt-2 text-[10px] bg-fbOrange/10 text-fbOrange p-2 rounded flex justify-between items-center font-bold uppercase"><span>{file.name}</span><X size={14} onClick={()=>setFile(null)} className="cursor-pointer"/></div>}
             </motion.div>
 
-            {/* SCROLLABLE FEED AREA */}
-            <div className="flex-1 overflow-y-auto pr-2 space-y-4 custom-scrollbar pb-10">
+            {/* SCROLLABLE FEED */}
+            <div className="flex-1 overflow-y-auto pr-2 space-y-4 custom-scrollbar">
               {announcements.map(ann => (
                 <motion.div key={ann.id} variants={v} className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                   <div className="p-4">
@@ -146,7 +145,7 @@ export default function AdminDashboard() {
                   </div>
                   {ann.file_url && (
                     <div className="border-t border-slate-50 bg-slate-50/50 p-4 flex items-center justify-between">
-                      <div className="flex items-center gap-2"><FileText size={18} className="text-fbNavy"/><span className="text-xs font-bold text-slate-600">Learning Resource Attached</span></div>
+                      <div className="flex items-center gap-2"><FileText size={18} className="text-fbNavy"/><span className="text-xs font-bold text-slate-600">Resource Attached</span></div>
                       <a href={ann.file_url} target="_blank" rel="noreferrer" className="text-xs font-black text-fbOrange uppercase hover:underline">Download</a>
                     </div>
                   )}
@@ -160,10 +159,10 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* RIGHT COLUMN (4/16): SIDEBAR (SECTIONS & REGISTRY) */}
-          <div className="col-span-4 flex flex-col space-y-6 overflow-hidden min-h-0">
+          {/* SIDEBAR COLUMN */}
+          <div className="lg:col-span-3 flex flex-col space-y-6 overflow-hidden min-h-0">
             
-            {/* ACTIVE SECTIONS CARD */}
+            {/* SECTIONS */}
             <div className="bg-white rounded-xl p-5 shadow-sm border border-slate-200 shrink-0">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-sm font-bold text-slate-900">Active Sections</h3>
@@ -182,14 +181,13 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {/* STUDENT REGISTRY CARD */}
+            {/* REGISTRY */}
             <div className="bg-white rounded-xl p-5 shadow-sm border border-slate-200 flex flex-col flex-1 overflow-hidden min-h-0">
                 <div className="mb-4 shrink-0">
                     <h2 className="text-sm font-black text-fbNavy uppercase italic">Student <span className="text-fbOrange">Registry</span></h2>
-                    <p className="text-[9px] font-bold text-slate-400 uppercase">Manage Entities</p>
                 </div>
                 
-                <div className="space-y-4 flex flex-col flex-1 overflow-hidden">
+                <div className="flex flex-col flex-1 overflow-hidden space-y-4">
                     <div className="relative shrink-0">
                         <input 
                             type="text" 
@@ -200,11 +198,11 @@ export default function AdminDashboard() {
                         <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" size={12}/>
                     </div>
                     
-                    <button onClick={handleExport} className="w-full py-2 bg-fbNavy text-white rounded-lg hover:bg-fbOrange transition-colors text-[10px] font-bold flex items-center justify-center gap-2 shrink-0">
-                        <FileDown size={14}/> EXPORT CSV
+                    <button onClick={handleExport} className="w-full py-2 bg-fbNavy text-white rounded-lg hover:bg-fbOrange transition-colors text-[10px] font-bold shrink-0">
+                        EXPORT CSV
                     </button>
 
-                    <div className="space-y-2 overflow-y-auto pr-1 flex-1 custom-scrollbar pb-4">
+                    <div className="overflow-y-auto pr-1 flex-1 space-y-2 custom-scrollbar">
                         <AnimatePresence>
                         {filtered.map(s => (
                             <motion.div layout initial={{opacity:0}} animate={{opacity:1}} key={s.id} className="bg-slate-50 p-3 rounded-xl border border-slate-100 shrink-0">
