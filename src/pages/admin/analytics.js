@@ -110,7 +110,7 @@ export default function AnalyticsPage() {
     document.body.removeChild(link);
   };
 
-  const goToApprovals = () => router.push('/admin/approval'); 
+  const goToApprovals = () => router.push('/admin/approvals'); 
 
   if (loading) return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#fdfdfd]">
@@ -160,7 +160,7 @@ export default function AnalyticsPage() {
                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Institutional Analytics</span>
               </div>
               <h1 className="text-3xl md:text-5xl font-black text-[#001529] italic tracking-tighter uppercase leading-none">
-                DATA <span className="text-[#FF6B00]">INTELLIGENCE</span>
+                DATA <span className="text-[#FF6B00]">ANALYTICS</span>
               </h1>
             </div>
           </div>
@@ -176,7 +176,7 @@ export default function AnalyticsPage() {
               <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center group-hover:bg-[#001529] group-hover:text-white transition-colors duration-300">
                 <FileSpreadsheet size={20} />
               </div>
-              <span className="text-[11px] font-black text-[#001529] uppercase tracking-widest">Generate Report</span>
+              <span className="text-[11px] font-black text-[#001529] uppercase tracking-widest">Download Report</span>
             </div>
             <Download size={18} className="text-slate-300 group-hover:text-[#FF6B00] group-hover:translate-y-1 transition-all" />
           </motion.button>
@@ -184,7 +184,7 @@ export default function AnalyticsPage() {
 
         {/* --- STAT CARDS GRID --- */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
-          <StatCard title="Total Roster" value={stats.totalStudents} icon={<Users />} label="STUDENTS" />
+          <StatCard title="Total Students" value={stats.totalStudents} icon={<Users />} label="STUDENTS" />
           <StatCard title="Active Status" value={stats.totalActive} icon={<UserCheck />} label="VERIFIED" />
           <StatCard title="Approval Queue" value={stats.totalPending} icon={<Clock />} label="PENDING" orange />
           <StatCard title="Active Sections" value={stats.sectionData.length} icon={<GraduationCap />} label="CLASSES" />
