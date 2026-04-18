@@ -1,166 +1,193 @@
+// src/pages/admin/approvals.js
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabaseClient';
+import RoleGuard from '../../components/RoleGuard';
 import { 
-  CheckCircle2, 
+  CheckCircle, 
   XCircle, 
-  ExternalLink, 
+  UserCheck, 
+  Search, 
+  Loader2, 
+  ShieldAlert, 
+  GraduationCap, 
   Clock, 
-  Filter, 
-  Search,
-  Zap,
-  Loader2,
-  ShieldCheck
+  Filter,
+  ArrowUpRight,
+  Fingerprint
 } from 'lucide-react';
 
 export default function ApprovalsPage() {
-  const [logs, setLogs] = useState([]);
+  const [pendingStudents, setPendingStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  useEffect(() => {
-    fetchPendingLogs();
-  }, []);
-
-  const fetchPendingLogs = async () => {
+  const fetchPending = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      // Fetching exercise logs joined with student profiles
       const { data, error } = await supabase
-        .from('exercise_logs')
-        .select(`
-          *,
-          profiles:student_id (
-            full_name,
-            student_id_number,
-            section_id
-          )
-        `)
-        .eq('status', 'pending') // Only show unverified logs
-        .order('created_at', { ascending: true });
+        .from('profiles')
+        .select('*')
+        .eq('status', 'pending')
+        .eq('Role', 'student') // Match your case-sensitive 'Role' column
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setLogs(data || []);
+      setPendingStudents(data || []);
     } catch (err) {
-      console.error('Error fetching logs:', err.message);
+      console.error("Error fetching pending accounts:", err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleAction = async (logId, status) => {
-    setProcessingId(logId);
+  useEffect(() => {
+    fetchPending();
+  }, []);
+
+  const handleAction = async (studentId, newStatus) => {
+    setProcessingId(studentId);
     try {
       const { error } = await supabase
-        .from('exercise_logs')
-        .update({ status: status, verified_at: new Date() })
-        .eq('id', logId);
+        .from('profiles')
+        .update({ status: newStatus })
+        .eq('id', studentId);
 
       if (error) throw error;
       
-      // Update local state to remove the processed log immediately
-      setLogs(prev => prev.filter(log => log.id !== logId));
+      // Smoothly remove from list
+      setPendingStudents(prev => prev.filter(s => s.id !== studentId));
+      alert(`Student successfully ${newStatus === 'active' ? 'Approved' : 'Rejected'}.`);
     } catch (err) {
-      alert('Failed to update log status');
+      alert("Action failed: " + err.message);
     } finally {
       setProcessingId(null);
     }
   };
 
+  const filtered = pendingStudents.filter(s => 
+    s.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    s.student_id?.includes(searchTerm)
+  );
+
   return (
-    <>
-      {/* HEADER SECTION */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-12">
-        <div>
-          <h1 className="text-4xl font-black text-fbNavy uppercase italic tracking-tighter">
-            Audit <span className="text-fbOrange">Queue</span>
-          </h1>
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2 flex items-center gap-2">
-            <ShieldCheck size={14} className="text-fbOrange" /> 
-            Verification required for student credits
-          </p>
-        </div>
-
-        <div className="bg-white px-6 py-3 rounded-2xl border border-gray-100 flex items-center gap-4 shadow-sm">
-          <div className="text-right">
-            <p className="text-[10px] font-black text-gray-300 uppercase">Pending Review</p>
-            <p className="text-xl font-black text-fbNavy italic">{logs.length}</p>
-          </div>
-          <div className="w-10 h-10 bg-fbOrange/10 rounded-xl flex items-center justify-center text-fbOrange">
-            <Zap size={20} className="fill-fbOrange" />
-          </div>
-        </div>
-      </div>
-
-      {/* QUEUE LIST */}
-      <div className="space-y-4">
-        {loading ? (
-          <div className="flex flex-col items-center justify-center py-32 opacity-20">
-            <Loader2 className="animate-spin text-fbNavy mb-4" size={40} />
-            <p className="font-black uppercase italic tracking-tighter">Loading Submissions...</p>
-          </div>
-        ) : logs.length === 0 ? (
-          <div className="bg-white rounded-[45px] p-20 border-2 border-dashed border-gray-100 flex flex-col items-center justify-center text-center">
-            <div className="w-20 h-20 bg-green-50 text-green-500 rounded-full flex items-center justify-center mb-6">
-              <CheckCircle2 size={40} />
+    <RoleGuard allowedRole="instructor">
+      <div className="min-h-screen pt-28 pb-20 px-6 md:px-10 lg:pl-12 max-w-[1600px] mx-auto animate-entrance">
+        
+        {/* HEADER SECTION */}
+        <header className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 mb-12 bg-white p-10 rounded-[40px] shadow-sm border border-slate-100">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 bg-fbOrange/10 rounded-lg">
+                <ShieldAlert className="text-fbOrange w-5 h-5" />
+              </div>
+              <span className="text-[11px] font-black text-fbOrange uppercase tracking-[0.4em]">Security Gateway</span>
             </div>
-            <h3 className="text-2xl font-black text-fbNavy uppercase italic tracking-tighter">Queue Clear</h3>
-            <p className="text-gray-400 font-bold text-xs uppercase tracking-widest mt-2">All student logs have been processed.</p>
+            <h1 className="text-5xl font-black text-fbNavy uppercase italic tracking-tighter leading-none">
+              Account <span className="text-fbOrange">Approvals</span>
+            </h1>
+            <div className="flex items-center gap-2 mt-4">
+              <div className={`h-2.5 w-2.5 rounded-full ${loading ? 'bg-slate-200' : 'bg-fbOrange animate-pulse'}`} />
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                {pendingStudents.length} Practitioner(s) awaiting clearance
+              </p>
+            </div>
+          </div>
+
+          <div className="relative group w-full lg:w-96">
+            <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300 group-focus-within:text-fbOrange transition-colors" />
+            <input 
+              type="text"
+              placeholder="Search by ID or Name..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-16 pr-8 py-5 bg-slate-50 border border-slate-100 rounded-[24px] text-xs font-black text-fbNavy outline-none focus:ring-8 focus:ring-fbNavy/5 focus:bg-white transition-all shadow-inner uppercase"
+            />
+          </div>
+        </header>
+
+        {/* DATA STATE */}
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-40">
+            <Loader2 className="animate-spin text-fbNavy mb-4" size={48} />
+            <p className="font-black uppercase italic tracking-[0.3em] text-fbNavy">Scanning Registry...</p>
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-32 bg-white rounded-[60px] border-2 border-dashed border-slate-100">
+            <div className="p-8 bg-slate-50 rounded-[35px] mb-6">
+              <UserCheck size={56} className="text-slate-200" />
+            </div>
+            <h3 className="font-black text-fbNavy uppercase italic text-2xl tracking-tighter">Queue Clear</h3>
+            <p className="text-slate-400 font-bold text-[11px] uppercase tracking-[0.25em] mt-3">All practitioners have been processed</p>
           </div>
         ) : (
-          logs.map((log) => (
-            <div 
-              key={log.id} 
-              className={`bg-white p-6 md:p-8 rounded-[35px] border border-gray-100 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6 transition-all hover:shadow-xl hover:translate-x-2 ${processingId === log.id ? 'opacity-50 pointer-events-none' : ''}`}
-            >
-              {/* STUDENT INFO */}
-              <div className="flex items-center gap-6 w-full md:w-auto">
-                <div className="w-16 h-16 bg-fbGray rounded-2xl flex flex-col items-center justify-center border-b-4 border-fbOrange">
-                  <span className="text-[10px] font-black text-fbNavy opacity-30 uppercase leading-none">Day</span>
-                  <span className="text-2xl font-black text-fbNavy italic leading-none">{new Date(log.created_at).getDate()}</span>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+            {filtered.map((student) => (
+              <div key={student.id} className="bg-white p-8 rounded-[48px] border border-slate-50 shadow-sm hover:shadow-2xl transition-all group relative overflow-hidden flex flex-col justify-between">
+                {/* ID Tag */}
+                <div className="absolute top-6 right-8">
+                  <div className="bg-fbNavy/5 px-4 py-2 rounded-2xl border border-fbNavy/5">
+                    <span className="text-[10px] font-black text-fbNavy tracking-widest uppercase">#{student.student_id || 'NO-ID'}</span>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-black text-fbNavy text-lg uppercase italic tracking-tight">
-                    {log.profiles?.full_name || 'Unknown Student'}
-                  </h4>
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                    {log.profiles?.student_id_number} • <span className="text-fbOrange">{log.exercise_type}</span>
-                  </p>
-                </div>
-              </div>
 
-              {/* LOG DATA */}
-              <div className="grid grid-cols-2 gap-8 w-full md:w-auto px-4 border-l border-gray-50">
-                <div>
-                  <p className="text-[9px] font-black text-gray-300 uppercase tracking-widest mb-1">Duration</p>
-                  <p className="text-sm font-black text-fbNavy italic">{log.duration_minutes} MINS</p>
-                </div>
-                <div>
-                  <p className="text-[9px] font-black text-gray-300 uppercase tracking-widest mb-1">Intensity</p>
-                  <p className="text-sm font-black text-fbNavy italic">{log.intensity_level}</p>
-                </div>
-              </div>
+                <div className="relative z-10">
+                  <div className="flex items-center gap-5 mb-8">
+                    <div className="w-16 h-16 rounded-3xl bg-fbNavy text-white flex items-center justify-center text-2xl font-black italic shadow-xl shadow-fbNavy/20 group-hover:bg-fbOrange transition-colors">
+                      {student.full_name?.charAt(0)}
+                    </div>
+                    <div>
+                      <h4 className="font-black text-fbNavy uppercase italic text-lg tracking-tight leading-tight">
+                        {student.full_name}
+                      </h4>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 flex items-center gap-2">
+                         <GraduationCap size={12} className="text-fbOrange" /> {student.course}
+                      </p>
+                    </div>
+                  </div>
 
-              {/* ACTION BUTTONS */}
-              <div className="flex items-center gap-3 w-full md:w-auto">
-                <button 
-                  onClick={() => handleAction(log.id, 'rejected')}
-                  className="flex-1 md:flex-none p-4 rounded-2xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-all active:scale-90"
-                  title="Reject Log"
-                >
-                  <XCircle size={22} />
-                </button>
-                <button 
-                  onClick={() => handleAction(log.id, 'approved')}
-                  className="flex-1 md:flex-none flex items-center justify-center gap-3 px-8 py-4 bg-fbNavy text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-green-500 transition-all active:scale-95 shadow-lg shadow-fbNavy/10"
-                >
-                  <CheckCircle2 size={18} />
-                  Approve Log
-                </button>
+                  <div className="space-y-4 mb-10 bg-slate-50 p-6 rounded-[32px] border border-slate-100">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">Target Unit</span>
+                      <span className="text-[11px] font-black text-fbNavy uppercase italic">{student.section_code}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">Sign-up Date</span>
+                      <span className="text-[11px] font-black text-fbNavy uppercase italic">{new Date(student.created_at).toLocaleDateString()}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">Access Key</span>
+                      <div className="flex items-center gap-1 text-fbOrange">
+                        <Fingerprint size={12} />
+                        <span className="text-[10px] font-black uppercase">Pending</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* ACTION BUTTONS */}
+                <div className="flex gap-4 relative z-10">
+                  <button 
+                    disabled={processingId === student.id}
+                    onClick={() => handleAction(student.id, 'active')}
+                    className="flex-1 py-4 bg-fbNavy text-white rounded-[22px] text-[11px] font-black uppercase tracking-widest hover:bg-green-600 transition-all shadow-lg shadow-fbNavy/10 flex items-center justify-center gap-2 disabled:opacity-50 active:scale-95"
+                  >
+                    {processingId === student.id ? <Loader2 className="animate-spin w-4 h-4" /> : <CheckCircle size={18} />}
+                    Grant Access
+                  </button>
+                  <button 
+                    disabled={processingId === student.id}
+                    onClick={() => handleAction(student.id, 'rejected')}
+                    className="w-14 h-14 bg-slate-100 text-slate-400 rounded-[22px] flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-all border border-transparent hover:border-red-200 active:scale-95"
+                  >
+                    <XCircle size={22} />
+                  </button>
+                </div>
               </div>
-            </div>
-          ))
+            ))}
+          </div>
         )}
       </div>
-    </>
+    </RoleGuard>
   );
 }
