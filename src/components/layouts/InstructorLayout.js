@@ -22,6 +22,7 @@ export default function InstructorLayout({ children }) {
     { name: 'My Classes', icon: <Users size={20} />, path: '/admin/classes' },
     { name: 'Approvals', icon: <ClipboardCheck size={20} />, path: '/admin/approvals' },
     { name: 'Analytics', icon: <BarChart size={20} />, path: '/admin/analytics' },
+    { name: 'Settings', icon: <Settings size={20} />, path: '/admin/settings' }, // Added Settings to nav
   ];
 
   const handleSignOut = async () => {
@@ -35,13 +36,18 @@ export default function InstructorLayout({ children }) {
     }
   };
 
+  // Helper to check if a route is active (handles sub-paths)
+  const isActive = (path) => router.pathname === path || router.pathname.startsWith(`${path}/`);
+
   return (
-    <div className="flex min-h-screen bg-[#F8F9FD] font-sans">
+    <div className="flex min-h-screen bg-[#F8F9FD] font-sans overflow-x-hidden">
       
       {/* MOBILE TOP BAR (Hidden on Desktop) */}
       <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-fbNavy flex items-center justify-between px-6 z-[60] border-b border-white/5">
         <div className="flex items-center gap-3">
-          <Zap size={18} className="text-fbOrange fill-fbOrange" />
+          <div className="w-8 h-8 bg-fbOrange rounded-lg flex items-center justify-center shadow-lg shadow-fbOrange/20">
+            <Zap size={16} className="text-white fill-white" />
+          </div>
           <h2 className="font-black italic text-white uppercase tracking-tighter text-sm">PATHFIT</h2>
         </div>
         <button 
@@ -69,40 +75,46 @@ export default function InstructorLayout({ children }) {
           <div className="w-8 h-8 bg-fbOrange rounded-lg flex items-center justify-center shadow-lg shadow-fbOrange/20">
             <Zap size={18} className="text-white fill-white" />
           </div>
-          <h2 className="font-black italic tracking-tighter text-lg uppercase text-white">
-            PATH<span className="text-fbOrange">FIT</span> <span className="text-[10px] block opacity-40 not-italic tracking-widest font-bold -mt-1">FACULTY</span>
-          </h2>
+          <div className="flex flex-col">
+            <h2 className="font-black italic tracking-tighter text-lg uppercase text-white leading-none">
+              PATH<span className="text-fbOrange">FIT</span>
+            </h2>
+            <span className="text-[10px] opacity-40 not-italic tracking-widest font-bold uppercase">Faculty</span>
+          </div>
         </div>
 
         <nav className="flex-1 px-4 space-y-2 mt-4">
-          {menuItems.map((item) => (
-            <button
-              key={item.name}
-              onClick={() => {
-                router.push(item.path);
-                setIsSidebarOpen(false); // Auto-close on mobile after navigation
-              }}
-              className={`w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-bold text-sm transition-all group ${
-                router.pathname === item.path 
-                ? 'bg-fbOrange text-white shadow-lg shadow-fbOrange/20' 
-                : 'text-white/40 hover:text-white hover:bg-white/5'
-              }`}
-            >
-              <span className={router.pathname === item.path ? 'text-white' : 'text-fbOrange opacity-50 group-hover:opacity-100'}>
-                {item.icon}
-              </span>
-              {item.name}
-            </button>
-          ))}
+          {menuItems.map((item) => {
+            const active = isActive(item.path);
+            return (
+              <button
+                key={item.name}
+                onClick={() => {
+                  router.push(item.path);
+                  setIsSidebarOpen(false); // Auto-close on mobile after navigation
+                }}
+                className={`w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-bold text-sm transition-all group ${
+                  active 
+                  ? 'bg-fbOrange text-white shadow-lg shadow-fbOrange/20' 
+                  : 'text-white/40 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                <span className={active ? 'text-white' : 'text-fbOrange opacity-50 group-hover:opacity-100 transition-opacity'}>
+                  {item.icon}
+                </span>
+                {item.name}
+              </button>
+            );
+          })}
         </nav>
 
         {/* UPDATED SIGN OUT BUTTON */}
         <div className="p-6 mt-auto border-t border-white/5">
           <button 
             onClick={handleSignOut}
-            className="w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-bold text-sm text-red-400 hover:bg-red-500/10 hover:text-red-500 transition-all active:scale-95"
+            className="w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-bold text-sm text-red-400 hover:bg-red-500/10 hover:text-red-500 transition-all active:scale-95 group"
           >
-            <LogOut size={20} />
+            <LogOut size={20} className="group-hover:-translate-x-1 transition-transform" />
             Sign Out
           </button>
         </div>
@@ -113,6 +125,7 @@ export default function InstructorLayout({ children }) {
         flex-1 p-6 md:p-10 transition-all duration-500
         lg:ml-64 mt-16 lg:mt-0 w-full overflow-x-hidden
       `}>
+        {/* Dynamic Page Wrapper */}
         <div className="max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
           {children}
         </div>
