@@ -9,7 +9,6 @@ import {
   Loader2, Zap, ChevronRight, Target, BookOpen, UserCheck
 } from 'lucide-react';
 
-// Variants for intense staggered animations
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -79,7 +78,6 @@ export default function AnalyticsPage() {
     finally { setLoading(false); }
   };
 
-  // UPDATED: Navigation Handler points to admin/approval
   const goToApprovals = () => {
     router.push('/admin/approval'); 
   };
@@ -89,16 +87,12 @@ export default function AnalyticsPage() {
       <motion.div 
         animate={{ scale: [1, 1.2, 1], rotate: [0, 180, 360] }}
         transition={{ duration: 2, repeat: Infinity }}
-        className="relative"
       >
         <Loader2 className="text-[#FF6B00]" size={80} />
       </motion.div>
-      <motion.p 
-        initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-        className="mt-6 font-black text-[#001529] uppercase tracking-[0.5em] text-xs"
-      >
+      <p className="mt-6 font-black text-[#001529] uppercase tracking-[0.5em] text-xs">
         Synchronizing Academic Data...
-      </motion.p>
+      </p>
     </div>
   );
 
@@ -108,48 +102,41 @@ export default function AnalyticsPage() {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="max-w-[1700px] mx-auto p-4 md:p-10 space-y-10 bg-[#f8fafc] min-h-screen font-sans"
+        className="max-w-[1700px] mx-auto p-6 md:p-12 space-y-12 bg-[#f8fafc] min-h-screen font-sans"
       >
-        
-        {/* --- DYNAMIC GLASS HEADER --- */}
+        {/* HEADER SECTION - Design Matched to Classes.js */}
         <motion.div 
           variants={itemVariants}
-          className="relative overflow-hidden bg-[#001529] p-10 md:p-16 rounded-[60px] shadow-2xl shadow-[#001529]/30"
+          className="relative overflow-hidden bg-[#001529] p-12 md:p-20 rounded-[40px] shadow-2xl shadow-[#001529]/40"
         >
-          <motion.div 
-            animate={{ opacity: [0.3, 0.6, 0.3], scale: [1, 1.1, 1] }}
-            transition={{ duration: 5, repeat: Infinity }}
-            className="absolute top-0 right-0 w-2/3 h-full bg-gradient-to-l from-[#FF6B00]/30 to-transparent z-0" 
-          />
-          <Zap className="absolute -right-10 -bottom-10 w-80 h-80 text-white/5 rotate-12" />
+          <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-[#FF6B00]/20 via-transparent to-transparent opacity-50" />
+          <Zap className="absolute -right-10 -bottom-10 w-96 h-96 text-white/5 rotate-12" />
           
-          <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
-            <div className="space-y-4">
-              <div className="inline-flex items-center gap-3 bg-white/10 backdrop-blur-md px-5 py-2 rounded-2xl border border-white/20">
-                <BookOpen className="text-[#FF6B00] w-4 h-4" />
-                <span className="text-[10px] font-black text-white uppercase tracking-[0.4em]">Instructor Command Center</span>
+          <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-10">
+            <div className="space-y-6">
+              <div className="inline-flex items-center gap-3 bg-white/10 backdrop-blur-xl px-6 py-3 rounded-2xl border border-white/10">
+                <BookOpen className="text-[#FF6B00] w-5 h-5" />
+                <span className="text-[12px] font-black text-white uppercase tracking-[0.4em]">Instructor Command Center</span>
               </div>
-              <h1 className="text-6xl md:text-8xl font-black text-white italic tracking-tighter leading-none">
+              <h1 className="text-7xl md:text-9xl font-black text-white italic tracking-tighter leading-[0.85]">
                 TEACHING <span className="text-[#FF6B00]">PULSE</span>
               </h1>
-              <p className="text-white/60 font-medium max-w-xl text-lg leading-relaxed">
-                Analyzing the bridge between your pedagogy and student enrollment. Track your class density and approval velocity in real-time.
+              <p className="text-white/50 font-medium max-w-2xl text-xl leading-relaxed">
+                Analyzing the bridge between your pedagogy and student enrollment.
               </p>
             </div>
             
             <motion.button 
-              whileHover={{ scale: 1.05, boxShadow: "0 20px 40px rgba(0,0,0,0.2)" }}
-              whileTap={{ scale: 0.95 }}
-              className="group relative bg-white text-[#001529] px-12 py-8 rounded-[35px] font-black text-[13px] uppercase tracking-[0.2em] transition-all overflow-hidden shadow-2xl"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.98 }}
+              className="bg-white text-[#001529] px-14 py-8 rounded-[30px] font-black text-[14px] uppercase tracking-[0.2em] shadow-2xl hover:bg-[#FF6B00] hover:text-white transition-colors"
             >
-              <span className="relative z-10 flex items-center gap-3">
-                <Download size={20} /> Download Faculty Audit
-              </span>
+              <Download size={22} className="inline mr-3" /> Download Faculty Audit
             </motion.button>
           </div>
         </motion.div>
 
-        {/* --- CORE STATS GRID --- */}
+        {/* STATS GRID - design elements matched */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <StatCard title="Student Reach" value={stats.totalStudents} icon={<Users />} color="blue" trend="Total Learners" />
           <StatCard title="Onboarding Rate" value={stats.totalActive} icon={<UserCheck />} color="green" trend="Ready to Teach" />
@@ -157,113 +144,54 @@ export default function AnalyticsPage() {
           <StatCard title="Teacher Load" value={stats.sectionData.length} icon={<Target />} color="purple" trend="Active Sections" />
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
-          
-          {/* --- SECTION PERFORMANCE --- */}
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-10 items-start">
+          {/* SECTION PERFORMANCE */}
           <motion.div 
             variants={itemVariants}
-            className="xl:col-span-8 bg-white p-12 rounded-[70px] shadow-2xl shadow-[#001529]/5 border border-white relative overflow-hidden"
+            className="xl:col-span-8 bg-white p-14 rounded-[50px] shadow-2xl shadow-[#001529]/5 border border-slate-100"
           >
-            <div className="flex items-center justify-between mb-16">
-              <div>
-                <h3 className="text-3xl font-black text-[#001529] uppercase italic tracking-tighter flex items-center gap-4">
-                  <BarChart3 className="text-[#FF6B00]" size={32} /> Classroom Density
-                </h3>
-                <p className="text-slate-400 text-xs font-black uppercase tracking-[0.3em] mt-2">Section Population Analysis</p>
-              </div>
-            </div>
-
-            <div className="grid gap-10">
+            <h3 className="text-4xl font-black text-[#001529] uppercase italic mb-12 flex items-center gap-5">
+              <BarChart3 className="text-[#FF6B00]" size={40} /> Classroom Density
+            </h3>
+            <div className="grid gap-8">
               {stats.sectionData.map((sec, index) => {
                 const count = sec.profiles?.[0]?.count || 0;
                 const percentage = stats.totalStudents > 0 ? (count / stats.totalStudents) * 100 : 0;
                 return (
-                  <motion.div 
-                    key={sec.id}
-                    whileHover={{ x: 15 }}
-                    className="relative group p-8 rounded-[40px] bg-slate-50/50 hover:bg-white transition-all border border-transparent hover:border-slate-100 hover:shadow-xl"
-                  >
+                  <div key={sec.id} className="p-8 rounded-[35px] bg-[#f8fafc] border border-transparent hover:border-[#FF6B00]/20 transition-all">
                     <div className="flex justify-between items-center mb-6">
-                      <div className="flex items-center gap-5">
-                        <div className="w-14 h-14 rounded-[22px] bg-[#001529] text-white flex items-center justify-center font-black italic text-sm group-hover:bg-[#FF6B00] transition-colors">
-                          {sec.section_code.substring(0, 2)}
-                        </div>
-                        <div>
-                          <span className="font-black text-[#001529] uppercase text-lg tracking-widest">{sec.section_code}</span>
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Assigned Section Code</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-2xl font-black text-[#001529] italic">{count}</span>
-                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Enrollments</p>
-                      </div>
+                      <span className="font-black text-[#001529] uppercase text-xl tracking-widest">{sec.section_code}</span>
+                      <span className="text-3xl font-black text-[#FF6B00] italic">{count}</span>
                     </div>
-                    <div className="h-4 bg-slate-200/50 rounded-full overflow-hidden">
+                    <div className="h-5 bg-white rounded-full p-1 border border-slate-100 overflow-hidden">
                       <motion.div 
                         initial={{ width: 0 }} 
                         animate={{ width: `${percentage}%` }}
-                        transition={{ duration: 2, ease: "circOut", delay: index * 0.1 }}
-                        className="h-full bg-gradient-to-r from-[#001529] to-blue-500 rounded-full relative group-hover:from-[#FF6B00] group-hover:to-orange-500 transition-all"
-                      >
-                        <motion.div 
-                          animate={{ x: ["0%", "100%"] }}
-                          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                          className="absolute inset-0 w-20 bg-white/20 skew-x-[-20deg]" 
-                        />
-                      </motion.div>
+                        transition={{ duration: 1.5, ease: "circOut" }}
+                        className="h-full bg-[#001529] rounded-full"
+                      />
                     </div>
-                  </motion.div>
+                  </div>
                 );
               })}
             </div>
           </motion.div>
 
-          {/* --- COURSE METRICS & PRIORITY --- */}
-          <motion.div 
-            variants={itemVariants}
-            className="xl:col-span-4 space-y-10"
-          >
-            <div className="bg-white p-12 rounded-[70px] shadow-2xl shadow-[#001529]/5 border border-white">
-              <h3 className="text-2xl font-black text-[#001529] uppercase italic mb-10 flex items-center gap-4">
-                <PieChart className="text-[#FF6B00]" size={28} /> Program Split
-              </h3>
-              <div className="space-y-5">
-                {Object.entries(stats.courseData).map(([name, count]) => (
-                  <motion.div 
-                    key={name} 
-                    whileHover={{ scale: 1.05 }}
-                    className="flex items-center justify-between p-6 bg-[#f8fafc] rounded-[35px] border border-transparent hover:border-[#FF6B00]/30 transition-all cursor-default"
-                  >
-                    <div className="flex items-center gap-5">
-                      <div className="w-12 h-12 rounded-2xl bg-white shadow-md flex items-center justify-center">
-                        <TrendingUp size={20} className="text-[#FF6B00]" />
-                      </div>
-                      <span className="text-xs font-black text-[#001529] uppercase tracking-widest">{name}</span>
-                    </div>
-                    <span className="font-black text-[#001529] italic text-2xl">{count}</span>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-
-            {/* ACTION CARD: CONNECTED TO ADMIN/APPROVAL */}
-            <motion.div 
-              whileHover={{ rotate: -2, scale: 1.02 }}
-              className="bg-gradient-to-br from-[#FF6B00] to-orange-600 p-12 rounded-[70px] text-white shadow-2xl shadow-[#FF6B00]/40 relative overflow-hidden group"
-            >
-              <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-1000" />
-              <Activity className="mb-8 w-14 h-14 p-3 bg-white/20 rounded-2xl" />
-              <h4 className="text-3xl font-black italic uppercase tracking-tighter mb-4">Urgent Review</h4>
-              <p className="text-white/90 text-sm font-medium mb-10 leading-relaxed">
-                There are <span className="underline decoration-white/50 underline-offset-4 font-black text-white">{stats.totalPending} learners</span> currently locked out of their sections. Review the queue to finalize your teaching rosters.
+          {/* SIDEBAR */}
+          <motion.div variants={itemVariants} className="xl:col-span-4 space-y-10">
+            <div className="bg-gradient-to-br from-[#001529] to-[#002a52] p-12 rounded-[50px] text-white shadow-2xl relative overflow-hidden group">
+              <Activity className="mb-8 w-16 h-16 p-4 bg-[#FF6B00] rounded-[25px] text-white" />
+              <h4 className="text-3xl font-black italic uppercase mb-4 text-[#FF6B00]">Approval Queue</h4>
+              <p className="text-white/70 text-lg mb-12 leading-relaxed font-medium">
+                Review and authorize <span className="text-white font-black underline underline-offset-8 decoration-[#FF6B00]">{stats.totalPending} pending</span> student applications.
               </p>
               <button 
                 onClick={goToApprovals}
-                className="w-full bg-[#001529] text-white py-6 rounded-[30px] font-black text-[11px] uppercase tracking-[0.3em] flex items-center justify-center gap-4 hover:bg-black transition-all group-hover:gap-6"
+                className="w-full bg-[#FF6B00] text-white py-7 rounded-[25px] font-black text-[12px] uppercase tracking-[0.3em] flex items-center justify-center gap-4 hover:bg-white hover:text-[#001529] transition-all"
               >
-                Open Approval Desk <ChevronRight size={18} />
+                Open Approval Desk <ChevronRight size={20} />
               </button>
-            </motion.div>
+            </div>
           </motion.div>
         </div>
       </motion.div>
@@ -273,38 +201,25 @@ export default function AnalyticsPage() {
 
 function StatCard({ title, value, icon, trend, color }) {
   const colorMap = {
-    blue: "text-blue-500 bg-blue-50 border-blue-100",
-    green: "text-emerald-500 bg-emerald-50 border-emerald-100",
-    orange: "text-[#FF6B00] bg-orange-50 border-orange-100",
-    purple: "text-purple-500 bg-purple-50 border-purple-100"
+    blue: "bg-blue-50 text-blue-600",
+    green: "bg-emerald-50 text-emerald-600",
+    orange: "bg-orange-50 text-[#FF6B00]",
+    purple: "bg-purple-50 text-purple-600"
   };
 
   return (
     <motion.div 
       variants={itemVariants}
-      whileHover={{ y: -15, scale: 1.02 }}
-      className="bg-white p-10 rounded-[55px] border border-slate-100 shadow-2xl shadow-[#001529]/5 relative overflow-hidden group transition-all"
+      whileHover={{ y: -10 }}
+      className="bg-white p-12 rounded-[40px] border border-slate-100 shadow-xl shadow-[#001529]/5 relative overflow-hidden group"
     >
-      <div className="relative z-10">
-        <motion.div 
-          whileHover={{ rotate: 360 }}
-          transition={{ duration: 0.8 }}
-          className={`w-16 h-16 rounded-[24px] flex items-center justify-center mb-8 shadow-inner border ${colorMap[color]}`}
-        >
-          {React.cloneElement(icon, { size: 32 })}
-        </motion.div>
-        <div className="space-y-2">
-          <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.4em]">{title}</p>
-          <div className="flex items-baseline gap-4">
-            <h4 className="text-6xl font-black text-[#001529] italic tracking-tighter group-hover:text-[#FF6B00] transition-colors">
-              {value}
-            </h4>
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-100 px-3 py-1 rounded-full">{trend}</span>
-          </div>
-        </div>
+      <div className={`w-16 h-16 rounded-[20px] flex items-center justify-center mb-10 ${colorMap[color]}`}>
+        {React.cloneElement(icon, { size: 32 })}
       </div>
-      <div className="absolute -right-8 -bottom-8 opacity-[0.03] group-hover:opacity-[0.1] transition-opacity duration-500">
-        {React.cloneElement(icon, { size: 180 })}
+      <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.4em] mb-4">{title}</p>
+      <div className="flex items-baseline gap-4">
+        <h4 className="text-7xl font-black text-[#001529] italic tracking-tighter group-hover:text-[#FF6B00] transition-colors">{value}</h4>
+        <span className="text-[10px] font-black text-[#001529]/30 uppercase bg-slate-50 px-3 py-1 rounded-lg">{trend}</span>
       </div>
     </motion.div>
   );
