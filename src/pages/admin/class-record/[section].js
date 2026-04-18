@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import { supabase } from '../../../lib/supabaseClient';
 import { PATHFIT_EXERCISES } from '../../../constants/exercises'; 
 import { 
-  ArrowLeft, Activity, Loader2, ChevronDown 
+  ArrowLeft, Activity, Loader2, ChevronDown, AlertCircle
 } from 'lucide-react';
 
 export default function ClassRecord() {
@@ -14,26 +14,30 @@ export default function ClassRecord() {
   const [selectedActivity, setSelectedActivity] = useState('Pre-Test');
   const [students, setStudents] = useState([]);
   const [exerciseLogs, setExerciseLogs] = useState([]);
-
-  const activities = [
-    'Pre-Test', 'Week 1', 'Week 2', 'Week 3', 'Week 4', 
-    'Week 5', 'Week 6', 'Week 7', 'Week 8', 'Post-test'
-  ];
+  
+  // Mobile Debug State
+  const [debug, setDebug] = useState({ urlSection: 'waiting...', dbCount: 0, status: 'initializing' });
 
   useEffect(() => {
-    // router.isReady ensures 'section' is actually available from the URL
-    if (router.isReady && section) {
+    if (router.isReady) {
       fetchData();
     }
   }, [router.isReady, section, selectedActivity]);
 
   const fetchData = async () => {
     setLoading(true);
-    try {
-      const sectionKey = String(section).trim();
-      console.log("Fetching data for Section:", sectionKey);
+    const sectionKey = section ? String(section).trim() : null;
+    
+    setDebug(prev => ({ ...prev, urlSection: sectionKey || 'MISSING', status: 'fetching...' }));
 
-      // 1. Get the students first
+    try {
+      if (!sectionKey) {
+        setDebug(prev => ({ ...prev, status: 'Error: No section in URL' }));
+        setLoading(false);
+        return;
+      }
+
+      // 1. Fetch Students
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('id, full_name, student_id_number')
@@ -41,65 +45,62 @@ export default function ClassRecord() {
 
       if (profileError) throw profileError;
       
-      // Update students state immediately
       const foundStudents = profileData || [];
       setStudents(foundStudents);
-      console.log(`Found ${foundStudents.length} students.`);
+      setDebug(prev => ({ ...prev, dbCount: foundStudents.length, status: 'Profiles Loaded' }));
 
       if (foundStudents.length > 0) {
-        // 2. Get the IDs of the students found
         const studentIds = foundStudents.map(s => s.id);
 
-        // 3. Fetch logs linked to these specific student IDs
+        // 2. Fetch Logs
         let logQuery = supabase
           .from('exercise_logs')
           .select('*')
           .in('student_id', studentIds);
 
-        // Apply filters based on the selected Protocol
         if (selectedActivity === 'Pre-Test' || selectedActivity === 'Post-test') {
           logQuery = logQuery.eq('test_name', selectedActivity);
         } else {
           const weekNum = parseInt(selectedActivity.split(' ')[1]);
-          if (!isNaN(weekNum)) {
-            logQuery = logQuery.eq('week_number', weekNum);
-          }
+          if (!isNaN(weekNum)) logQuery = logQuery.eq('week_number', weekNum);
         }
 
         const { data: logData, error: logError } = await logQuery;
         if (logError) throw logError;
         
         setExerciseLogs(logData || []);
-        console.log(`Found ${logData?.length || 0} exercise logs.`);
-      } else {
-        setExerciseLogs([]);
+        setDebug(prev => ({ ...prev, status: 'All Data Synced' }));
       }
     } catch (err) {
-      console.error("Fetch Error:", err.message);
+      setDebug(prev => ({ ...prev, status: `DB Error: ${err.message}` }));
     } finally {
       setLoading(false);
     }
   };
 
   const getAvgScore = (profileId, exercise) => {
-    // Filter logs for this specific student and this specific exercise ID (e.g., 'ex1')
     const logs = exerciseLogs.filter(
       l => l.student_id === profileId && l.exercise_id === exercise.id
     );
-    
     if (logs.length === 0) return 0;
-    
     const expectedSets = exercise.sets || 3;
     const totalSetSum = logs.reduce((acc, curr) => {
-      const setSum = (curr.set_1_val || 0) + (curr.set_2_val || 0) + (expectedSets === 3 ? (curr.set_3_val || 0) : 0);
-      return acc + setSum;
+      return acc + (curr.set_1_val || 0) + (curr.set_2_val || 0) + (expectedSets === 3 ? (curr.set_3_val || 0) : 0);
     }, 0);
-    
     return (totalSetSum / (logs.length * expectedSets));
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] p-6 lg:p-10 pb-32">
+    <div className="min-h-screen bg-[#F8FAFC] p-4 lg:p-10 pb-32 font-sans">
+      
+      {/* DEBUG OVERLAY - This is for you to read since you have no console */}
+      <div className="mb-6 p-4 bg-yellow-100 border-2 border-yellow-400 rounded-2xl text-[10px] font-mono text-yellow-800">
+        <div className="flex items-center gap-2 mb-1 font-bold italic underline"><AlertCircle size={12}/> SYSTEM DIAGNOSTICS:</div>
+        <p>URL SECTION: <span className="font-black text-black">{debug.urlSection}</span></p>
+        <p>DB ROWS FOUND: <span className="font-black text-black">{debug.dbCount}</span></p>
+        <p>STATUS: <span className="font-black text-black">{debug.status}</span></p>
+      </div>
+
       <div className="max-w-[1700px] mx-auto flex flex-col md:flex-row justify-between items-center mb-12 gap-6">
         <div className="flex items-center gap-6">
           <button onClick={() => router.back()} className="p-4 bg-white rounded-3xl shadow-sm hover:bg-[#001529] hover:text-white transition-all">
@@ -107,7 +108,7 @@ export default function ClassRecord() {
           </button>
           <div>
             <h1 className="text-3xl font-black text-[#001529] uppercase italic leading-none">
-              SECTION <span className="text-[#FF6B00]">{section}</span>
+              SECTION <span className="text-[#FF6B00]">{section || '...'}</span>
             </h1>
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2">
                {students.length} Operatives Enrolled
@@ -147,11 +148,7 @@ export default function ClassRecord() {
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {loading ? (
-                  <tr>
-                    <td colSpan={PATHFIT_EXERCISES.length + 2} className="p-20 text-center">
-                      <Loader2 className="animate-spin mx-auto text-[#FF6B00]" size={32} />
-                    </td>
-                  </tr>
+                  <tr><td colSpan={PATHFIT_EXERCISES.length + 2} className="p-20 text-center"><Loader2 className="animate-spin mx-auto text-[#FF6B00]" size={32} /></td></tr>
                 ) : students.length > 0 ? (
                   students.map(s => {
                     let rowTotal = 0;
@@ -160,25 +157,18 @@ export default function ClassRecord() {
                       rowTotal += avg;
                       return avg;
                     });
-
                     return (
                       <tr key={s.id} className="hover:bg-slate-50">
                         <td className="p-8 sticky left-0 bg-white font-black text-xs text-[#001529] border-r uppercase">{s.full_name}</td>
                         {scores.map((score, i) => (
-                          <td key={i} className="p-4 text-center text-xs font-bold text-slate-500">
-                            {score > 0 ? score.toFixed(1) : '-'}
-                          </td>
+                          <td key={i} className="p-4 text-center text-xs font-bold text-slate-500">{score > 0 ? score.toFixed(1) : '-'}</td>
                         ))}
                         <td className="p-6 text-center text-sm font-black text-[#001529] bg-slate-50/50">{rowTotal.toFixed(1)}</td>
                       </tr>
                     );
                   })
                 ) : (
-                  <tr>
-                    <td colSpan={PATHFIT_EXERCISES.length + 2} className="p-20 text-center text-gray-400 font-bold uppercase text-xs">
-                      No Operatives found in this section
-                    </td>
-                  </tr>
+                  <tr><td colSpan={PATHFIT_EXERCISES.length + 2} className="p-20 text-center text-gray-400 font-bold uppercase text-xs">No Operatives found in this section</td></tr>
                 )}
               </tbody>
             </table>
