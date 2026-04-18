@@ -15,13 +15,11 @@ export default function ClassRecord() {
   const [students, setStudents] = useState([]);
   const [exerciseLogs, setExerciseLogs] = useState([]);
   
-  // Define the activities array so the build doesn't crash
   const activities = [
     'Pre-Test', 'Week 1', 'Week 2', 'Week 3', 'Week 4', 
     'Week 5', 'Week 6', 'Week 7', 'Week 8', 'Post-test'
   ];
 
-  // Mobile Debug State to see what's happening without a console
   const [debug, setDebug] = useState({ 
     urlSection: 'waiting...', 
     dbCount: 0, 
@@ -47,10 +45,10 @@ export default function ClassRecord() {
         return;
       }
 
-      // 1. Fetch Students
+      // 1. Fetch Students - FIXED: Removed the non-existent student_id_number column
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
-        .select('id, full_name, student_id_number')
+        .select('id, full_name, section_code')
         .eq('section_code', sectionKey);
 
       if (profileError) throw profileError;
@@ -80,6 +78,8 @@ export default function ClassRecord() {
         
         setExerciseLogs(logData || []);
         setDebug(prev => ({ ...prev, status: 'All Data Synced' }));
+      } else {
+        setExerciseLogs([]);
       }
     } catch (err) {
       setDebug(prev => ({ ...prev, status: `DB Error: ${err.message}` }));
