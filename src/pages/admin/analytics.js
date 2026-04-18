@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabaseClient';
-import InstructorLayout from '../../components/layouts/InstructorLayout';
 import { 
   BarChart3, 
   TrendingUp, 
@@ -29,7 +28,7 @@ export default function AnalyticsPage() {
   }, []);
 
   return (
-    <InstructorLayout>
+    <>
       {/* HEADER WITH EXPORT ACTION */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-12">
         <div>
@@ -128,7 +127,7 @@ export default function AnalyticsPage() {
           </div>
         </div>
       </div>
-    </InstructorLayout>
+    </>
   );
 }
 
