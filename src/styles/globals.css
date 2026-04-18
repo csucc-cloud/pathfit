@@ -8,17 +8,11 @@
     @apply bg-fbGray text-fbNavy antialiased;
     /* Prevents the 'bouncy' scroll on mobile but keeps it smooth */
     overflow-x: hidden;
-    max-width: 100vw;
   }
 
   /* Customizing the selection color to match your branding */
   ::selection {
     @apply bg-fbOrange/30 text-fbNavy;
-  }
-
-  /* Prevent auto-zoom on iOS inputs */
-  input, textarea, select {
-    font-size: 16px !important;
   }
 }
 
@@ -35,93 +29,66 @@
 }
 
 /* ===========================================================
-  GLOBAL RESPONSIVE OVERRIDE
-  This section forces the JS components to adapt to mobile
-  without changing the .js files.
+  SURGICAL MOBILE OVERRIDE (PROTECTS HEADER)
   ===========================================================
 */
 
 @media (max-width: 1024px) {
   /* 1. Kill the Sidebar Offset */
   aside {
-    transform: translateX(-100%); /* Hides sidebar by default on mobile */
+    transform: translateX(-100%);
     transition: transform 0.3s ease-in-out !important;
-    z-index: 100 !important;
   }
 
   main {
-    margin-left: 0 !important; /* Removes the ml-64 */
-    padding: 1.25rem !important; /* Reduces p-10 to p-5 for mobile */
+    margin-left: 0 !important;
+    padding: 1rem !important;
     width: 100% !important;
   }
 
-  /* 2. Force Grids to Stack */
-  .grid {
-    grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
-    gap: 1rem !important;
+  /* 2. PROTECT THE BRANDING (Fixes the detached "P" and Orange Bar) */
+  /* We force the header to remain horizontal regardless of global flex rules */
+  header, 
+  .fb-header-branding,
+  [class*="Logo"], 
+  [class*="logo"] {
+    flex-direction: row !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
   }
 
-  /* 3. Force Flex-Rows into Columns */
-  /* This targets headers and action bars that use flex-row */
-  header, 
-  .flex-row,
-  .md\:flex-row {
+  /* 3. STACK CONTENT ONLY INSIDE MAIN */
+  /* This ensures your profile cards and dashboard stats stack, 
+     but your header stays professional. */
+  main .grid,
+  main .flex-row,
+  main .md\:flex-row {
+    grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
     flex-direction: column !important;
-    align-items: flex-start !important;
     gap: 1.5rem !important;
   }
 
-  /* Ensure horizontal containers inside flex-cols stay row-based (like button groups) */
-  .flex-row .flex, 
-  header .flex {
-    flex-direction: row !important;
-    width: 100%;
-    justify-content: space-between;
-  }
-
-  /* 4. Table Responsiveness */
-  /* Keeps the table scrollable horizontally without breaking the screen */
+  /* 4. Table Guard */
   .overflow-hidden {
     overflow-x: auto !important;
     -webkit-overflow-scrolling: touch;
   }
 
   table {
-    min-width: 700px !important; /* Keeps "Aggressive Sport" typography readable */
+    min-width: 600px !important;
   }
 
-  /* 5. Scaling Down Typography for Small Screens */
+  /* 5. Mobile Typography Scaling */
   h1, .text-4xl {
-    font-size: 1.875rem !important; /* text-3xl */
-    line-height: 2.25rem !important;
+    font-size: 1.75rem !important;
+    line-height: 1.2 !important;
   }
 
-  h2, .text-3xl {
-    font-size: 1.5rem !important; /* text-2xl */
-  }
-
-  /* 6. Modal Scaling */
-  .max-w-lg, .max-w-md, .rounded-\[45px\] {
-    max-width: 95vw !important;
+  /* 6. Modal / Card Scaling */
+  .max-w-lg, .rounded-\[45px\], .rounded-\[40px\] {
+    max-width: 92vw !important;
     margin-left: auto !important;
     margin-right: auto !important;
-    border-radius: 30px !important; /* Slightly smaller radius for mobile */
-  }
-
-  /* 7. Input/Button spacing for thumbs */
-  button, input, textarea {
-    width: 100% !important; /* Makes most buttons full-width on mobile */
-  }
-}
-
-/* 8. Specific Fix for the "Master Roster" search and export area */
-@media (max-width: 768px) {
-  .flex.items-center.gap-4 {
-    flex-direction: column !important;
-    width: 100%;
-  }
-  
-  input[type="text"] {
-    width: 100% !important;
   }
 }
