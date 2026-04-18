@@ -64,10 +64,10 @@ export default function ClassesPage() {
   };
 
   return (
-    /* FIX: Added pt-28 to push content below the Top Nav 
-       Added px-6 and lg:pl-12 to respect the Sidebar width
+    /* FIXED: Reduced pt-28 to pt-12 (on mobile) and lg:pt-8 (on desktop).
+       This removes the excessive white space shown in your edited-image.png.
     */
-    <div className="min-h-screen pt-28 pb-20 px-6 md:px-10 lg:pl-12 max-w-[1600px] mx-auto">
+    <div className="min-h-screen pt-12 lg:pt-8 pb-20 px-6 md:px-10 lg:pl-12 max-w-[1600px] mx-auto">
       
       {/* HEADER AREA: Professional & Dynamic */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 mb-16 bg-white p-10 rounded-[40px] shadow-sm border border-slate-100">
