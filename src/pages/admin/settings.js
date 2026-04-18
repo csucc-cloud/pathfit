@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import { 
   User, 
@@ -31,12 +31,16 @@ const itemVariants = {
 export default function SettingsPage() {
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
+  const [uploading, setUploading] = useState(false);
   const [saved, setSaved] = useState(false);
+  const fileInputRef = useRef(null);
+  
   const [profile, setProfile] = useState({
     full_name: '',
     email: '',
     department: '',
-    instructor_id: ''
+    employee_id: '',
+    avatar_url: ''
   });
 
   useEffect(() => {
@@ -48,25 +52,66 @@ export default function SettingsPage() {
       setFetching(true);
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
+        // Updated to target 'instructors' table based on your schema
         const { data, error } = await supabase
-          .from('profiles')
-          .select('full_name, department, student_id_number')
+          .from('instructors')
+          .select('full_name, department, employee_id, avatar_url')
           .eq('id', user.id)
           .single();
+        
         if (error) throw error;
         if (data) {
           setProfile({
             full_name: data.full_name || '',
             email: user.email || '',
             department: data.department || '',
-            instructor_id: data.student_id_number || '' 
+            employee_id: data.employee_id || '',
+            avatar_url: data.avatar_url || ''
           });
         }
       }
     } catch (err) {
-      console.error('Error fetching profile:', err.message);
+      console.error('Error fetching instructor profile:', err.message);
     } finally {
       setFetching(false);
+    }
+  };
+
+  const handleAvatarUpload = async (event) => {
+    try {
+      setUploading(true);
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const { data: { user } } = await supabase.auth.getUser();
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}-${Math.random()}.${fileExt}`;
+      const filePath = `avatars/${fileName}`;
+
+      // Uploading to Storage Bucket
+      const { error: uploadError } = await supabase.storage
+        .from('profile-pictures')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('profile-pictures')
+        .getPublicUrl(filePath);
+
+      // Update the instructor table with the new avatar URL
+      const { error: updateError } = await supabase
+        .from('instructors')
+        .update({ avatar_url: publicUrl })
+        .eq('id', user.id);
+
+      if (updateError) throw updateError;
+
+      setProfile(prev => ({ ...prev, avatar_url: publicUrl }));
+    } catch (err) {
+      alert('Avatar upload failed: ' + err.message);
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -74,13 +119,14 @@ export default function SettingsPage() {
     setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
+      
+      // Updated update logic to match 'instructors' table columns
       const { error } = await supabase
-        .from('profiles')
+        .from('instructors')
         .update({
           full_name: profile.full_name,
           department: profile.department,
-          student_id_number: profile.instructor_id,
-          updated_at: new Date().toISOString(),
+          employee_id: profile.employee_id,
         })
         .eq('id', user.id);
 
@@ -152,12 +198,29 @@ export default function SettingsPage() {
           >
             <div className="absolute top-0 right-0 w-32 h-32 bg-fbOrange/5 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-700" />
             <div className="relative w-32 h-32 mx-auto mb-6">
-              <div className="w-full h-full bg-fbGray rounded-[35px] flex items-center justify-center border-4 border-white shadow-xl overflow-hidden">
-                 <User size={60} className="text-gray-300" />
+              <div className="w-full h-full bg-fbGray rounded-[35px] flex items-center justify-center border-4 border-white shadow-xl overflow-hidden relative">
+                 {profile.avatar_url ? (
+                   <img src={profile.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+                 ) : (
+                   <User size={60} className="text-gray-300" />
+                 )}
+                 {uploading && (
+                   <div className="absolute inset-0 bg-fbNavy/60 flex items-center justify-center">
+                     <Loader2 className="text-white animate-spin" size={24} />
+                   </div>
+                 )}
               </div>
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                onChange={handleAvatarUpload} 
+                className="hidden" 
+                accept="image/*" 
+              />
               <motion.button 
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
+                onClick={() => fileInputRef.current.click()}
                 className="absolute bottom-0 right-0 p-3 bg-fbNavy text-white rounded-2xl shadow-lg hover:bg-fbOrange transition-colors"
               >
                 <Camera size={18} />
@@ -183,14 +246,14 @@ export default function SettingsPage() {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <InputGroup label="Full Name" value={profile.full_name} onChange={(v) => setProfile({...profile, full_name: v})} />
-              <InputGroup label="Instructor ID" value={profile.instructor_id} onChange={(v) => setProfile({...profile, instructor_id: v})} />
+              <InputGroup label="Employee ID" value={profile.employee_id} onChange={(v) => setProfile({...profile, employee_id: v})} />
               <InputGroup label="Email Address" value={profile.email} disabled />
               <InputGroup label="Department" value={profile.department} onChange={(v) => setProfile({...profile, department: v})} />
             </div>
 
             <div className="mt-10 pt-10 border-t border-gray-50 flex flex-col sm:flex-row justify-between items-center gap-6">
               <p className="text-[10px] font-bold text-gray-400 uppercase max-w-xs leading-relaxed">
-                Ensure your Instructor ID matches your faculty records to avoid registry conflicts.
+                Ensure your Employee ID matches your official faculty record.
               </p>
               <motion.button 
                 whileHover={{ scale: 1.05 }}
