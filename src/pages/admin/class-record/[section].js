@@ -15,11 +15,21 @@ export default function ClassRecord() {
   const [students, setStudents] = useState([]);
   const [exerciseLogs, setExerciseLogs] = useState([]);
   
-  // Mobile Debug State
-  const [debug, setDebug] = useState({ urlSection: 'waiting...', dbCount: 0, status: 'initializing' });
+  // Define the activities array so the build doesn't crash
+  const activities = [
+    'Pre-Test', 'Week 1', 'Week 2', 'Week 3', 'Week 4', 
+    'Week 5', 'Week 6', 'Week 7', 'Week 8', 'Post-test'
+  ];
+
+  // Mobile Debug State to see what's happening without a console
+  const [debug, setDebug] = useState({ 
+    urlSection: 'waiting...', 
+    dbCount: 0, 
+    status: 'initializing' 
+  });
 
   useEffect(() => {
-    if (router.isReady) {
+    if (router.isReady && section) {
       fetchData();
     }
   }, [router.isReady, section, selectedActivity]);
@@ -91,14 +101,16 @@ export default function ClassRecord() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] p-4 lg:p-10 pb-32 font-sans">
+    <div className="min-h-screen bg-[#F8FAFC] p-4 lg:p-10 pb-32">
       
-      {/* DEBUG OVERLAY - This is for you to read since you have no console */}
-      <div className="mb-6 p-4 bg-yellow-100 border-2 border-yellow-400 rounded-2xl text-[10px] font-mono text-yellow-800">
-        <div className="flex items-center gap-2 mb-1 font-bold italic underline"><AlertCircle size={12}/> SYSTEM DIAGNOSTICS:</div>
-        <p>URL SECTION: <span className="font-black text-black">{debug.urlSection}</span></p>
-        <p>DB ROWS FOUND: <span className="font-black text-black">{debug.dbCount}</span></p>
-        <p>STATUS: <span className="font-black text-black">{debug.status}</span></p>
+      {/* YELLOW DIAGNOSTIC BOX */}
+      <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-2xl text-[10px] font-mono">
+        <div className="flex items-center gap-2 mb-1 font-bold text-yellow-700 underline">
+          <AlertCircle size={12}/> SYSTEM DIAGNOSTICS:
+        </div>
+        <p>URL SECTION: <span className="font-black">{debug.urlSection}</span></p>
+        <p>STUDENTS FOUND: <span className="font-black">{debug.dbCount}</span></p>
+        <p>STATUS: <span className="font-black">{debug.status}</span></p>
       </div>
 
       <div className="max-w-[1700px] mx-auto flex flex-col md:flex-row justify-between items-center mb-12 gap-6">
@@ -120,7 +132,7 @@ export default function ClassRecord() {
           <select 
             value={selectedActivity}
             onChange={(e) => setSelectedActivity(e.target.value)}
-            className="appearance-none bg-white text-[#001529] px-8 py-5 rounded-[24px] font-black text-[12px] uppercase border border-gray-100 shadow-xl min-w-[280px] outline-none"
+            className="appearance-none bg-white text-[#001529] px-8 py-5 rounded-[24px] font-black text-[12px] uppercase border border-gray-100 shadow-xl min-w-[280px] outline-none cursor-pointer"
           >
             {activities.map(act => <option key={act} value={act}>{act}</option>)}
           </select>
@@ -159,7 +171,7 @@ export default function ClassRecord() {
                     });
                     return (
                       <tr key={s.id} className="hover:bg-slate-50">
-                        <td className="p-8 sticky left-0 bg-white font-black text-xs text-[#001529] border-r uppercase">{s.full_name}</td>
+                        <td className="p-8 sticky left-0 bg-white font-black text-xs text-[#001529] border-r uppercase italic">{s.full_name}</td>
                         {scores.map((score, i) => (
                           <td key={i} className="p-4 text-center text-xs font-bold text-slate-500">{score > 0 ? score.toFixed(1) : '-'}</td>
                         ))}
