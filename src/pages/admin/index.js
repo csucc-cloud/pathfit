@@ -24,7 +24,7 @@ export default function AdminDashboard() {
 
   const handleExport = () => {
     const data = filteredStudents.map(s => ({ StudentID: s.student_id, FullName: s.full_name, ExercisesCompleted: s.exercises, Progress: `${Math.round((s.exercises / 15) * 100)}%`, LastActive: new Date(s.lastActive).toLocaleDateString() }));
-    downloadCSV(data, `PATHFit_Practicum_${pId}_Grades`);
+    downloadCSV(data, `PATHFit_Student_List`);
   };
 
   const handlePostAnnouncement = async () => {
@@ -99,24 +99,17 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
+        {/* KPI CARDS - REMOVED AVG SCORE AND PRACTICUM */}
+        <div className="grid grid-cols-1 md:grid-cols-1 gap-6 pt-4 max-w-sm">
           <div className="bg-white p-8 rounded-[35px] border border-gray-100 shadow-sm flex items-center gap-6 group hover:border-fbOrange/20 transition-all">
-            <div className="bg-blue-50 p-4 rounded-2xl text-blue-600 group-hover:scale-110 transition-transform"><Users size={28} /></div>
-            <div><p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Total Students</p><h3 className="text-3xl font-black text-fbNavy italic">{students.length}</h3></div>
-          </div>
-          <div className="bg-white p-8 rounded-[35px] border border-gray-100 shadow-sm flex items-center gap-6 group hover:border-fbOrange/20 transition-all">
-            <div className="bg-fbOrange/10 p-4 rounded-2xl text-fbOrange group-hover:scale-110 transition-transform"><Activity size={28} /></div>
-            <div><p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Avg. Score</p><h3 className="text-3xl font-black text-fbNavy italic">84.2</h3></div>
-          </div>
-          <div className="bg-white p-8 rounded-[35px] border border-gray-100 shadow-sm flex items-center gap-6 group hover:border-fbOrange/20 transition-all">
-            <div className="bg-green-50 p-4 rounded-2xl text-green-600 group-hover:scale-110 transition-transform"><Award size={28} /></div>
-            <div><p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Practicum</p><h3 className="text-3xl font-black text-fbNavy italic">P-{pId}</h3></div>
+            <div className="bg-fbOrange/10 p-4 rounded-2xl text-fbOrange group-hover:scale-110 transition-transform"><Users size={28} /></div>
+            <div><p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Total Enrolled Students</p><h3 className="text-3xl font-black text-fbNavy italic">{students.length}</h3></div>
           </div>
         </div>
 
         <div className="space-y-6">
           <div className="flex flex-wrap items-center justify-between gap-4">
-            <h2 className="text-xs font-black text-gray-400 uppercase tracking-[0.3em] px-2">Master Roster</h2>
+            <h2 className="text-xs font-black text-gray-400 uppercase tracking-[0.3em] px-2">List of Students</h2>
             <div className="flex items-center gap-4">
               <div className="relative group"><Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-fbOrange transition-colors" /><input type="text" placeholder="Search ID or Name..." className="pl-12 pr-6 py-4 rounded-2xl bg-white border border-gray-100 text-sm font-bold text-fbNavy focus:ring-4 focus:ring-fbOrange/5 outline-none w-72 shadow-sm transition-all" onChange={(e) => setSearchTerm(e.target.value)} /></div>
               <button onClick={handleExport} className="p-4 bg-white border border-gray-100 rounded-2xl text-fbNavy hover:text-fbOrange transition-all shadow-sm"><FileDown size={20} /></button>
@@ -126,10 +119,10 @@ export default function AdminDashboard() {
             <table className="w-full text-left border-collapse">
               <thead className="bg-fbGray/5 border-b border-gray-100">
                 <tr>
-                  <th className="p-6 text-[10px] font-black uppercase text-gray-400 tracking-widest">Student ID</th>
-                  <th className="p-6 text-[10px] font-black uppercase text-gray-400 tracking-widest"><div className="flex items-center gap-2"><User className="w-3 h-3 text-fbOrange" /> Name</div></th>
-                  <th className="p-6 text-[10px] font-black uppercase text-gray-400 tracking-widest">Completion</th>
-                  <th className="p-6 text-[10px] font-black uppercase text-gray-400 tracking-widest text-center"><div className="flex items-center justify-center gap-2"><Calendar className="w-3 h-3 text-fbOrange" /> Activity</div></th>
+                  <th className="p-6 text-[10px] font-black uppercase text-gray-400 tracking-widest">Profile</th>
+                  <th className="p-6 text-[10px] font-black uppercase text-gray-400 tracking-widest">Full Name</th>
+                  <th className="p-6 text-[10px] font-black uppercase text-gray-400 tracking-widest">Course & ID</th>
+                  <th className="p-6 text-[10px] font-black uppercase text-gray-400 tracking-widest">Section Code</th>
                   <th className="p-6 text-[10px] font-black uppercase text-gray-400 tracking-widest text-right">Action</th>
                 </tr>
               </thead>
@@ -138,11 +131,38 @@ export default function AdminDashboard() {
                   <tr><td colSpan="5" className="p-20 text-center"><div className="flex flex-col items-center gap-4"><Loader2 className="w-10 h-10 animate-spin text-fbOrange" /><p className="text-fbNavy font-black italic uppercase tracking-widest text-xs animate-pulse">Synchronizing Records...</p></div></td></tr>
                 ) : filteredStudents.map((s) => (
                   <tr key={s.id} className="hover:bg-fbGray/10 transition-all group">
-                    <td className="p-6 font-black text-xs text-fbNavy tracking-tighter">{s.student_id || "PENDING"}</td>
-                    <td className="p-6"><div className="flex items-center gap-3"><div className="w-8 h-8 rounded-full bg-fbNavy text-white flex items-center justify-center text-[10px] font-black italic">{s.full_name?.substring(0,2).toUpperCase() || "??"}</div><span className="text-sm font-black text-fbNavy uppercase italic tracking-tight group-hover:text-fbOrange transition-colors">{s.full_name || "Unknown Student"}</span></div></td>
-                    <td className="p-6"><div className="flex items-center gap-4"><div className="flex-1 h-2 bg-fbGray/30 rounded-full max-w-[120px] overflow-hidden"><div className="h-full bg-fbOrange rounded-full shadow-[0_0_12px_rgba(245,124,0,0.3)] transition-all duration-1000 ease-out" style={{ width: `${(s.exercises / 15) * 100}%` }}></div></div><span className="text-[10px] font-black text-fbNavy italic">{s.exercises}<span className="text-gray-300">/15</span></span></div></td>
-                    <td className="p-6 text-center"><span className="text-[10px] font-bold text-gray-400 uppercase">{new Date(s.lastActive).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span></td>
-                    <td className="p-6 text-right"><button className="bg-white border border-gray-100 text-fbNavy font-black text-[10px] px-4 py-2 rounded-xl uppercase tracking-widest hover:bg-fbNavy hover:text-white transition-all shadow-sm flex items-center gap-2 ml-auto group/btn"><Eye className="w-3 h-3 text-fbOrange group-hover/btn:text-white" /> View Log</button></td>
+                    <td className="p-6">
+                      <div className="w-12 h-12 rounded-2xl bg-fbGray overflow-hidden border-2 border-white shadow-sm transition-transform group-hover:scale-105">
+                        {s.avatar_url ? (
+                          <img src={s.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-fbNavy text-white font-black italic text-xs">
+                            {s.full_name?.substring(0, 2).toUpperCase()}
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                    <td className="p-6">
+                      <span className="text-sm font-black text-fbNavy uppercase italic tracking-tight group-hover:text-fbOrange transition-colors">
+                        {s.full_name || "Unknown Student"}
+                      </span>
+                    </td>
+                    <td className="p-6">
+                      <div className="flex flex-col">
+                        <span className="text-[11px] font-black text-fbNavy uppercase tracking-tight">{s.course || "N/A"}</span>
+                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{s.student_id || "PENDING"}</span>
+                      </div>
+                    </td>
+                    <td className="p-6">
+                      <span className="bg-fbGray/20 text-fbNavy px-3 py-1 rounded-lg text-[10px] font-black italic uppercase">
+                        {s.section_code || "UNASSIGNED"}
+                      </span>
+                    </td>
+                    <td className="p-6 text-right">
+                      <button className="bg-white border border-gray-100 text-fbNavy font-black text-[10px] px-4 py-2 rounded-xl uppercase tracking-widest hover:bg-fbNavy hover:text-white transition-all shadow-sm flex items-center gap-2 ml-auto group/btn">
+                        <Eye className="w-3 h-3 text-fbOrange group-hover/btn:text-white" /> View Log
+                      </button>
+                    </td>
                   </tr>
                 ))}
                 {!loading && filteredStudents.length === 0 && (
@@ -154,7 +174,6 @@ export default function AdminDashboard() {
         </div>
       </div>
       
-      {/* SECTION CREATION MODAL */}
       <CreateSectionModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
