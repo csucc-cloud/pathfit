@@ -40,11 +40,13 @@ export default function AdminDashboard() {
         const sectionCodes = sectionData.map(s => s.section_code.trim());
         
         if (sectionCodes.length > 0) {
+          // --- UPDATED: Added .eq('status', 'active') filter ---
           const { data: studentData, error: studError } = await supabase
             .from('profiles')
             .select('*')
             .in('section_code', sectionCodes)
-            .eq('Role', 'student');
+            .eq('Role', 'student')
+            .eq('status', 'active'); // Only fetch approved students
 
           if (!studError) setStudents(studentData || []);
         }
@@ -111,7 +113,7 @@ export default function AdminDashboard() {
     <RoleGuard allowedRole="instructor">
       <div className="max-w-[1440px] mx-auto animate-entrance space-y-8 p-4 md:p-8 bg-[#f8fafc] min-h-screen font-sans">
         
-        {/* --- ENHANCED HEADER --- */}
+        {/* --- HEADER --- */}
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-white p-8 rounded-[40px] shadow-xl shadow-fbNavy/5 border border-white">
           <div className="flex items-center gap-6">
             <div className="bg-fbNavy p-4 rounded-3xl shadow-2xl shadow-fbNavy/20 rotate-3 hover:rotate-0 transition-transform duration-500">
@@ -184,10 +186,8 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* --- MIDDLE COLUMN: ENHANCED FEED --- */}
+          {/* --- MIDDLE COLUMN: FEED --- */}
           <div className="lg:col-span-8 space-y-8">
-            
-            {/* POST COMPOSER */}
             <div className="bg-white rounded-[40px] p-8 shadow-xl shadow-fbNavy/5 border border-white">
               <div className="flex gap-5 mb-6">
                 <div className="w-14 h-14 rounded-[22px] bg-gradient-to-tr from-fbNavy to-blue-900 flex-shrink-0 flex items-center justify-center text-white font-black text-lg border-4 border-white shadow-xl shadow-fbNavy/20">
@@ -293,7 +293,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* --- ENHANCED STUDENT REGISTRY --- */}
+        {/* --- STUDENT REGISTRY --- */}
         <div className="space-y-8 pt-12">
           <div className="flex flex-col md:flex-row justify-between items-end gap-6 px-4">
             <div>
