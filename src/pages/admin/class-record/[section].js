@@ -100,14 +100,30 @@ export default function ClassRecord() {
   };
 
   const getActivityTotal = (studentId, activityName) => {
-    let filtered = [];
+    // 1. Filter logs for this specific student and activity
+    let filteredLogs = [];
     if (activityName === 'Pre-Test' || activityName === 'Post-test') {
-      filtered = allLogs.filter(l => l.student_id === studentId && l.test_name === activityName);
+      filteredLogs = allLogs.filter(l => l.student_id === studentId && l.test_name === activityName);
     } else {
       const weekNum = parseInt(activityName.split(' ')[1]);
-      filtered = allLogs.filter(l => l.student_id === studentId && l.week_number === weekNum);
+      filteredLogs = allLogs.filter(l => l.student_id === studentId && l.week_number === weekNum);
     }
-    return filtered.reduce((sum, log) => sum + (log.set_1_val || 0) + (log.set_2_val || 0) + (log.set_3_val || 0), 0);
+
+    // 2. Calculate the sum of the MEAN scores for each exercise to ensure accuracy
+    return PATHFIT_EXERCISES.reduce((totalActivityScore, exercise) => {
+      const logsForExercise = filteredLogs.filter(l => l.exercise_id === exercise.id);
+      
+      if (logsForExercise.length === 0) return totalActivityScore;
+
+      const expectedSets = exercise.sets || 3;
+      const setSum = logsForExercise.reduce((acc, curr) => {
+        return acc + (curr.set_1_val || 0) + (curr.set_2_val || 0) + (expectedSets === 3 ? (curr.set_3_val || 0) : 0);
+      }, 0);
+
+      // Add the mean of this exercise to the total for the week
+      const exerciseAverage = setSum / (logsForExercise.length * expectedSets);
+      return totalActivityScore + exerciseAverage;
+    }, 0);
   };
 
   const getRemarks = (avg) => {
@@ -249,11 +265,11 @@ export default function ClassRecord() {
                       </td>
                       {activityScores.map((score, idx) => (
                         <td key={idx} className="p-4 text-center text-xs font-bold text-slate-500">
-                          {score > 0 ? score : '-'}
+                          {score > 0 ? score.toFixed(1) : '-'}
                         </td>
                       ))}
                       <td className="p-6 text-center text-xs font-black text-[#FF6B00] bg-orange-50/30">{weeklyAvg.toFixed(1)}</td>
-                      <td className="p-6 text-center text-xs font-black text-[#001529] bg-slate-50/50">{cumulativeTotal}</td>
+                      <td className="p-6 text-center text-xs font-black text-[#001529] bg-slate-50/50">{cumulativeTotal.toFixed(1)}</td>
                       <td className={`p-6 text-center text-[9px] font-black uppercase italic ${remarks.color}`}>
                         {remarks.label}
                       </td>
