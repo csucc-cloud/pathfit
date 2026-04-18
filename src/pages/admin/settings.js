@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabaseClient';
-import InstructorLayout from '../../components/layouts/InstructorLayout';
 import { 
   User, 
   Lock, 
@@ -58,7 +57,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <InstructorLayout>
+    <>
       {/* HEADER */}
       <div className="mb-12">
         <h1 className="text-4xl font-black text-fbNavy uppercase italic tracking-tighter">
@@ -143,7 +142,7 @@ export default function SettingsPage() {
 
         </div>
       </div>
-    </InstructorLayout>
+    </>
   );
 }
 
