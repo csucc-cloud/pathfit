@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import RoleGuard from '../../components/RoleGuard';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   BarChart3, PieChart, TrendingUp, Users, 
-  GraduationCap, Activity, Download, Filter,
-  ArrowUpRight, ArrowDownRight, Loader2, Award,
-  ShieldCheck, Clock
+  Activity, Download, ShieldCheck, Clock,
+  ArrowUpRight, ArrowDownRight, Loader2, 
+  Zap, ChevronRight, Target, Sparkles
 } from 'lucide-react';
 
 export default function AnalyticsPage() {
@@ -15,25 +16,20 @@ export default function AnalyticsPage() {
     totalPending: 0,
     sectionData: [],
     courseData: {},
-    recentActivity: []
+    totalStudents: 0
   });
 
-  useEffect(() => {
-    fetchAnalytics();
-  }, []);
+  useEffect(() => { fetchAnalytics(); }, []);
 
   const fetchAnalytics = async () => {
     try {
       setLoading(true);
       const { data: { user } } = await supabase.auth.getUser();
-
-      // 1. Fetch Sections to map against students
       const { data: sections } = await supabase
         .from('sections')
         .select('*, profiles(count)')
         .eq('instructor_id', user.id);
 
-      // 2. Fetch All Students under this instructor's sections
       const sectionCodes = sections.map(s => s.section_code);
       const { data: students } = await supabase
         .from('profiles')
@@ -41,11 +37,9 @@ export default function AnalyticsPage() {
         .in('section_code', sectionCodes)
         .eq('Role', 'student');
 
-      // 3. Process Data
       const active = students.filter(s => s.status === 'active').length;
       const pending = students.filter(s => s.status !== 'active').length;
       
-      // Group by Course
       const courses = students.reduce((acc, curr) => {
         const c = curr.course || 'Unassigned';
         acc[c] = (acc[c] || 0) + 1;
@@ -59,135 +53,196 @@ export default function AnalyticsPage() {
         courseData: courses,
         totalStudents: students.length
       });
-
-    } catch (err) {
-      console.error("Analytics Error:", err);
-    } finally {
-      setLoading(false);
-    }
+    } catch (err) { console.error("Analytics Error:", err); } 
+    finally { setLoading(false); }
   };
 
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-[#f8fafc]">
-      <Loader2 className="animate-spin text-fbOrange" size={48} />
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#f8fafc]">
+      <div className="relative">
+        <Loader2 className="animate-spin text-fbOrange" size={64} />
+        <Activity className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-fbNavy w-6 h-6" />
+      </div>
+      <p className="mt-4 font-black text-fbNavy uppercase tracking-[0.3em] text-[10px]">Processing Intelligence...</p>
     </div>
   );
 
   return (
     <RoleGuard allowedRole="instructor">
-      <div className="max-w-[1600px] mx-auto p-6 md:p-10 space-y-10 bg-[#f8fafc] min-h-screen">
+      <div className="max-w-[1700px] mx-auto p-4 md:p-10 space-y-10 bg-[#f8fafc] min-h-screen font-sans">
         
-        {/* HEADER */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-white p-10 rounded-[40px] shadow-sm border border-slate-100">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <Activity className="text-fbOrange w-5 h-5" />
-              <span className="text-[11px] font-black text-fbOrange uppercase tracking-[0.4em]">Data Intelligence</span>
+        {/* --- DYNAMIC GLASS HEADER --- */}
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}
+          className="relative overflow-hidden bg-fbNavy p-10 md:p-16 rounded-[50px] shadow-2xl shadow-fbNavy/20"
+        >
+          <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-fbOrange/20 to-transparent z-0" />
+          <Zap className="absolute -right-10 -bottom-10 w-64 h-64 text-white/5 rotate-12" />
+          
+          <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
+            <div className="space-y-4">
+              <div className="inline-flex items-center gap-3 bg-white/10 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/10">
+                <Sparkles className="text-fbOrange w-4 h-4" />
+                <span className="text-[10px] font-bold text-white uppercase tracking-[0.3em]">Live Intelligence Feed</span>
+              </div>
+              <h1 className="text-5xl md:text-7xl font-black text-white italic tracking-tighter leading-none">
+                FACULTY <span className="text-fbOrange">INSIGHTS</span>
+              </h1>
+              <p className="text-white/50 font-medium max-w-xl text-lg">
+                Real-time visualization of student distribution and enrollment health across your assigned sections.
+              </p>
             </div>
-            <h1 className="text-5xl font-black text-fbNavy uppercase italic tracking-tighter">
-              Performance <span className="text-fbOrange">Analytics</span>
-            </h1>
+            
+            <button className="group relative bg-white text-fbNavy px-10 py-6 rounded-3xl font-black text-[12px] uppercase tracking-[0.2em] hover:bg-fbOrange hover:text-white transition-all overflow-hidden shadow-xl active:scale-95">
+              <span className="relative z-10 flex items-center gap-3">
+                <Download size={20} className="group-hover:-translate-y-1 transition-transform" /> Export Analytics
+              </span>
+            </button>
           </div>
-          <button className="flex items-center gap-3 bg-fbNavy text-white px-8 py-4 rounded-[22px] font-black text-[11px] uppercase tracking-widest hover:bg-fbOrange transition-all shadow-xl shadow-fbNavy/10">
-            <Download size={18} /> Generate Report
-          </button>
-        </div>
+        </motion.div>
 
-        {/* TOP LEVEL METRICS */}
+        {/* --- CORE STATS GRID --- */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          <StatCard 
-            title="Total Registered" 
-            value={stats.totalStudents} 
-            icon={<Users className="text-blue-500" />} 
-            trend="+12%" 
-            isUp={true} 
-          />
-          <StatCard 
-            title="Approved Status" 
-            value={stats.totalActive} 
-            icon={<ShieldCheck className="text-green-500" />} 
-            trend="Active" 
-            isUp={true} 
-            color="bg-green-50"
-          />
-          <StatCard 
-            title="Pending Review" 
-            value={stats.totalPending} 
-            icon={<Clock className="text-fbOrange" />} 
-            trend="Urgent" 
-            isUp={false} 
-            color="bg-orange-50"
-          />
-          <StatCard 
-            title="Avg. Class Size" 
-            value={Math.round(stats.totalActive / (stats.sectionData.length || 1))} 
-            icon={<TrendingUp className="text-purple-500" />} 
-            trend="Normal" 
-            isUp={true} 
-          />
+          <StatCard title="Active Network" value={stats.totalStudents} icon={<Users />} color="blue" trend="+5.2%" />
+          <StatCard title="Compliance Rate" value={stats.totalActive} icon={<ShieldCheck />} color="green" trend="Verified" />
+          <StatCard title="Pipeline Queue" value={stats.totalPending} icon={<Clock />} color="orange" trend="Action Required" />
+          <StatCard title="Unit Density" value={Math.round(stats.totalActive / (stats.sectionData.length || 1))} icon={<Target />} color="purple" trend="Avg/Class" />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* SECTION DISTRIBUTION */}
-          <div className="lg:col-span-8 bg-white p-10 rounded-[50px] shadow-sm border border-slate-100">
-            <h3 className="text-xl font-black text-fbNavy uppercase italic mb-8 flex items-center gap-4">
-              <BarChart3 className="text-fbOrange" /> Section Population
-            </h3>
-            <div className="space-y-6">
-              {stats.sectionData.map((sec) => {
-                const percentage = (sec.profiles[0].count / stats.totalStudents) * 100;
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
+          
+          {/* --- SECTION PERFORMANCE (LEFT) --- */}
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}
+            className="xl:col-span-8 bg-white p-10 rounded-[60px] shadow-xl shadow-fbNavy/5 border border-white relative overflow-hidden"
+          >
+            <div className="flex items-center justify-between mb-12">
+              <div>
+                <h3 className="text-2xl font-black text-fbNavy uppercase italic tracking-tighter flex items-center gap-3">
+                  <BarChart3 className="text-fbOrange" size={28} /> Section Distribution
+                </h3>
+                <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Live Population Census</p>
+              </div>
+              <div className="flex gap-2">
+                <div className="w-3 h-3 rounded-full bg-slate-100" />
+                <div className="w-3 h-3 rounded-full bg-slate-200" />
+                <div className="w-3 h-3 rounded-full bg-slate-300" />
+              </div>
+            </div>
+
+            <div className="grid gap-8">
+              {stats.sectionData.map((sec, index) => {
+                const count = sec.profiles?.[0]?.count || 0;
+                const percentage = stats.totalStudents > 0 ? (count / stats.totalStudents) * 100 : 0;
                 return (
-                  <div key={sec.id} className="group">
-                    <div className="flex justify-between items-end mb-2">
-                      <span className="font-black text-fbNavy uppercase text-xs tracking-widest">{sec.section_code}</span>
-                      <span className="text-[10px] font-bold text-slate-400">{sec.profiles[0].count} Students</span>
+                  <motion.div 
+                    key={sec.id}
+                    initial={{ width: 0 }} animate={{ width: "100%" }} transition={{ delay: index * 0.1 }}
+                    className="relative group p-6 rounded-[32px] hover:bg-slate-50 transition-all border border-transparent hover:border-slate-100"
+                  >
+                    <div className="flex justify-between items-center mb-4">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-2xl bg-fbNavy text-white flex items-center justify-center font-black italic text-xs">
+                          {sec.section_code.substring(0, 2)}
+                        </div>
+                        <span className="font-black text-fbNavy uppercase text-sm tracking-widest">{sec.section_code}</span>
+                      </div>
+                      <span className="text-[12px] font-black text-fbNavy bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-100">
+                        {count} <span className="text-slate-400 font-bold ml-1">STUDENTS</span>
+                      </span>
                     </div>
-                    <div className="h-4 bg-slate-50 rounded-full overflow-hidden border border-slate-100">
-                      <div 
-                        className="h-full bg-fbNavy group-hover:bg-fbOrange transition-all duration-1000 rounded-full"
-                        style={{ width: `${percentage}%` }}
-                      />
+                    <div className="h-6 bg-slate-100 rounded-2xl overflow-hidden p-1">
+                      <motion.div 
+                        initial={{ width: 0 }} animate={{ width: `${percentage}%` }}
+                        transition={{ duration: 1.5, ease: "circOut" }}
+                        className="h-full bg-gradient-to-r from-fbNavy to-blue-600 rounded-xl relative group-hover:from-fbOrange group-hover:to-orange-500 transition-all shadow-lg"
+                      >
+                        <div className="absolute top-0 right-0 w-8 h-full bg-white/20 skew-x-12 -mr-4" />
+                      </motion.div>
                     </div>
-                  </div>
+                  </motion.div>
                 );
               })}
             </div>
-          </div>
+          </motion.div>
 
-          {/* COURSE SPLIT */}
-          <div className="lg:col-span-4 bg-white p-10 rounded-[50px] shadow-sm border border-slate-100">
-            <h3 className="text-xl font-black text-fbNavy uppercase italic mb-8 flex items-center gap-4">
-              <PieChart className="text-fbOrange" /> Course Split
-            </h3>
-            <div className="space-y-6">
-              {Object.entries(stats.courseData).map(([name, count]) => (
-                <div key={name} className="flex items-center justify-between p-4 bg-slate-50 rounded-[24px]">
-                  <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 rounded-full bg-fbOrange" />
-                    <span className="text-[11px] font-black text-fbNavy uppercase tracking-wider">{name}</span>
+          {/* --- COURSE METRICS & PRIORITY (RIGHT) --- */}
+          <motion.div 
+            initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
+            className="xl:col-span-4 space-y-8"
+          >
+            {/* Course Split */}
+            <div className="bg-white p-10 rounded-[60px] shadow-xl shadow-fbNavy/5 border border-white">
+              <h3 className="text-xl font-black text-fbNavy uppercase italic mb-8 flex items-center gap-3">
+                <PieChart className="text-fbOrange" size={24} /> Academic Split
+              </h3>
+              <div className="space-y-4">
+                {Object.entries(stats.courseData).map(([name, count]) => (
+                  <div key={name} className="flex items-center justify-between p-5 bg-[#f8fafc] rounded-[28px] border border-transparent hover:border-fbOrange/20 transition-all group cursor-default">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center group-hover:rotate-12 transition-transform">
+                        <TrendingUp size={16} className="text-fbOrange" />
+                      </div>
+                      <span className="text-[11px] font-black text-fbNavy uppercase tracking-widest leading-none">{name}</span>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-black text-fbNavy italic text-xl leading-none">{count}</p>
+                      <p className="text-[9px] font-bold text-slate-400 uppercase mt-1">Enrollments</p>
+                    </div>
                   </div>
-                  <span className="font-black text-fbNavy italic">{count}</span>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
+
+            {/* Quick Insights Card (Necessary Utility) */}
+            <div className="bg-gradient-to-br from-fbOrange to-orange-600 p-10 rounded-[60px] text-white shadow-2xl shadow-fbOrange/30 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-3xl group-hover:bg-white/20 transition-all" />
+              <Activity className="mb-6 w-10 h-10 p-2 bg-white/20 rounded-xl" />
+              <h4 className="text-2xl font-black italic uppercase tracking-tighter mb-2">Attention Required</h4>
+              <p className="text-white/80 text-sm font-medium mb-8">
+                You have <span className="font-black text-white">{stats.totalPending} students</span> waiting for section approval. Approve them to include them in active analytics.
+              </p>
+              <button className="w-full bg-fbNavy text-white py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:gap-5 transition-all">
+                Review Queue <ChevronRight size={16} />
+              </button>
+            </div>
+          </motion.div>
         </div>
       </div>
     </RoleGuard>
   );
 }
 
-function StatCard({ title, value, icon, trend, isUp, color = "bg-white" }) {
+function StatCard({ title, value, icon, trend, color }) {
+  const colorMap = {
+    blue: "text-blue-500 bg-blue-50 border-blue-100",
+    green: "text-emerald-500 bg-emerald-50 border-emerald-100",
+    orange: "text-fbOrange bg-orange-50 border-orange-100",
+    purple: "text-purple-500 bg-purple-50 border-purple-100"
+  };
+
   return (
-    <div className={`${color} p-8 rounded-[40px] border border-slate-100 shadow-sm hover:shadow-xl transition-all group`}>
-      <div className="flex justify-between items-start mb-6">
-        <div className="p-4 bg-white rounded-2xl shadow-sm group-hover:scale-110 transition-transform">{icon}</div>
-        <div className={`flex items-center gap-1 text-[10px] font-black uppercase px-3 py-1 rounded-full ${isUp ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
-          {isUp ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />} {trend}
+    <motion.div 
+      whileHover={{ y: -10 }}
+      className="bg-white p-8 rounded-[45px] border border-slate-100 shadow-xl shadow-fbNavy/5 relative overflow-hidden group transition-all"
+    >
+      <div className="relative z-10">
+        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 shadow-sm border ${colorMap[color]}`}>
+          {React.cloneElement(icon, { size: 28 })}
+        </div>
+        <div className="space-y-1">
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">{title}</p>
+          <div className="flex items-baseline gap-3">
+            <h4 className="text-5xl font-black text-fbNavy italic tracking-tighter group-hover:text-fbOrange transition-colors">
+              {value}
+            </h4>
+            <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">{trend}</span>
+          </div>
         </div>
       </div>
-      <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">{title}</p>
-      <h4 className="text-5xl font-black text-fbNavy italic tracking-tighter">{value}</h4>
-    </div>
+      <div className="absolute -right-4 -bottom-4 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity">
+        {React.cloneElement(icon, { size: 120 })}
+      </div>
+    </motion.div>
   );
 }
