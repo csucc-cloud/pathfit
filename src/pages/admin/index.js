@@ -7,7 +7,7 @@ import { downloadCSV } from '../../utils/exportHelper';
 import { 
   Users, Search, FileDown, Eye, LayoutDashboard, Loader2, Plus, 
   Megaphone, Send, Clock, ChevronRight, Paperclip, X, FileText, 
-  Image as ImageIcon, Filter, GraduationCap, Layers, Activity, Calendar // Added Activity here
+  Image as ImageIcon, Filter, GraduationCap, Layers, Activity, Calendar
 } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -35,14 +35,16 @@ export default function AdminDashboard() {
 
       if (!secError && sectionData) {
         setSections(sectionData);
-        const sectionCodes = sectionData.map(s => s.section_code);
+        // Added .trim() to handle any accidental spaces in the database
+        const sectionCodes = sectionData.map(s => s.section_code.trim());
         
         if (sectionCodes.length > 0) {
           const { data: studentData, error: studError } = await supabase
             .from('profiles')
             .select('*')
             .in('section_code', sectionCodes)
-            .eq('role', 'student');
+            // Updated 'role' to 'Role' to match your case-sensitive database column
+            .eq('Role', 'student');
 
           if (!studError) setStudents(studentData || []);
         }
