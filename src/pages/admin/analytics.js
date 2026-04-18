@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/router'; // Added for navigation
+import { useRouter } from 'next/router'; 
 import { supabase } from '../../lib/supabaseClient';
 import RoleGuard from '../../components/RoleGuard';
 import { motion } from 'framer-motion';
@@ -29,7 +29,7 @@ const itemVariants = {
 };
 
 export default function AnalyticsPage() {
-  const router = useRouter(); // Initialize router
+  const router = useRouter(); 
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     totalActive: 0,
@@ -79,9 +79,9 @@ export default function AnalyticsPage() {
     finally { setLoading(false); }
   };
 
-  // Navigation Handler
+  // UPDATED: Navigation Handler points to admin/approval
   const goToApprovals = () => {
-    router.push('/instructor/approval'); // Adjusted to standard file-based routing
+    router.push('/admin/approval'); 
   };
 
   if (loading) return (
@@ -153,7 +153,7 @@ export default function AnalyticsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <StatCard title="Student Reach" value={stats.totalStudents} icon={<Users />} color="blue" trend="Total Learners" />
           <StatCard title="Onboarding Rate" value={stats.totalActive} icon={<UserCheck />} color="green" trend="Ready to Teach" />
-          <StatCard title="Pending Rosters" value={stats.totalPending} icon={<orange />} color="orange" trend="Awaiting Access" />
+          <StatCard title="Pending Rosters" value={stats.totalPending} icon={<Clock />} color="orange" trend="Awaiting Access" />
           <StatCard title="Teacher Load" value={stats.sectionData.length} icon={<Target />} color="purple" trend="Active Sections" />
         </div>
 
@@ -246,7 +246,7 @@ export default function AnalyticsPage() {
               </div>
             </div>
 
-            {/* ACTION CARD: CONNECTED TO APPROVAL.JS */}
+            {/* ACTION CARD: CONNECTED TO ADMIN/APPROVAL */}
             <motion.div 
               whileHover={{ rotate: -2, scale: 1.02 }}
               className="bg-gradient-to-br from-[#FF6B00] to-orange-600 p-12 rounded-[70px] text-white shadow-2xl shadow-[#FF6B00]/40 relative overflow-hidden group"
