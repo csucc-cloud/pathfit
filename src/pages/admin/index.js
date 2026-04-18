@@ -7,7 +7,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Users, Search, FileDown, Eye, Loader2, Plus, Send, ChevronRight, 
   X, FileText, Image as ImageIcon, MessageSquare, 
-  Globe, ShieldCheck, Activity, Terminal, Share2, ThumbsUp, MoreHorizontal
+  Globe, ShieldCheck, Activity, Terminal, Share2, ThumbsUp, MoreHorizontal,
+  Paperclip, Clock, Calendar
 } from 'lucide-react';
 
 const v = { hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } };
@@ -54,35 +55,64 @@ export default function AdminDashboard() {
     try {
       let fUrl = null, fType = null;
       if (file) {
-        const name = `${Date.now()}.${file.name.split('.').pop()}`;
-        await supabase.storage.from('announcement-attachments').upload(name, file);
-        fUrl = supabase.storage.from('announcement-attachments').getPublicUrl(name).publicUrl;
+        const name = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+        const { data, error } = await supabase.storage.from('announcement-attachments').upload(name, file);
+        if (error) throw error;
+        
+        const { data: publicData } = supabase.storage.from('announcement-attachments').getPublicUrl(name);
+        fUrl = publicData.publicUrl;
         fType = file.name.split('.').pop();
       }
-      await supabase.from('announcements').insert([{ content: announcement, target_section: targetSection === 'all' ? null : targetSection, is_global: targetSection === 'all', instructor_id: instructor.id, file_url: fUrl, file_type: fType }]);
-      setAnnouncement(""); setFile(null); fetchData();
-    } catch (err) { alert(err.message); } finally { setIsPosting(false); }
+      
+      const { error: insertError } = await supabase.from('announcements').insert([{ 
+        content: announcement, 
+        target_section: targetSection === 'all' ? null : targetSection, 
+        is_global: targetSection === 'all', 
+        instructor_id: instructor.id, 
+        file_url: fUrl, 
+        file_type: fType 
+      }]);
+
+      if (insertError) throw insertError;
+
+      setAnnouncement(""); 
+      setFile(null); 
+      fetchData();
+    } catch (err) { 
+        console.error(err);
+        alert("Failed to post: " + err.message); 
+    } finally { 
+        setIsPosting(false); 
+    }
   };
 
   return (
     <RoleGuard allowedRole="instructor">
-      <div className="fixed inset-0 -z-10 bg-[#F0F2F5]" /> 
+      <div className="fixed inset-0 -z-10 bg-[#F8FAFC] bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:16px_16px]" /> 
       
       <motion.div initial="hidden" animate="visible" variants={{visible:{transition:{staggerChildren:0.05}}}} className="max-w-[1500px] mx-auto p-4 md:p-6 space-y-6 font-sans h-screen flex flex-col overflow-hidden">
         
-        {/* HEADER */}
-        <header className="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-slate-200 z-50 shrink-0">
-          <h1 className="text-xl font-black text-fbNavy tracking-tighter flex items-center gap-2">
-            <div className="p-1.5 bg-fbNavy rounded-lg text-white"><Terminal size={18}/></div>
-            PORTAL <span className="text-fbOrange">HUB</span>
-          </h1>
+        {/* HEADER - GLASSMORPHISM */}
+        <header className="flex justify-between items-center bg-white/80 backdrop-blur-md p-4 rounded-2xl shadow-sm border border-white/20 z-50 shrink-0">
+          <div className="flex items-center gap-4">
+            <h1 className="text-xl font-black text-fbNavy tracking-tighter flex items-center gap-2">
+                <div className="p-2 bg-fbNavy rounded-xl text-white shadow-lg shadow-fbNavy/20"><Terminal size={20}/></div>
+                PORTAL <span className="text-fbOrange">HUB</span>
+            </h1>
+            <div className="h-6 w-[1px] bg-slate-200 hidden md:block" />
+            <div className="hidden md:flex items-center gap-2 px-3 py-1 bg-slate-100 rounded-full">
+                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">System Online</span>
+            </div>
+          </div>
+
           <div className="flex items-center gap-3">
              <div className="text-right hidden sm:block">
-                <p className="text-[12px] font-bold text-slate-900 leading-none">{instructor?.full_name}</p>
-                <p className="text-[9px] font-bold text-fbOrange uppercase">Administrator</p>
+                <p className="text-[12px] font-extrabold text-slate-900 leading-none">{instructor?.full_name}</p>
+                <p className="text-[9px] font-black text-fbOrange uppercase tracking-tighter">Academic Lead</p>
              </div>
-             <div className="w-9 h-9 rounded-full bg-slate-200 overflow-hidden border border-slate-200">
-                {instructor?.avatar_url ? <img src={instructor.avatar_url} className="w-full h-full object-cover" alt="avatar"/> : <div className="w-full h-full flex items-center justify-center font-bold">{instructor?.full_name?.[0]}</div>}
+             <div className="w-10 h-10 rounded-xl bg-slate-200 overflow-hidden border-2 border-white shadow-sm hover:border-fbOrange transition-all cursor-pointer">
+                {instructor?.avatar_url ? <img src={instructor.avatar_url} className="w-full h-full object-cover" alt="avatar"/> : <div className="w-full h-full flex items-center justify-center font-bold bg-fbNavy text-white">{instructor?.full_name?.[0]}</div>}
              </div>
           </div>
         </header>
@@ -94,65 +124,130 @@ export default function AdminDashboard() {
           <div className="lg:col-span-9 flex flex-col space-y-5 overflow-hidden min-h-0">
             
             {/* POST COMPOSER */}
-            <motion.div variants={v} className="bg-white rounded-xl p-4 shadow-sm border border-slate-200 shrink-0">
-              <div className="flex gap-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-slate-100 shrink-0 overflow-hidden">
-                  {instructor?.avatar_url ? <img src={instructor.avatar_url} className="w-full h-full object-cover" alt="user"/> : <div className="w-full h-full flex items-center justify-center">{instructor?.full_name?.[0]}</div>}
+            <motion.div variants={v} className="bg-white rounded-2xl p-5 shadow-md border border-slate-100 shrink-0 ring-1 ring-black/[0.02]">
+              <div className="flex gap-4 mb-4">
+                <div className="w-12 h-12 rounded-full bg-slate-100 shrink-0 overflow-hidden border-2 border-white shadow-sm">
+                  {instructor?.avatar_url ? <img src={instructor.avatar_url} className="w-full h-full object-cover" alt="user"/> : <div className="w-full h-full flex items-center justify-center bg-slate-200 text-slate-500 font-bold">{instructor?.full_name?.[0]}</div>}
                 </div>
                 <div className="flex-1">
                     <textarea 
                         value={announcement} 
                         onChange={(e)=>setAnnouncement(e.target.value)} 
-                        className="w-full p-3 bg-slate-50 rounded-xl text-sm border-none focus:ring-0 resize-none min-h-[60px]" 
-                        placeholder="Post a new school announcement..." 
+                        className="w-full p-4 bg-slate-50/50 rounded-2xl text-sm border border-transparent focus:border-fbNavy/10 focus:bg-white focus:ring-4 focus:ring-fbNavy/5 transition-all outline-none resize-none min-h-[80px]" 
+                        placeholder={`What's on your mind, ${instructor?.full_name?.split(' ')[0]}?`} 
                     />
                 </div>
               </div>
-              <div className="border-t border-slate-100 pt-3 flex items-center justify-between">
+
+              {/* ATTACHMENT PREVIEW */}
+              {file && (
+                <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="mb-4 ml-16 p-3 bg-fbOrange/5 border border-fbOrange/20 rounded-xl flex items-center justify-between group">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-fbOrange rounded-lg text-white">
+                            <Paperclip size={16}/>
+                        </div>
+                        <div>
+                            <p className="text-xs font-bold text-slate-800 truncate max-w-[200px]">{file.name}</p>
+                            <p className="text-[10px] text-fbOrange font-bold uppercase tracking-tighter">Ready to upload</p>
+                        </div>
+                    </div>
+                    <button onClick={()=>setFile(null)} className="p-1 hover:bg-fbOrange/10 rounded-full text-fbOrange transition-colors">
+                        <X size={18}/>
+                    </button>
+                </motion.div>
+              )}
+
+              <div className="border-t border-slate-100 pt-4 flex items-center justify-between">
                 <div className="flex gap-2">
-                  <button onClick={()=>fileInputRef.current.click()} className="flex items-center gap-2 px-3 py-2 hover:bg-slate-50 rounded-lg text-slate-500 text-xs font-bold transition-all"><ImageIcon size={16} className="text-emerald-500"/> Photo/File</button>
-                  <select value={targetSection} onChange={(e)=>setTargetSection(e.target.value)} className="bg-slate-50 text-[10px] font-bold uppercase rounded-lg px-2 border-none outline-none">
-                    <option value="all">Public</option>
-                    {sections.map(s => <option key={s.id} value={s.section_code}>{s.section_code}</option>)}
-                  </select>
+                  <button onClick={()=>fileInputRef.current.click()} className="flex items-center gap-2 px-4 py-2 hover:bg-slate-50 rounded-xl text-slate-600 text-xs font-bold transition-all border border-transparent hover:border-slate-200">
+                    <ImageIcon size={18} className="text-emerald-500"/> 
+                    <span className="hidden sm:inline">Attach Media</span>
+                  </button>
+                  <div className="w-[1px] h-4 bg-slate-200 self-center mx-1" />
+                  <div className="relative group">
+                    <select 
+                        value={targetSection} 
+                        onChange={(e)=>setTargetSection(e.target.value)} 
+                        className="appearance-none bg-slate-50 hover:bg-slate-100 text-[11px] font-bold uppercase rounded-xl px-4 py-2 border border-slate-200 outline-none transition-all cursor-pointer pr-8"
+                    >
+                        <option value="all">Public (Global)</option>
+                        {sections.map(s => <option key={s.id} value={s.section_code}>{s.section_code}</option>)}
+                    </select>
+                    <ChevronRight size={14} className="absolute right-3 top-1/2 -translate-y-1/2 rotate-90 text-slate-400 pointer-events-none"/>
+                  </div>
                 </div>
-                {announcement.trim() || file ? (
-                  <button onClick={handlePost} disabled={isPosting} className="bg-fbNavy text-white px-4 py-1.5 rounded-lg text-xs font-bold">Post</button>
-                ) : null}
+
+                <button 
+                    onClick={handlePost} 
+                    disabled={isPosting || (!announcement.trim() && !file)} 
+                    className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all shadow-lg ${
+                        isPosting || (!announcement.trim() && !file) 
+                        ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none' 
+                        : 'bg-fbNavy text-white hover:bg-fbNavy/90 active:scale-95 shadow-fbNavy/20'
+                    }`}
+                >
+                    {isPosting ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
+                    {isPosting ? 'Posting...' : 'Post Announcement'}
+                </button>
               </div>
               <input type="file" ref={fileInputRef} className="hidden" onChange={(e)=>setFile(e.target.files[0])}/>
-              {file && <div className="mt-2 text-[10px] bg-fbOrange/10 text-fbOrange p-2 rounded flex justify-between items-center font-bold uppercase"><span>{file.name}</span><X size={14} onClick={()=>setFile(null)} className="cursor-pointer"/></div>}
             </motion.div>
 
             {/* SCROLLABLE FEED */}
-            <div className="flex-1 overflow-y-auto pr-2 space-y-4 custom-scrollbar">
+            <div className="flex-1 overflow-y-auto pr-2 space-y-6 custom-scrollbar pb-10">
+              {announcements.length === 0 && !loading && (
+                <div className="flex flex-col items-center justify-center py-20 text-slate-400 italic">
+                    <Activity size={48} className="mb-4 opacity-20"/>
+                    <p>No announcements posted yet.</p>
+                </div>
+              )}
+
               {announcements.map(ann => (
-                <motion.div key={ann.id} variants={v} className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                  <div className="p-4">
+                <motion.div key={ann.id} variants={v} className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-md transition-all duration-300">
+                  <div className="p-5">
                     <div className="flex justify-between items-start">
-                      <div className="flex gap-3">
-                        <div className="w-10 h-10 rounded-full bg-fbNavy flex items-center justify-center text-white text-sm font-bold overflow-hidden">
+                      <div className="flex gap-4">
+                        <div className="w-11 h-11 rounded-xl bg-fbNavy flex items-center justify-center text-white text-sm font-bold overflow-hidden shadow-inner">
                            {instructor?.avatar_url ? <img src={instructor.avatar_url} className="w-full h-full object-cover" alt="instructor"/> : instructor?.full_name?.[0]}
                         </div>
                         <div>
-                          <h4 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">{instructor?.full_name} <ShieldCheck size={14} className="text-blue-500 fill-blue-500 text-white"/></h4>
-                          <p className="text-[11px] text-slate-500 font-medium flex items-center gap-1">{new Date(ann.created_at).toLocaleDateString()} • <Globe size={10}/> {ann.target_section || "Global"}</p>
+                          <h4 className="text-sm font-black text-slate-900 flex items-center gap-2">
+                            {instructor?.full_name} 
+                            <div className="flex items-center gap-1 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
+                                <ShieldCheck size={12} className="text-blue-500 fill-blue-500 text-white"/>
+                                <span className="text-[9px] text-blue-600 uppercase font-black">Verified</span>
+                            </div>
+                          </h4>
+                          <div className="flex items-center gap-3 mt-1">
+                            <p className="text-[10px] text-slate-400 font-bold flex items-center gap-1"><Clock size={12}/> {new Date(ann.created_at).toLocaleDateString()}</p>
+                            <p className="text-[10px] text-fbOrange font-black uppercase flex items-center gap-1"><Globe size={12}/> {ann.target_section || "Global Access"}</p>
+                          </div>
                         </div>
                       </div>
-                      <button className="text-slate-400 hover:bg-slate-50 p-1 rounded-full"><MoreHorizontal size={20}/></button>
+                      <button className="text-slate-400 hover:bg-slate-50 p-2 rounded-xl transition-colors"><MoreHorizontal size={20}/></button>
                     </div>
-                    <p className="mt-3 text-[14px] text-slate-800 leading-normal">{ann.content}</p>
+                    <p className="mt-4 text-[15px] text-slate-700 leading-relaxed font-medium whitespace-pre-wrap">{ann.content}</p>
                   </div>
+
                   {ann.file_url && (
-                    <div className="border-t border-slate-50 bg-slate-50/50 p-4 flex items-center justify-between">
-                      <div className="flex items-center gap-2"><FileText size={18} className="text-fbNavy"/><span className="text-xs font-bold text-slate-600">Resource Attached</span></div>
-                      <a href={ann.file_url} target="_blank" rel="noreferrer" className="text-xs font-black text-fbOrange uppercase hover:underline">Download</a>
+                    <div className="mx-5 mb-5 p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between group hover:bg-slate-100 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <div className="p-3 bg-white rounded-xl shadow-sm border border-slate-200 text-fbNavy group-hover:text-fbOrange transition-colors">
+                            <FileText size={22} />
+                        </div>
+                        <div>
+                            <span className="text-xs font-black text-slate-700 block uppercase tracking-tight">Attachment Preview</span>
+                            <span className="text-[10px] font-bold text-slate-400 uppercase">Document • {ann.file_type || 'File'}</span>
+                        </div>
+                      </div>
+                      <a href={ann.file_url} target="_blank" rel="noreferrer" className="px-4 py-2 bg-white text-[10px] font-black text-fbNavy rounded-xl border border-slate-200 hover:bg-fbNavy hover:text-white transition-all shadow-sm">VIEW RESOURCE</a>
                     </div>
                   )}
-                  <div className="px-4 py-1 border-t border-slate-100 flex items-center justify-between">
-                    <button className="flex-1 flex items-center justify-center gap-2 py-2 hover:bg-slate-50 rounded-lg text-slate-500 text-sm font-bold transition-all"><ThumbsUp size={18}/> Like</button>
-                    <button className="flex-1 flex items-center justify-center gap-2 py-2 hover:bg-slate-50 rounded-lg text-slate-500 text-sm font-bold transition-all"><MessageSquare size={18}/> Comment</button>
-                    <button className="flex-1 flex items-center justify-center gap-2 py-2 hover:bg-slate-50 rounded-lg text-slate-500 text-sm font-bold transition-all"><Share2 size={18}/> Share</button>
+
+                  <div className="px-5 py-2 border-t border-slate-50 bg-slate-50/30 flex items-center justify-between gap-2">
+                    <button className="flex-1 flex items-center justify-center gap-2 py-2.5 hover:bg-white hover:shadow-sm rounded-xl text-slate-500 hover:text-fbNavy text-xs font-black transition-all uppercase tracking-widest"><ThumbsUp size={16}/> Like</button>
+                    <button className="flex-1 flex items-center justify-center gap-2 py-2.5 hover:bg-white hover:shadow-sm rounded-xl text-slate-500 hover:text-fbNavy text-xs font-black transition-all uppercase tracking-widest"><MessageSquare size={16}/> Comment</button>
+                    <button className="flex-1 flex items-center justify-center gap-2 py-2.5 hover:bg-white hover:shadow-sm rounded-xl text-slate-500 hover:text-fbNavy text-xs font-black transition-all uppercase tracking-widest"><Share2 size={16}/> Share</button>
                   </div>
                 </motion.div>
               ))}
@@ -163,56 +258,65 @@ export default function AdminDashboard() {
           <div className="lg:col-span-3 flex flex-col space-y-6 overflow-hidden min-h-0">
             
             {/* SECTIONS */}
-            <div className="bg-white rounded-xl p-5 shadow-sm border border-slate-200 shrink-0">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-sm font-bold text-slate-900">Active Sections</h3>
-                <button onClick={()=>setIsModalOpen(true)} className="p-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"><Plus size={16}/></button>
+            <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 shrink-0">
+              <div className="flex justify-between items-center mb-5">
+                <div>
+                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Academic Control</h3>
+                    <h3 className="text-sm font-black text-fbNavy">Active Sections</h3>
+                </div>
+                <button onClick={()=>setIsModalOpen(true)} className="p-2 bg-fbNavy/5 hover:bg-fbNavy text-fbNavy hover:text-white rounded-xl transition-all"><Plus size={18}/></button>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {sections.map(s => (
-                  <div key={s.id} className="flex items-center justify-between group cursor-pointer">
+                  <div key={s.id} className="flex items-center justify-between group cursor-pointer p-2 hover:bg-slate-50 rounded-xl transition-all border border-transparent hover:border-slate-100">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center font-bold text-[10px] text-fbNavy">{s.section_code[0]}</div>
-                      <span className="text-xs font-bold text-slate-700">{s.section_code}</span>
+                      <div className="w-9 h-9 bg-slate-100 group-hover:bg-fbNavy group-hover:text-white rounded-xl flex items-center justify-center font-black text-[11px] text-fbNavy transition-all">{s.section_code[0]}</div>
+                      <span className="text-xs font-bold text-slate-700 group-hover:text-fbNavy transition-colors">{s.section_code}</span>
                     </div>
-                    <ChevronRight size={14} className="text-slate-300 group-hover:text-fbOrange transition-all"/>
+                    <ChevronRight size={14} className="text-slate-300 group-hover:text-fbOrange group-hover:translate-x-1 transition-all"/>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* REGISTRY */}
-            <div className="bg-white rounded-xl p-5 shadow-sm border border-slate-200 flex flex-col flex-1 overflow-hidden min-h-0">
-                <div className="mb-4 shrink-0">
-                    <h2 className="text-sm font-black text-fbNavy uppercase italic">Student <span className="text-fbOrange">Registry</span></h2>
+            <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex flex-col flex-1 overflow-hidden min-h-0">
+                <div className="mb-5 shrink-0">
+                    <h2 className="text-sm font-black text-fbNavy uppercase italic flex items-center gap-2">
+                        <Users size={16} className="text-fbOrange"/> Student <span className="text-fbOrange">Registry</span>
+                    </h2>
                 </div>
                 
                 <div className="flex flex-col flex-1 overflow-hidden space-y-4">
                     <div className="relative shrink-0">
                         <input 
                             type="text" 
-                            placeholder="Search..." 
+                            placeholder="Find a student..." 
                             onChange={(e)=>setSearchTerm(e.target.value)} 
-                            className="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 pl-8 pr-2 text-[11px] font-bold focus:bg-white outline-none"
+                            className="w-full bg-slate-50 border-none rounded-xl py-3 pl-10 pr-4 text-[11px] font-bold focus:bg-white focus:ring-2 focus:ring-fbNavy/10 transition-all outline-none"
                         />
-                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" size={12}/>
+                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={14}/>
                     </div>
                     
-                    <button onClick={handleExport} className="w-full py-2 bg-fbNavy text-white rounded-lg hover:bg-fbOrange transition-colors text-[10px] font-bold shrink-0">
-                        EXPORT CSV
+                    <button onClick={handleExport} className="w-full py-3 bg-fbNavy text-white rounded-xl hover:bg-fbOrange transition-all text-[10px] font-black uppercase tracking-widest shadow-lg shadow-fbNavy/10 active:scale-[0.98] shrink-0">
+                        GENERATE REPORT (CSV)
                     </button>
 
                     <div className="overflow-y-auto pr-1 flex-1 space-y-2 custom-scrollbar">
                         <AnimatePresence>
                         {filtered.map(s => (
-                            <motion.div layout initial={{opacity:0}} animate={{opacity:1}} key={s.id} className="bg-slate-50 p-3 rounded-xl border border-slate-100 shrink-0">
+                            <motion.div layout initial={{opacity:0}} animate={{opacity:1}} key={s.id} className="bg-slate-50/50 p-3 rounded-2xl border border-slate-100 shrink-0 group hover:bg-white hover:shadow-md transition-all">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center overflow-hidden shrink-0">
-                                        {s.avatar_url ? <img src={s.avatar_url} className="w-full h-full object-cover" alt="student"/> : <div className="text-[10px] font-bold text-fbNavy">{s.full_name?.[0]}</div>}
+                                    <div className="w-9 h-9 rounded-full bg-white border border-slate-200 flex items-center justify-center overflow-hidden shrink-0 group-hover:border-fbOrange transition-all">
+                                        {s.avatar_url ? <img src={s.avatar_url} className="w-full h-full object-cover" alt="student"/> : <div className="text-[11px] font-black text-fbNavy">{s.full_name?.[0]}</div>}
                                     </div>
                                     <div className="overflow-hidden">
-                                        <h4 className="text-[10px] font-bold text-slate-900 truncate uppercase">{s.full_name}</h4>
-                                        <p className="text-[8px] font-black text-fbOrange">{s.student_id}</p>
+                                        <h4 className="text-[11px] font-black text-slate-900 truncate uppercase leading-tight group-hover:text-fbNavy">{s.full_name}</h4>
+                                        <div className="flex items-center gap-1">
+                                            <p className="text-[9px] font-black text-fbOrange tracking-tighter">{s.student_id}</p>
+                                            <div className="w-1 h-1 rounded-full bg-slate-300" />
+                                            <p className="text-[9px] font-bold text-slate-400">{s.section_code}</p>
+                                        </div>
                                     </div>
                                 </div>
                             </motion.div>
@@ -229,10 +333,10 @@ export default function AdminDashboard() {
       <CreateSectionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onRefresh={fetchData} />
       
       <style jsx>{`
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 20px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
       `}</style>
     </RoleGuard>
   );
