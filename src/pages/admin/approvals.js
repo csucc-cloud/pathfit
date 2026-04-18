@@ -29,7 +29,7 @@ export default function ApprovalsPage() {
         .from('profiles')
         .select('*')
         .eq('status', 'pending')
-        .eq('Role', 'student') // Match your case-sensitive 'Role' column
+        .eq('Role', 'student') 
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -45,22 +45,16 @@ export default function ApprovalsPage() {
     fetchPending();
   }, []);
 
-  // --- DATABASE COMMUNICATION HANDLER ---
   const handleAction = async (studentId, newStatus) => {
     setProcessingId(studentId);
     try {
-      // Updates the 'status' column in your 'profiles' table
       const { error } = await supabase
         .from('profiles')
         .update({ status: newStatus })
         .eq('id', studentId);
 
       if (error) throw error;
-      
-      // Smoothly remove from UI list after successful DB update
       setPendingStudents(prev => prev.filter(s => s.id !== studentId));
-      
-      // Feedback for the Instructor
       console.log(`User ${studentId} status updated to: ${newStatus}`);
     } catch (err) {
       alert("Database Error: " + err.message);
@@ -127,30 +121,31 @@ export default function ApprovalsPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
             {filtered.map((student) => (
-              <div key={student.id} className="bg-white p-8 rounded-[48px] border border-slate-50 shadow-sm hover:shadow-2xl transition-all group relative overflow-hidden flex flex-col justify-between">
-                {/* ID Tag */}
-                <div className="absolute top-6 right-8">
-                  <div className="bg-fbNavy/5 px-4 py-2 rounded-2xl border border-fbNavy/5">
-                    <span className="text-[10px] font-black text-fbNavy tracking-widest uppercase">#{student.student_id || 'NO-ID'}</span>
+              <div key={student.id} className="bg-white p-8 rounded-[48px] border border-slate-50 shadow-sm hover:shadow-2xl transition-all group relative overflow-hidden flex flex-col justify-between min-h-[450px]">
+                
+                {/* FIXED ID Tag: Moved to top right with proper z-index and no overlap */}
+                <div className="absolute top-8 right-8 z-20">
+                  <div className="bg-fbNavy/5 px-3 py-1.5 rounded-xl border border-fbNavy/10 backdrop-blur-sm">
+                    <span className="text-[9px] font-black text-fbNavy tracking-tighter uppercase whitespace-nowrap">#{student.student_id || 'NO-ID'}</span>
                   </div>
                 </div>
 
-                <div className="relative z-10">
-                  <div className="flex items-center gap-5 mb-8">
-                    <div className="w-16 h-16 rounded-3xl bg-fbNavy text-white flex items-center justify-center text-2xl font-black italic shadow-xl shadow-fbNavy/20 group-hover:bg-fbOrange transition-colors">
+                <div className="relative z-10 pt-4">
+                  <div className="flex items-start gap-5 mb-8">
+                    <div className="shrink-0 w-16 h-16 rounded-3xl bg-fbNavy text-white flex items-center justify-center text-2xl font-black italic shadow-xl shadow-fbNavy/20 group-hover:bg-fbOrange transition-colors">
                       {student.full_name?.charAt(0)}
                     </div>
-                    <div>
-                      <h4 className="font-black text-fbNavy uppercase italic text-lg tracking-tight leading-tight">
+                    <div className="pr-16"> {/* Added padding right to prevent name hitting the ID tag */}
+                      <h4 className="font-black text-fbNavy uppercase italic text-lg tracking-tight leading-tight break-words">
                         {student.full_name}
                       </h4>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 flex items-center gap-2">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2 flex items-center gap-2">
                          <GraduationCap size={12} className="text-fbOrange" /> {student.course}
                       </p>
                     </div>
                   </div>
 
-                  <div className="space-y-4 mb-10 bg-slate-50 p-6 rounded-[32px] border border-slate-100">
+                  <div className="space-y-4 mb-8 bg-slate-50 p-6 rounded-[32px] border border-slate-100">
                     <div className="flex justify-between items-center">
                       <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">Target Unit</span>
                       <span className="text-[11px] font-black text-fbNavy uppercase italic">{student.section_code}</span>
@@ -170,7 +165,7 @@ export default function ApprovalsPage() {
                 </div>
 
                 {/* ACTION BUTTONS */}
-                <div className="flex gap-4 relative z-10">
+                <div className="flex gap-4 relative z-10 pb-2">
                   <button 
                     disabled={processingId === student.id}
                     onClick={() => handleAction(student.id, 'active')}
