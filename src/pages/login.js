@@ -1,4 +1,3 @@
-// src/pages/login.js
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
@@ -54,25 +53,50 @@ export default function Login() {
     }, 800); // Wait for the 800ms transition to finish
   };
 
-  // --- ORIGINAL LOGIN LOGIC ---
+  // --- FINALIZED LOGIN LOGIC WITH DUAL-TABLE & GATEKEEPER ---
   const handleEmailAuth = async (e) => {
     e.preventDefault();
     if (!supabase) return;
     setLoading(true);
 
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({ email, password });
 
-    if (error) {
-      alert(error.message);
+    if (authError) {
+      alert(authError.message);
       setLoading(false);
     } else {
-      const { data: instructor } = await supabase
-        .from('instructors')
-        .select('id')
-        .eq('id', data.user.id)
-        .single();
+      try {
+        // 1. First, check the dedicated instructors table
+        const { data: instructor } = await supabase
+          .from('instructors')
+          .select('id')
+          .eq('id', authData.user.id)
+          .single();
 
-      router.push(instructor ? '/admin' : '/dashboard'); 
+        if (instructor) {
+          router.push('/admin');
+        } else {
+          // 2. If not an instructor, check student profile and approval status
+          const { data: profile, error: profError } = await supabase
+            .from('profiles')
+            .select('status')
+            .eq('id', authData.user.id)
+            .single();
+
+          if (profError) throw profError;
+
+          // 3. Gatekeeper routing
+          if (profile?.status === 'pending') {
+            router.push('/waiting-room');
+          } else {
+            router.push('/dashboard'); 
+          }
+        }
+      } catch (err) {
+        console.error("Routing Error:", err.message);
+        // Fallback if profile record is missing or query fails
+        router.push('/dashboard');
+      }
     }
     setLoading(false);
   };
