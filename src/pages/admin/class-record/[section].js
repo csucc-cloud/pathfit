@@ -36,12 +36,18 @@ export default function ClassRecord() {
         .select(`id, student_id, profiles:student_id(full_name, avatar_url, student_id_number)`)
         .eq('section_code', section);
 
-      // 2. Fetch Logs for the specific activity
-      const { data: logData } = await supabase
-        .from('exercise_logs')
-        .select('*')
-        .eq('section_code', section)
-        .eq('activity_type', selectedActivity);
+      // 2. Build Query for exercise_logs based on your schema
+      let logQuery = supabase.from('exercise_logs').select('*').eq('section_code', section);
+
+      // Consolidate activity filtering: use test_name for tests, week_number for weeks
+      if (selectedActivity === 'Pre-test' || selectedActivity === 'Post-test') {
+        logQuery = logQuery.eq('test_name', selectedActivity.toLowerCase().replace('-', ''));
+      } else {
+        const weekNum = parseInt(selectedActivity.split(' ')[1]);
+        logQuery = logQuery.eq('week_number', weekNum);
+      }
+
+      const { data: logData } = await logQuery;
 
       setStudents(enrollmentData || []);
       setExerciseLogs(logData || []);
@@ -52,14 +58,20 @@ export default function ClassRecord() {
     }
   };
 
-  // Logic to calculate the average score for a student per exercise
+  // Logic to calculate average across set_1_val, set_2_val, and set_3_val
   const getAvgScore = (studentId, exerciseName) => {
+    // Note: uses exercise_id column from your logs to match PATHFIT_EXERCISES name
     const logs = exerciseLogs.filter(
-      l => l.student_id === studentId && l.exercise_name === exerciseName
+      l => l.student_id === studentId && (l.exercise_id === exerciseName || l.test_name === exerciseName)
     );
     if (logs.length === 0) return 0;
-    const sum = logs.reduce((acc, curr) => acc + curr.score, 0);
-    return (sum / logs.length);
+    
+    const totalSetSum = logs.reduce((acc, curr) => {
+      return acc + (curr.set_1_val || 0) + (curr.set_2_val || 0) + (curr.set_3_val || 0);
+    }, 0);
+    
+    const totalSetsCount = logs.length * 3;
+    return (totalSetSum / totalSetsCount);
   };
 
   return (
@@ -116,7 +128,6 @@ export default function ClassRecord() {
               <thead>
                 <tr className="bg-slate-50">
                   <th className="p-8 text-[11px] font-black uppercase text-fbNavy sticky left-0 bg-slate-50 z-20 border-r border-gray-100"> Operative Name</th>
-                  {/* Updated to PATHFIT_EXERCISES */}
                   {PATHFIT_EXERCISES.map((ex) => (
                     <th key={ex.id || ex.name} className="p-4 text-[9px] font-black uppercase text-center text-gray-400 min-w-[100px]">
                       {ex.name}
@@ -129,7 +140,6 @@ export default function ClassRecord() {
               <tbody className="divide-y divide-gray-50">
                 {students.map(s => {
                   let rowTotal = 0;
-                  // Updated to PATHFIT_EXERCISES
                   const scores = PATHFIT_EXERCISES.map(ex => {
                     const avg = getAvgScore(s.student_id, ex.name);
                     rowTotal += avg;
