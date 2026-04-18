@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabaseClient';
-import InstructorLayout from '../../components/layouts/InstructorLayout';
 import { 
   Search, 
   UserPlus, 
@@ -63,7 +62,7 @@ export default function ClassesPage() {
   };
 
   return (
-    <InstructorLayout>
+    <>
       {/* HEADER AREA */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-12">
         <div>
@@ -124,7 +123,7 @@ export default function ClassesPage() {
           ))}
         </div>
       )}
-    </InstructorLayout>
+    </>
   );
 }
 
