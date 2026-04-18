@@ -6,8 +6,14 @@ import { useRouter } from "next/router";
 function MyApp({ Component, pageProps }) {
   const router = useRouter();
 
-  // Updated: Define which paths should NOT have the sidebar/layout (Auth/Landing)
-  const noLayoutPages = ["/", "/login", "/auth/register", "/auth/faculty-enroll"];
+  // UPDATED: Added "/waiting-room" to the list of pages that bypass the sidebar/layout
+  const noLayoutPages = [
+    "/", 
+    "/login", 
+    "/auth/register", 
+    "/auth/faculty-enroll", 
+    "/waiting-room"
+  ];
 
   // Check if the current path is in our "no layout" list
   const isNoLayoutPage = noLayoutPages.includes(router.pathname);
@@ -37,7 +43,7 @@ function MyApp({ Component, pageProps }) {
       `}</style>
 
       {isNoLayoutPage ? (
-        // 1. AUTH PAGES: No sidebar, no wrapper
+        // 1. AUTH & WAITING ROOM: No sidebar, no wrapper
         <Component {...pageProps} />
       ) : isInstructorRoute ? (
         // 2. INSTRUCTOR PAGES: Wrap in the new Instructor/Admin Sidebar
