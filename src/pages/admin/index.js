@@ -7,7 +7,7 @@ import { downloadCSV } from '../../utils/exportHelper';
 import { 
   Users, Search, FileDown, Eye, LayoutDashboard, Loader2, Plus, 
   Megaphone, Send, Clock, ChevronRight, Paperclip, X, FileText, 
-  Image as ImageIcon, Filter, GraduationCap, Layers, Activity // Added Activity here
+  Image as ImageIcon, Filter, GraduationCap, Layers, Activity, Calendar // Added Activity here
 } from 'lucide-react';
 
 export default function AdminDashboard() {
