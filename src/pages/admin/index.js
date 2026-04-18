@@ -259,8 +259,8 @@ export default function AdminDashboard() {
         <div className="space-y-6 pt-4">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 px-2">
             <div>
-              <h2 className="text-lg font-black text-fbNavy uppercase italic tracking-tight">Student <span className="text-fbOrange">Registry</span></h2>
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Database of all enrolled practitioners</p>
+              <h2 className="text-lg font-black text-fbNavy uppercase italic tracking-tight">Student <span className="text-fbOrange">Information</span></h2>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Database of all enrolled students</p>
             </div>
             
             <div className="flex items-center gap-3 w-full md:w-auto">
@@ -287,10 +287,10 @@ export default function AdminDashboard() {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-fbGray/5">
-                    <th className="p-8 text-[10px] font-black uppercase text-gray-400 tracking-[0.2em]">Practitioner</th>
-                    <th className="p-8 text-[10px] font-black uppercase text-gray-400 tracking-[0.2em]">Verification</th>
-                    <th className="p-8 text-[10px] font-black uppercase text-gray-400 tracking-[0.2em]">Assignment</th>
-                    <th className="p-8 text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] text-right">Activity</th>
+                    <th className="p-8 text-[10px] font-black uppercase text-gray-400 tracking-[0.2em]">Profile</th>
+                    <th className="p-8 text-[10px] font-black uppercase text-gray-400 tracking-[0.2em]">Information</th>
+                    <th className="p-8 text-[10px] font-black uppercase text-gray-400 tracking-[0.2em]">Section/Block</th>
+                    <th className="p-8 text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] text-right">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
