@@ -23,7 +23,7 @@ export default function ClassRecord() {
     'Week 5', 'Week 6', 'Week 7', 'Week 8', 'Post-test'
   ];
 
-  // Critical Fix: Only fetch when the router is fully ready and the section exists
+  // Logic: Wait specifically for router.isReady so 'section' isn't null during the first fetch
   useEffect(() => {
     if (router.isReady && section) {
       fetchData();
@@ -33,8 +33,7 @@ export default function ClassRecord() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // 1. Fetch Students directly from profiles table
-      // Using .select('*') to ensure no column mismatches
+      // 1. Fetch Students: Profiles table contains the section_code
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
@@ -42,12 +41,13 @@ export default function ClassRecord() {
 
       if (profileError) throw profileError;
 
-      // 2. Build Query for exercise_logs based on your schema
+      // 2. Fetch Logs: Using the same section_code for consistency
       let logQuery = supabase.from('exercise_logs').select('*').eq('section_code', section);
 
       // Consolidate activity filtering: use test_name for tests, week_number for weeks
+      // Logic adjusted to match the exact string "Pre-Test" or "Post-test" as in your activities array
       if (selectedActivity === 'Pre-Test' || selectedActivity === 'Post-test') {
-        logQuery = logQuery.eq('test_name', selectedActivity.toLowerCase().replace('-', ''));
+        logQuery = logQuery.eq('test_name', selectedActivity);
       } else {
         const weekNum = parseInt(selectedActivity.split(' ')[1]);
         logQuery = logQuery.eq('week_number', weekNum);
@@ -77,6 +77,7 @@ export default function ClassRecord() {
     if (logs.length === 0) return 0;
     
     const totalSetSum = logs.reduce((acc, curr) => {
+      // Calculate sum based on whether the exercise requires 2 or 3 sets
       const setSum = (curr.set_1_val || 0) + (curr.set_2_val || 0) + (expectedSets === 3 ? (curr.set_3_val || 0) : 0);
       return acc + setSum;
     }, 0);
@@ -99,7 +100,7 @@ export default function ClassRecord() {
           </button>
           <div>
             <h1 className="text-3xl font-black text-fbNavy uppercase italic leading-none">
-              SECTION <span className="text-fbOrange">{section}</span>
+              SECTION <span className="text-fbOrange">{section || '...'}</span>
             </h1>
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2">Active Class Record</p>
           </div>
@@ -218,7 +219,7 @@ export default function ClassRecord() {
                         </div>
                         <div>
                           <p className="text-xs font-black text-fbNavy uppercase italic">{s.full_name}</p>
-                          <p className="text-[9px] font-bold text-gray-400 mt-1 uppercase tracking-widest">{s.student_id_number}</p>
+                          <p className="text-[9px] font-bold text-gray-400 mt-1 uppercase tracking-widest">{s.student_id_number || 'N/A'}</p>
                         </div>
                       </div>
                     </td>
