@@ -76,7 +76,7 @@ export default function ClassRecord() {
           </button>
           <div>
             <h1 className="text-3xl font-black text-fbNavy uppercase italic leading-none">
-              Vault <span className="text-fbOrange">{section}</span>
+              SECTION <span className="text-fbOrange">{section}</span>
             </h1>
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2">Active Class Record</p>
           </div>
