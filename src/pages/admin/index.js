@@ -68,10 +68,11 @@ export default function AdminDashboard() {
     <RoleGuard allowedRole="instructor">
       <div className="fixed inset-0 -z-10 bg-[#F0F2F5]" /> 
       
-      <motion.div initial="hidden" animate="visible" variants={{visible:{transition:{staggerChildren:0.05}}}} className="max-w-[1600px] mx-auto p-4 md:p-6 space-y-6 font-sans h-screen flex flex-col">
+      {/* Container restricted to viewport height to ensure two-column scroll works */}
+      <motion.div initial="hidden" animate="visible" variants={{visible:{transition:{staggerChildren:0.05}}}} className="max-w-[1600px] mx-auto p-4 md:p-6 font-sans h-screen flex flex-col overflow-hidden">
         
         {/* HEADER / TOP NAV */}
-        <header className="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-slate-200 z-50 shrink-0">
+        <header className="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-slate-200 z-50 shrink-0 mb-6">
           <h1 className="text-xl font-black text-fbNavy tracking-tighter flex items-center gap-2">
             <div className="p-1.5 bg-fbNavy rounded-lg text-white"><Terminal size={18}/></div>
             PORTAL <span className="text-fbOrange">HUB</span>
@@ -87,11 +88,11 @@ export default function AdminDashboard() {
           </div>
         </header>
 
-        {/* 2 COLUMN GRID (12/16 and 4/16) */}
-        <div className="grid grid-cols-1 lg:grid-cols-16 gap-6 flex-1 overflow-hidden">
+        {/* 2 COLUMN GRID (Force 12/16 and 4/16 split) */}
+        <div className="flex-1 grid grid-cols-16 gap-6 min-h-0">
           
-          {/* LEFT COLUMN (12/16): FB STYLE FEED - SCROLLABLE */}
-          <div className="lg:col-span-12 flex flex-col space-y-5 overflow-hidden">
+          {/* LEFT COLUMN (12/16): FB STYLE FEED */}
+          <div className="col-span-12 flex flex-col space-y-5 overflow-hidden">
             
             {/* POST COMPOSER */}
             <motion.div variants={v} className="bg-white rounded-xl p-4 shadow-sm border border-slate-200 shrink-0">
@@ -125,7 +126,7 @@ export default function AdminDashboard() {
             </motion.div>
 
             {/* SCROLLABLE FEED AREA */}
-            <div className="flex-1 overflow-y-auto pr-2 space-y-4 custom-scrollbar">
+            <div className="flex-1 overflow-y-auto pr-2 space-y-4 custom-scrollbar pb-10">
               {announcements.map(ann => (
                 <motion.div key={ann.id} variants={v} className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                   <div className="p-4">
@@ -159,11 +160,11 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* RIGHT COLUMN (4/16): SECTIONS & REGISTRY */}
-          <div className="lg:col-span-4 space-y-6 overflow-y-auto pr-1 custom-scrollbar">
+          {/* RIGHT COLUMN (4/16): SIDEBAR AREA */}
+          <div className="col-span-4 flex flex-col space-y-6 overflow-hidden">
             
             {/* ACTIVE SECTIONS CARD */}
-            <div className="bg-white rounded-xl p-5 shadow-sm border border-slate-200">
+            <div className="bg-white rounded-xl p-5 shadow-sm border border-slate-200 shrink-0">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-sm font-bold text-slate-900">Active Sections</h3>
                 <button onClick={()=>setIsModalOpen(true)} className="p-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"><Plus size={16}/></button>
@@ -181,15 +182,15 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {/* STUDENT REGISTRY CARD (TRANSFERRED HERE) */}
-            <div className="bg-white rounded-xl p-5 shadow-sm border border-slate-200">
-                <div className="mb-4">
+            {/* STUDENT REGISTRY CARD (NESTED IN RIGHT SIDEBAR) */}
+            <div className="bg-white rounded-xl p-5 shadow-sm border border-slate-200 flex flex-col flex-1 min-h-0">
+                <div className="mb-4 shrink-0">
                     <h2 className="text-sm font-black text-fbNavy uppercase italic">Student <span className="text-fbOrange">Registry</span></h2>
                     <p className="text-[9px] font-bold text-slate-400 uppercase">Manage Entities</p>
                 </div>
                 
-                <div className="space-y-4">
-                    <div className="relative">
+                <div className="flex flex-col flex-1 min-h-0 space-y-4">
+                    <div className="relative shrink-0">
                         <input 
                             type="text" 
                             placeholder="Search..." 
@@ -199,11 +200,11 @@ export default function AdminDashboard() {
                         <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" size={12}/>
                     </div>
                     
-                    <button onClick={handleExport} className="w-full py-2 bg-fbNavy text-white rounded-lg hover:bg-fbOrange transition-colors text-[10px] font-bold flex items-center justify-center gap-2">
+                    <button onClick={handleExport} className="shrink-0 w-full py-2 bg-fbNavy text-white rounded-lg hover:bg-fbOrange transition-colors text-[10px] font-bold flex items-center justify-center gap-2">
                         <FileDown size={14}/> EXPORT CSV
                     </button>
 
-                    <div className="space-y-2 max-h-[400px] overflow-y-auto pr-1">
+                    <div className="flex-1 overflow-y-auto pr-1 space-y-2 custom-scrollbar">
                         <AnimatePresence>
                         {filtered.map(s => (
                             <motion.div layout initial={{opacity:0}} animate={{opacity:1}} key={s.id} className="bg-slate-50 p-3 rounded-xl border border-slate-100">
