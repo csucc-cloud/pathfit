@@ -45,9 +45,11 @@ export default function ApprovalsPage() {
     fetchPending();
   }, []);
 
+  // --- DATABASE COMMUNICATION HANDLER ---
   const handleAction = async (studentId, newStatus) => {
     setProcessingId(studentId);
     try {
+      // Updates the 'status' column in your 'profiles' table
       const { error } = await supabase
         .from('profiles')
         .update({ status: newStatus })
@@ -55,11 +57,13 @@ export default function ApprovalsPage() {
 
       if (error) throw error;
       
-      // Smoothly remove from list
+      // Smoothly remove from UI list after successful DB update
       setPendingStudents(prev => prev.filter(s => s.id !== studentId));
-      alert(`Student successfully ${newStatus === 'active' ? 'Approved' : 'Rejected'}.`);
+      
+      // Feedback for the Instructor
+      console.log(`User ${studentId} status updated to: ${newStatus}`);
     } catch (err) {
-      alert("Action failed: " + err.message);
+      alert("Database Error: " + err.message);
     } finally {
       setProcessingId(null);
     }
