@@ -1,4 +1,4 @@
-import React, { useState } from 'react'; // Added useState for toggle logic
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { supabase } from '../../lib/supabaseClient'; 
 import { 
@@ -9,20 +9,20 @@ import {
   Settings, 
   LogOut,
   Zap,
-  Menu, // Added for mobile toggle
-  X     // Added for mobile toggle
+  Menu,
+  X 
 } from 'lucide-react';
 
 export default function InstructorLayout({ children }) {
   const router = useRouter();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Mobile sidebar state
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
   const menuItems = [
     { name: 'Overview', icon: <LayoutDashboard size={20} />, path: '/admin' },
     { name: 'My Classes', icon: <Users size={20} />, path: '/admin/classes' },
     { name: 'Approvals', icon: <ClipboardCheck size={20} />, path: '/admin/approvals' },
     { name: 'Analytics', icon: <BarChart size={20} />, path: '/admin/analytics' },
-    { name: 'Settings', icon: <Settings size={20} />, path: '/admin/settings' }, // Added Settings to nav
+    { name: 'Settings', icon: <Settings size={20} />, path: '/admin/settings' },
   ];
 
   const handleSignOut = async () => {
@@ -36,54 +36,59 @@ export default function InstructorLayout({ children }) {
     }
   };
 
-  // Helper to check if a route is active (handles sub-paths)
-  const isActive = (path) => router.pathname === path || router.pathname.startsWith(`${path}/`);
+  // HIGHEST UI/UX: Exact path matching for Overview to prevent double-activation
+  const isActive = (path) => {
+    if (path === '/admin') return router.pathname === '/admin';
+    return router.pathname.startsWith(path);
+  };
 
   return (
-    <div className="flex min-h-screen bg-[#F8F9FD] font-sans overflow-x-hidden">
+    <div className="flex min-h-screen bg-[#F8F9FD] font-sans selection:bg-fbOrange/30">
       
-      {/* MOBILE TOP BAR (Hidden on Desktop) */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-fbNavy flex items-center justify-between px-6 z-[60] border-b border-white/5">
+      {/* MOBILE TOP BAR (High-Fidelity Blur) */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-20 bg-fbNavy/95 backdrop-blur-xl flex items-center justify-between px-6 z-[60] border-b border-white/10">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-fbOrange rounded-lg flex items-center justify-center shadow-lg shadow-fbOrange/20">
-            <Zap size={16} className="text-white fill-white" />
+          <div className="w-10 h-10 bg-fbOrange rounded-xl flex items-center justify-center shadow-lg shadow-fbOrange/30 border border-white/20">
+            <Zap size={20} className="text-white fill-white" />
           </div>
-          <h2 className="font-black italic text-white uppercase tracking-tighter text-sm">PATHFIT</h2>
+          <h2 className="font-black italic text-white uppercase tracking-tighter text-lg">PATHFIT</h2>
         </div>
         <button 
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          className="p-2 bg-fbOrange/10 rounded-xl text-fbOrange active:scale-95 transition-all"
+          className="w-12 h-12 flex items-center justify-center bg-white/5 rounded-2xl text-fbOrange active:scale-90 transition-all border border-white/10"
         >
           {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
 
-      {/* MOBILE OVERLAY (Blur/Darken background when sidebar open) */}
+      {/* MOBILE OVERLAY */}
       {isSidebarOpen && (
         <div 
-          className="fixed inset-0 bg-fbNavy/60 backdrop-blur-sm z-[45] lg:hidden animate-in fade-in duration-300"
+          className="fixed inset-0 bg-fbNavy/80 backdrop-blur-md z-[45] lg:hidden animate-in fade-in duration-500"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
 
-      {/* SIDEBAR */}
+      {/* SIDEBAR (Refined Motion & Glassmorphism) */}
       <aside className={`
-        fixed h-full z-50 w-64 bg-fbNavy text-white flex flex-col transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]
-        ${isSidebarOpen ? 'translate-x-0 shadow-[20px_0_60px_-15px_rgba(0,0,0,0.5)]' : '-translate-x-full lg:translate-x-0'}
+        fixed h-full z-50 w-72 bg-fbNavy text-white flex flex-col transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]
+        ${isSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'}
       `}>
-        <div className="p-8 flex items-center gap-3">
-          <div className="w-8 h-8 bg-fbOrange rounded-lg flex items-center justify-center shadow-lg shadow-fbOrange/20">
-            <Zap size={18} className="text-white fill-white" />
+        {/* SIDEBAR HEADER */}
+        <div className="p-10 flex items-center gap-4">
+          <div className="w-10 h-10 bg-fbOrange rounded-xl flex items-center justify-center shadow-2xl shadow-fbOrange/40 border border-white/10 transform -rotate-3">
+            <Zap size={22} className="text-white fill-white" />
           </div>
           <div className="flex flex-col">
-            <h2 className="font-black italic tracking-tighter text-lg uppercase text-white leading-none">
+            <h2 className="font-black italic tracking-tighter text-2xl uppercase text-white leading-none">
               PATH<span className="text-fbOrange">FIT</span>
             </h2>
-            <span className="text-[10px] opacity-40 not-italic tracking-widest font-bold uppercase">Faculty</span>
+            <span className="text-[10px] opacity-40 not-italic tracking-[0.2em] font-black uppercase mt-1">Admin Portal</span>
           </div>
         </div>
 
-        <nav className="flex-1 px-4 space-y-2 mt-4">
+        {/* NAVIGATION AREA */}
+        <nav className="flex-1 px-6 space-y-3 mt-6">
           {menuItems.map((item) => {
             const active = isActive(item.path);
             return (
@@ -91,15 +96,20 @@ export default function InstructorLayout({ children }) {
                 key={item.name}
                 onClick={() => {
                   router.push(item.path);
-                  setIsSidebarOpen(false); // Auto-close on mobile after navigation
+                  setIsSidebarOpen(false);
                 }}
-                className={`w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-bold text-sm transition-all group ${
+                className={`group relative w-full flex items-center gap-4 px-6 py-4 rounded-[22px] font-black text-[13px] uppercase tracking-widest transition-all duration-300 ${
                   active 
-                  ? 'bg-fbOrange text-white shadow-lg shadow-fbOrange/20' 
-                  : 'text-white/40 hover:text-white hover:bg-white/5'
+                  ? 'bg-fbOrange text-white shadow-xl shadow-fbOrange/25 translate-x-1' 
+                  : 'text-white/40 hover:text-white hover:bg-white/5 hover:translate-x-1'
                 }`}
               >
-                <span className={active ? 'text-white' : 'text-fbOrange opacity-50 group-hover:opacity-100 transition-opacity'}>
+                {/* Active Indicator Line */}
+                {active && (
+                  <div className="absolute left-0 w-1.5 h-6 bg-white rounded-full -translate-x-3 animate-in fade-in zoom-in duration-500" />
+                )}
+                
+                <span className={`transition-all duration-300 ${active ? 'text-white scale-110' : 'text-fbOrange opacity-40 group-hover:opacity-100 group-hover:scale-110'}`}>
                   {item.icon}
                 </span>
                 {item.name}
@@ -108,25 +118,27 @@ export default function InstructorLayout({ children }) {
           })}
         </nav>
 
-        {/* UPDATED SIGN OUT BUTTON */}
-        <div className="p-6 mt-auto border-t border-white/5">
+        {/* SIGN OUT AREA */}
+        <div className="p-8 mt-auto border-t border-white/10">
           <button 
             onClick={handleSignOut}
-            className="w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-bold text-sm text-red-400 hover:bg-red-500/10 hover:text-red-500 transition-all active:scale-95 group"
+            className="w-full flex items-center gap-4 px-6 py-5 rounded-3xl font-black text-[13px] uppercase tracking-widest text-red-400/70 hover:bg-red-500/10 hover:text-red-400 transition-all active:scale-95 group border border-transparent hover:border-red-500/20"
           >
-            <LogOut size={20} className="group-hover:-translate-x-1 transition-transform" />
+            <div className="p-2 bg-red-500/10 rounded-xl group-hover:bg-red-500/20 transition-colors">
+              <LogOut size={18} className="group-hover:-translate-x-1 transition-transform" />
+            </div>
             Sign Out
           </button>
         </div>
       </aside>
 
-      {/* MAIN CONTENT AREA */}
+      {/* MAIN CONTENT AREA (High-Fidelity Animations) */}
       <main className={`
-        flex-1 p-6 md:p-10 transition-all duration-500
-        lg:ml-64 mt-16 lg:mt-0 w-full overflow-x-hidden
+        flex-1 min-h-screen transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]
+        lg:ml-72 pt-28 lg:pt-12 px-6 md:px-12 pb-12 w-full
       `}>
-        {/* Dynamic Page Wrapper */}
-        <div className="max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
+        {/* Dynamic Page Wrapper with Entrance Motion */}
+        <div className="max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-6 duration-1000 fill-mode-both">
           {children}
         </div>
       </main>
