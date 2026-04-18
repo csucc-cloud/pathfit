@@ -18,7 +18,7 @@ export default function InstructorLayout({ children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
   const menuItems = [
-    { name: 'Overview', icon: <LayoutDashboard size={20} />, path: '/admin' },
+    { name: 'Ann. Feed', icon: <LayoutDashboard size={20} />, path: '/admin' },
     { name: 'My Classes', icon: <Users size={20} />, path: '/admin/classes' },
     { name: 'Approvals', icon: <ClipboardCheck size={20} />, path: '/admin/approvals' },
     { name: 'Analytics', icon: <BarChart size={20} />, path: '/admin/analytics' },
