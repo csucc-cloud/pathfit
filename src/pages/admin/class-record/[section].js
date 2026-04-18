@@ -30,14 +30,16 @@ export default function ClassRecord() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // 1. Fetch Students
-      const { data: enrollmentData } = await supabase
+      // 1. Fetch Students - Using ilike for case-insensitive matching to ensure section "qwert" matches "QWERT"
+      const { data: enrollmentData, error: enrollError } = await supabase
         .from('enrollments')
         .select(`id, student_id, profiles:student_id(full_name, avatar_url, student_id_number)`)
-        .eq('section_code', section);
+        .ilike('section_code', section);
+
+      if (enrollError) throw enrollError;
 
       // 2. Build Query for exercise_logs based on your schema
-      let logQuery = supabase.from('exercise_logs').select('*').eq('section_code', section);
+      let logQuery = supabase.from('exercise_logs').select('*').ilike('section_code', section);
 
       // Consolidate activity filtering: use test_name for tests, week_number for weeks
       if (selectedActivity === 'Pre-test' || selectedActivity === 'Post-test') {
@@ -47,7 +49,8 @@ export default function ClassRecord() {
         logQuery = logQuery.eq('week_number', weekNum);
       }
 
-      const { data: logData } = await logQuery;
+      const { data: logData, error: logError } = await logQuery;
+      if (logError) throw logError;
 
       setStudents(enrollmentData || []);
       setExerciseLogs(logData || []);
@@ -58,19 +61,26 @@ export default function ClassRecord() {
     }
   };
 
-  // Logic to calculate average across set_1_val, set_2_val, and set_3_val
+  // Logic to calculate average dynamically based on the number of sets defined in constants
   const getAvgScore = (studentId, exerciseName) => {
-    // Note: uses exercise_id column from your logs to match PATHFIT_EXERCISES name
+    // Check constant to see if this exercise has 2 or 3 sets
+    const exerciseDef = PATHFIT_EXERCISES.find(ex => ex.name === exerciseName);
+    const expectedSets = exerciseDef?.sets || 3; 
+
     const logs = exerciseLogs.filter(
       l => l.student_id === studentId && (l.exercise_id === exerciseName || l.test_name === exerciseName)
     );
+    
     if (logs.length === 0) return 0;
     
     const totalSetSum = logs.reduce((acc, curr) => {
-      return acc + (curr.set_1_val || 0) + (curr.set_2_val || 0) + (curr.set_3_val || 0);
+      // Sum up only the number of sets that are expected
+      let sum = (curr.set_1_val || 0) + (curr.set_2_val || 0);
+      if (expectedSets === 3) sum += (curr.set_3_val || 0);
+      return acc + sum;
     }, 0);
     
-    const totalSetsCount = logs.length * 3;
+    const totalSetsCount = logs.length * expectedSets;
     return (totalSetSum / totalSetsCount);
   };
 
@@ -118,7 +128,7 @@ export default function ClassRecord() {
                <div className="p-3 bg-fbOrange/10 rounded-2xl"><Activity className="text-fbOrange" size={28} /></div>
                <div>
                   <h2 className="font-black text-fbNavy uppercase italic text-xl">{selectedActivity} Mean Scores</h2>
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Calculated per 15-exercise set</p>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Calculated per exercise set</p>
                </div>
             </div>
           </div>
@@ -138,30 +148,38 @@ export default function ClassRecord() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {students.map(s => {
-                  let rowTotal = 0;
-                  const scores = PATHFIT_EXERCISES.map(ex => {
-                    const avg = getAvgScore(s.student_id, ex.name);
-                    rowTotal += avg;
-                    return avg;
-                  });
-                  const rowAvg = (rowTotal / PATHFIT_EXERCISES.length).toFixed(1);
+                {students.length > 0 ? (
+                  students.map(s => {
+                    let rowTotal = 0;
+                    const scores = PATHFIT_EXERCISES.map(ex => {
+                      const avg = getAvgScore(s.student_id, ex.name);
+                      rowTotal += avg;
+                      return avg;
+                    });
+                    const rowAvg = (rowTotal / PATHFIT_EXERCISES.length).toFixed(1);
 
-                  return (
-                    <tr key={s.id} className="hover:bg-fbGray/10 transition-colors group">
-                      <td className="p-8 sticky left-0 bg-white group-hover:bg-gray-50 font-black text-xs text-fbNavy z-10 border-r border-gray-50 italic uppercase">
-                        {s.profiles.full_name}
-                      </td>
-                      {scores.map((score, i) => (
-                        <td key={i} className="p-4 text-center text-xs font-bold text-slate-500">
-                          {score > 0 ? score.toFixed(1) : '-'}
+                    return (
+                      <tr key={s.id} className="hover:bg-fbGray/10 transition-colors group">
+                        <td className="p-8 sticky left-0 bg-white group-hover:bg-gray-50 font-black text-xs text-fbNavy z-10 border-r border-gray-50 italic uppercase">
+                          {s.profiles?.full_name || 'Unknown Student'}
                         </td>
-                      ))}
-                      <td className="p-6 text-center text-sm font-black text-fbNavy bg-slate-50/50">{rowTotal.toFixed(1)}</td>
-                      <td className="p-6 text-center text-sm font-black text-fbOrange bg-fbOrange/5">{rowAvg}</td>
-                    </tr>
-                  );
-                })}
+                        {scores.map((score, i) => (
+                          <td key={i} className="p-4 text-center text-xs font-bold text-slate-500">
+                            {score > 0 ? score.toFixed(1) : '-'}
+                          </td>
+                        ))}
+                        <td className="p-6 text-center text-sm font-black text-fbNavy bg-slate-50/50">{rowTotal.toFixed(1)}</td>
+                        <td className="p-6 text-center text-sm font-black text-fbOrange bg-fbOrange/5">{rowAvg}</td>
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan={PATHFIT_EXERCISES.length + 3} className="p-20 text-center text-gray-400 font-bold uppercase tracking-widest text-xs">
+                      {loading ? 'Initializing Matrix...' : 'No Operatives found in this section'}
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -190,11 +208,11 @@ export default function ClassRecord() {
                     <td className="p-8">
                       <div className="flex items-center gap-5">
                         <div className="w-12 h-12 rounded-2xl bg-fbGray overflow-hidden border-2 border-white shadow-md">
-                          <img src={s.profiles.avatar_url || '/api/placeholder/48/48'} className="w-full h-full object-cover" />
+                          <img src={s.profiles?.avatar_url || '/api/placeholder/48/48'} className="w-full h-full object-cover" />
                         </div>
                         <div>
-                          <p className="text-xs font-black text-fbNavy uppercase italic">{s.profiles.full_name}</p>
-                          <p className="text-[9px] font-bold text-gray-400 mt-1 uppercase tracking-widest">{s.profiles.student_id_number}</p>
+                          <p className="text-xs font-black text-fbNavy uppercase italic">{s.profiles?.full_name}</p>
+                          <p className="text-[9px] font-bold text-gray-400 mt-1 uppercase tracking-widest">{s.profiles?.student_id_number}</p>
                         </div>
                       </div>
                     </td>
@@ -203,7 +221,6 @@ export default function ClassRecord() {
                         <div className="w-4 h-4 rounded-full bg-green-500/20 border-2 border-green-500 mx-auto" />
                       </td>
                     ))}
-                    {/* Placeholder Logic for totals */}
                     <td className="p-4 text-center font-black text-fbNavy text-xs">0.0</td>
                     <td className="p-4 text-center font-black text-fbNavy text-xs">0.0</td>
                     <td className="p-4 text-center font-black text-fbOrange text-xs italic">0.0</td>
