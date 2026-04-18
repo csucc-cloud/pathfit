@@ -103,7 +103,7 @@ export default function AnalyticsPage() {
     document.body.removeChild(link);
   };
 
-  const goToApprovals = () => router.push('/admin/approval'); 
+  const goToApprovals = () => router.push('/admin/approvals'); 
 
   if (loading) return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#f8fafc]">
