@@ -1,3 +1,4 @@
+// src/pages/classes/index.js (or equivalent path)
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -13,7 +14,8 @@ import {
   Users,
   LayoutGrid,
   Sparkles,
-  ArrowRightCircle
+  ArrowRightCircle,
+  LayoutDashboard // Added to match the Hub icon
 } from 'lucide-react';
 
 // Animation Variants
@@ -89,45 +91,44 @@ export default function ClassesPage() {
   return (
     <div className="min-h-screen pt-12 lg:pt-8 pb-20 px-6 md:px-10 lg:pl-12 max-w-[1600px] mx-auto overflow-hidden">
       
-      {/* HEADER AREA */}
-      <motion.div 
+      {/* --- UPDATED BRANDED HEADER --- */}
+      <motion.header 
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 mb-16 bg-white p-10 rounded-[50px] shadow-2xl shadow-fbNavy/5 border border-slate-100 relative overflow-hidden"
+        className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-white p-8 rounded-[40px] shadow-xl shadow-fbNavy/5 border border-white mb-16"
       >
-        <div className="absolute top-0 left-0 w-2 h-full bg-fbOrange" />
-        <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="p-2 bg-fbOrange/10 rounded-xl">
-              <LayoutGrid className="text-fbOrange w-5 h-5" />
+        <div className="flex items-center gap-6">
+          <motion.div 
+            whileHover={{ rotate: 0, scale: 1.1 }}
+            className="bg-fbNavy p-4 rounded-3xl shadow-2xl shadow-fbNavy/20 rotate-3 transition-all duration-500"
+          >
+            <LayoutGrid className="w-8 h-8 text-white" />
+          </motion.div>
+          <div>
+            <h1 className="text-3xl font-black text-fbNavy tracking-tight italic uppercase leading-none">
+              Class <span className="text-fbOrange">Vault</span>
+            </h1>
+            <div className="flex items-center gap-2 text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em] mt-2">
+              <span className="relative flex h-2 w-2">
+                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${loading ? 'bg-orange-400' : 'bg-green-400'}`}></span>
+                <span className={`relative inline-flex rounded-full h-2 w-2 ${loading ? 'bg-fbOrange' : 'bg-green-500'}`}></span>
+              </span>
+              {loading ? 'Syncing Registry...' : 'Registry Secure'}
             </div>
-            <span className="text-[10px] font-black text-fbOrange uppercase tracking-[0.4em]">Section Control Matrix</span>
-          </div>
-          <h1 className="text-5xl md:text-6xl font-black text-fbNavy uppercase italic tracking-tighter leading-none">
-            Class <span className="text-fbOrange">Vault</span>
-          </h1>
-          <div className="flex items-center gap-3 mt-5">
-            <div className={`h-2.5 w-2.5 rounded-full ${loading ? 'bg-slate-200 animate-pulse' : 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]'}`} />
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
-              <Database size={12} className={loading ? "animate-spin" : "text-fbNavy"} /> 
-              {loading ? 'Re-Routing Data...' : 'Biometric Link Active'}
-            </p>
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto z-10">
-          <div className="relative group flex-1 sm:w-96">
-            <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300 group-focus-within:text-fbOrange transition-all" />
-            <input 
-              type="text"
-              placeholder="Search section code..."
-              className="w-full pl-16 pr-8 py-6 bg-slate-50 border border-slate-100 rounded-[30px] text-xs font-black text-fbNavy outline-none focus:ring-8 focus:ring-fbNavy/5 focus:bg-white transition-all shadow-inner uppercase placeholder:normal-case placeholder:font-medium"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
+        <div className="relative group w-full md:w-[400px]">
+          <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300 group-focus-within:text-fbOrange transition-colors" />
+          <input 
+            type="text" 
+            placeholder="Search section code..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-14 pr-8 py-5 bg-[#f8fafc] border border-slate-100 rounded-[28px] text-[12px] font-black text-fbNavy uppercase focus:ring-8 focus:ring-fbNavy/5 focus:border-fbNavy focus:bg-white outline-none transition-all shadow-inner"
+          />
         </div>
-      </motion.div>
+      </motion.header>
 
       {/* ERROR STATE */}
       <AnimatePresence>
