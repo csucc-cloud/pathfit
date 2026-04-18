@@ -14,7 +14,7 @@ export default function ClassRecord() {
   const { section } = router.query;
 
   const [loading, setLoading] = useState(true);
-  const [selectedActivity, setSelectedActivity] = useState('Pre-test');
+  const [selectedActivity, setSelectedActivity] = useState('Pre-Test');
   const [students, setStudents] = useState([]);
   const [exerciseLogs, setExerciseLogs] = useState([]);
 
