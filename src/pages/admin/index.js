@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import RoleGuard from '../../components/RoleGuard';
 import CreateSectionModal from '../../components/section/create';
+import PostCard from './PostCard'; // Imported the new component
 import { supabase } from '../../lib/supabaseClient'; 
 import { downloadCSV } from '../../utils/exportHelper'; 
 import { motion, AnimatePresence } from 'framer-motion';
@@ -193,7 +194,7 @@ export default function AdminDashboard() {
               <input type="file" ref={fileInputRef} className="hidden" onChange={(e)=>setFile(e.target.files[0])}/>
             </motion.div>
 
-            {/* SCROLLABLE FEED */}
+            {/* SCROLLABLE FEED - NOW USING POSTCARD */}
             <div className="flex-1 overflow-y-auto pr-2 space-y-6 custom-scrollbar pb-10">
               {announcements.length === 0 && !loading && (
                 <div className="flex flex-col items-center justify-center py-20 text-slate-400 italic">
@@ -203,53 +204,7 @@ export default function AdminDashboard() {
               )}
 
               {announcements.map(ann => (
-                <motion.div key={ann.id} variants={v} className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-md transition-all duration-300">
-                  <div className="p-5">
-                    <div className="flex justify-between items-start">
-                      <div className="flex gap-4">
-                        <div className="w-11 h-11 rounded-xl bg-fbNavy flex items-center justify-center text-white text-sm font-bold overflow-hidden shadow-inner">
-                           {instructor?.avatar_url ? <img src={instructor.avatar_url} className="w-full h-full object-cover" alt="instructor"/> : instructor?.full_name?.[0]}
-                        </div>
-                        <div>
-                          <h4 className="text-sm font-black text-slate-900 flex items-center gap-2">
-                            {instructor?.full_name} 
-                            <div className="flex items-center gap-1 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
-                                <ShieldCheck size={12} className="text-blue-500 fill-blue-500 text-white"/>
-                                <span className="text-[9px] text-blue-600 uppercase font-black">Verified</span>
-                            </div>
-                          </h4>
-                          <div className="flex items-center gap-3 mt-1">
-                            <p className="text-[10px] text-slate-400 font-bold flex items-center gap-1"><Clock size={12}/> {new Date(ann.created_at).toLocaleDateString()}</p>
-                            <p className="text-[10px] text-fbOrange font-black uppercase flex items-center gap-1"><Globe size={12}/> {ann.target_section || "Global Access"}</p>
-                          </div>
-                        </div>
-                      </div>
-                      <button className="text-slate-400 hover:bg-slate-50 p-2 rounded-xl transition-colors"><MoreHorizontal size={20}/></button>
-                    </div>
-                    <p className="mt-4 text-[15px] text-slate-700 leading-relaxed font-medium whitespace-pre-wrap">{ann.content}</p>
-                  </div>
-
-                  {ann.file_url && (
-                    <div className="mx-5 mb-5 p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between group hover:bg-slate-100 transition-colors">
-                      <div className="flex items-center gap-3">
-                        <div className="p-3 bg-white rounded-xl shadow-sm border border-slate-200 text-fbNavy group-hover:text-fbOrange transition-colors">
-                            <FileText size={22} />
-                        </div>
-                        <div>
-                            <span className="text-xs font-black text-slate-700 block uppercase tracking-tight">Attachment Preview</span>
-                            <span className="text-[10px] font-bold text-slate-400 uppercase">Document • {ann.file_type || 'File'}</span>
-                        </div>
-                      </div>
-                      <a href={ann.file_url} target="_blank" rel="noreferrer" className="px-4 py-2 bg-white text-[10px] font-black text-fbNavy rounded-xl border border-slate-200 hover:bg-fbNavy hover:text-white transition-all shadow-sm">VIEW RESOURCE</a>
-                    </div>
-                  )}
-
-                  <div className="px-5 py-2 border-t border-slate-50 bg-slate-50/30 flex items-center justify-between gap-2">
-                    <button className="flex-1 flex items-center justify-center gap-2 py-2.5 hover:bg-white hover:shadow-sm rounded-xl text-slate-500 hover:text-fbNavy text-xs font-black transition-all uppercase tracking-widest"><ThumbsUp size={16}/> Like</button>
-                    <button className="flex-1 flex items-center justify-center gap-2 py-2.5 hover:bg-white hover:shadow-sm rounded-xl text-slate-500 hover:text-fbNavy text-xs font-black transition-all uppercase tracking-widest"><MessageSquare size={16}/> Comment</button>
-                    <button className="flex-1 flex items-center justify-center gap-2 py-2.5 hover:bg-white hover:shadow-sm rounded-xl text-slate-500 hover:text-fbNavy text-xs font-black transition-all uppercase tracking-widest"><Share2 size={16}/> Share</button>
-                  </div>
-                </motion.div>
+                <PostCard key={ann.id} ann={ann} instructor={instructor} />
               ))}
             </div>
           </div>
