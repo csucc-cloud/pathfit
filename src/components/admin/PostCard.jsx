@@ -47,7 +47,6 @@ export default function PostCard({ ann, instructor }) {
   }, [ann.id, instructor?.id]);
 
   const handleDeletePost = async () => {
-    // Custom non-blocking confirm logic could go here, keeping simple for logic integrity
     if (!window.confirm("Delete this memory forever?")) return;
     setIsDeleting(true);
     const { error } = await supabase.from('announcements').delete().eq('id', ann.id);
@@ -61,7 +60,7 @@ export default function PostCard({ ann, instructor }) {
     const { error } = await supabase.from('announcements').update({ content: editContent }).eq('id', ann.id);
     if (error) { alert(error.message); setIsUpdating(false); } 
     else { 
-      setTimeout(() => { // Small delay for "Saving" satisfaction
+      setTimeout(() => {
         setIsEditing(false); setIsUpdating(false); setShowMenu(false); ann.content = editContent; 
       }, 600);
     }
@@ -104,7 +103,6 @@ export default function PostCard({ ann, instructor }) {
           exit={{ opacity: 0, scale: 0.8, filter: "blur(10px)", transition: { duration: 0.3 } }}
           className={`relative bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden mb-6 group ${isDeleting ? 'pointer-events-none' : ''}`}
         >
-          {/* Progress Shimmer for Updates */}
           {isUpdating && <motion.div className="absolute top-0 left-0 h-1 bg-gradient-to-r from-fbNavy to-fbOrange z-[80]" initial={{ width: 0 }} animate={{ width: "100%" }} transition={{ duration: 1, repeat: Infinity }} />}
 
           <div className="p-6">
@@ -168,7 +166,14 @@ export default function PostCard({ ann, instructor }) {
                     </motion.div>
                   )}
                 </AnimatePresence>
-                <button onMouseEnter={() => setShowReactions(true)} onClick={() => handleReaction('like')} className={`w-full flex items-center justify-center gap-2 py-3 rounded-[20px] text-[11px] font-black transition-all uppercase tracking-tighter ${reaction ? reactions.find(r => r.id === reaction).bg + " " + reactions.find(r => r.id === reaction).color : 'text-slate-400 hover:bg-white'}`}>
+                
+                {/* FIXED REACTION BUTTON: Prevent Browser Context Menu */}
+                <button 
+                  onMouseEnter={() => setShowReactions(true)} 
+                  onContextMenu={(e) => e.preventDefault()}
+                  onClick={() => handleReaction('like')} 
+                  className={`w-full flex items-center justify-center gap-2 py-3 rounded-[20px] text-[11px] font-black transition-all uppercase tracking-tighter no-system-menu ${reaction ? reactions.find(r => r.id === reaction).bg + " " + reactions.find(r => r.id === reaction).color : 'text-slate-400 hover:bg-white'}`}
+                >
                   {reaction ? React.cloneElement(reactions.find(r => r.id === reaction).icon, { className: reactions.find(r => r.id === reaction).fill }) : <ThumbsUp size={18}/>}
                   {reaction ? reactions.find(r => r.id === reaction).label : 'React'}
                 </button>
@@ -214,7 +219,6 @@ export default function PostCard({ ann, instructor }) {
             )}
           </AnimatePresence>
 
-          {/* Delete Overlay */}
           <AnimatePresence>
             {isDeleting && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0 z-[100] bg-white/80 backdrop-blur-md flex items-center justify-center flex-col gap-4">
@@ -226,6 +230,15 @@ export default function PostCard({ ann, instructor }) {
               </motion.div>
             )}
           </AnimatePresence>
+
+          {/* Global Style for Prevention */}
+          <style jsx global>{`
+            .no-system-menu {
+              -webkit-touch-callout: none !important;
+              -webkit-user-select: none !important;
+              user-select: none !important;
+            }
+          `}</style>
         </motion.div>
       )}
     </AnimatePresence>
