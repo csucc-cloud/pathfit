@@ -81,22 +81,22 @@ export default function InstructorLayout({ children }) {
         ${isSidebarOpen ? 'translate-x-0 shadow-2xl shadow-black/50' : '-translate-x-full lg:translate-x-0'}
         lg:sticky lg:top-0 lg:h-screen
       `}>
-        {/* LOGO AREA - Fixed */}
-        <div className="p-10 flex items-center gap-4 shrink-0">
-          <div className="w-11 h-11 bg-fbOrange rounded-2xl flex items-center justify-center shadow-2xl shadow-fbOrange/40 transform -rotate-6">
-            <Zap size={24} className="text-white fill-white" />
+        {/* LOGO AREA - Responsive Padding */}
+        <div className="p-10 landscape:p-6 lg:p-10 flex items-center gap-4 shrink-0">
+          <div className="w-11 h-11 landscape:w-9 landscape:h-9 lg:w-11 lg:h-11 bg-fbOrange rounded-2xl flex items-center justify-center shadow-2xl shadow-fbOrange/40 transform -rotate-6">
+            <Zap size={24} className="text-white fill-white landscape:scale-75 lg:scale-100" />
           </div>
           <div className="flex flex-col">
-            <h2 className="font-black italic tracking-tighter text-2xl uppercase leading-none">
+            <h2 className="font-black italic tracking-tighter text-2xl landscape:text-xl lg:text-2xl uppercase leading-none">
               PATH<span className="text-fbOrange">FIT</span>
             </h2>
-            <span className="text-[10px] opacity-50 font-black uppercase mt-1 tracking-[0.2em]">Instructor</span>
+            <span className="text-[10px] opacity-50 font-black uppercase mt-1 tracking-[0.2em] landscape:hidden lg:block">Instructor</span>
           </div>
         </div>
 
-        {/* NAVIGATION AREA - Flex-1 with min-h-0 allows internal scrolling */}
-        <nav className="flex-1 min-h-0 px-6 mt-4 overflow-y-auto custom-scrollbar">
-          <div className="space-y-3 pb-10">
+        {/* NAVIGATION AREA - Scrollable Middle */}
+        <nav className="flex-1 min-h-0 px-6 landscape:px-4 lg:px-6 mt-4 landscape:mt-1 lg:mt-4 overflow-y-auto custom-scrollbar">
+          <div className="space-y-3 landscape:space-y-1 lg:space-y-3 pb-10">
             {menuItems.map((item) => {
               const active = isActive(item.path);
               return (
@@ -106,7 +106,7 @@ export default function InstructorLayout({ children }) {
                     router.push(item.path);
                     setIsSidebarOpen(false);
                   }}
-                  className={`group relative w-full flex items-center gap-4 px-6 py-4 rounded-[20px] font-black text-[13px] uppercase tracking-widest transition-all duration-300 ${
+                  className={`group relative w-full flex items-center gap-4 px-6 py-4 landscape:py-3 lg:py-4 rounded-[20px] font-black text-[13px] uppercase tracking-widest transition-all duration-300 ${
                     active 
                     ? 'bg-fbOrange text-white shadow-xl shadow-fbOrange/30 translate-x-1' 
                     : 'text-white/40 hover:text-white hover:bg-white/5'
@@ -125,11 +125,11 @@ export default function InstructorLayout({ children }) {
           </div>
         </nav>
 
-        {/* SIGN OUT AREA - Locked at bottom with shrink-0 and Safe Area Padding */}
-        <div className="p-8 pb-[max(2rem,env(safe-area-inset-bottom))] border-t border-white/5 bg-fbNavy shrink-0 mt-auto">
+        {/* SIGN OUT AREA - Optimized for landscape */}
+        <div className="p-8 landscape:p-4 lg:p-8 pb-[max(1.5rem,env(safe-area-inset-bottom))] border-t border-white/5 bg-fbNavy shrink-0 mt-auto">
           <button 
             onClick={handleSignOut}
-            className="w-full flex items-center gap-4 px-6 py-5 rounded-[20px] font-black text-[12px] uppercase tracking-widest text-red-400/50 hover:bg-red-500/10 hover:text-red-400 transition-all group"
+            className="w-full flex items-center gap-4 px-6 py-5 landscape:py-3 lg:py-5 rounded-[20px] font-black text-[12px] uppercase tracking-widest text-red-400/50 hover:bg-red-500/10 hover:text-red-400 transition-all group"
           >
             <LogOut size={20} className="group-hover:-translate-x-1 transition-transform" />
             Sign Out
@@ -172,18 +172,19 @@ export default function InstructorLayout({ children }) {
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
         
-        /* Force container to ignore mobile browser UI scaling issues */
         html, body {
             height: 100%;
+            margin: 0;
+            padding: 0;
             overflow: hidden;
             position: fixed;
             width: 100%;
         }
 
-        @media (max-height: 600px) and (orientation: landscape) {
-          .p-10 { padding: 1.5rem !important; }
-          nav { margin-top: 0.5rem !important; }
-          .pb-10 { padding-bottom: 5rem !important; }
+        @media (max-height: 500px) {
+          .p-10 { padding: 1rem !important; }
+          nav { margin-top: 0 !important; }
+          .pb-10 { padding-bottom: 2rem !important; }
         }
       `}</style>
     </div>
