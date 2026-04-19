@@ -49,7 +49,7 @@ export default function InstructorLayout({ children }) {
   };
 
   return (
-    <div className="flex h-[100dvh] bg-[#F8F9FD] font-sans selection:bg-fbOrange/30 overflow-hidden">
+    <div className="flex h-[100dvh] w-full bg-[#F8F9FD] font-sans selection:bg-fbOrange/30 overflow-hidden">
       
       {/* MOBILE TOP BAR - Fixed Height & High Z-Index */}
       <div className="lg:hidden fixed top-0 left-0 right-0 h-16 md:h-20 bg-fbNavy/95 backdrop-blur-xl flex items-center justify-between px-6 md:px-10 z-[60] border-b border-white/10 shadow-lg">
@@ -79,7 +79,7 @@ export default function InstructorLayout({ children }) {
       <aside className={`
         fixed inset-y-0 left-0 z-50 w-[300px] bg-fbNavy text-white flex flex-col transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)]
         ${isSidebarOpen ? 'translate-x-0 shadow-2xl shadow-black/50' : '-translate-x-full lg:translate-x-0'}
-        lg:sticky lg:h-screen
+        lg:sticky lg:top-0 lg:h-screen
       `}>
         {/* LOGO AREA - Fixed */}
         <div className="p-10 flex items-center gap-4 shrink-0">
@@ -94,7 +94,7 @@ export default function InstructorLayout({ children }) {
           </div>
         </div>
 
-        {/* NAVIGATION AREA - Scrollable Middle */}
+        {/* NAVIGATION AREA - Flex-1 with min-h-0 allows internal scrolling */}
         <nav className="flex-1 min-h-0 px-6 mt-4 overflow-y-auto custom-scrollbar">
           <div className="space-y-3 pb-10">
             {menuItems.map((item) => {
@@ -125,8 +125,8 @@ export default function InstructorLayout({ children }) {
           </div>
         </nav>
 
-        {/* SIGN OUT AREA - Locked at bottom with shrink-0 */}
-        <div className="p-8 border-t border-white/5 bg-fbNavy shrink-0 mt-auto">
+        {/* SIGN OUT AREA - Locked at bottom with shrink-0 and Safe Area Padding */}
+        <div className="p-8 pb-[max(2rem,env(safe-area-inset-bottom))] border-t border-white/5 bg-fbNavy shrink-0 mt-auto">
           <button 
             onClick={handleSignOut}
             className="w-full flex items-center gap-4 px-6 py-5 rounded-[20px] font-black text-[12px] uppercase tracking-widest text-red-400/50 hover:bg-red-500/10 hover:text-red-400 transition-all group"
@@ -171,8 +171,15 @@ export default function InstructorLayout({ children }) {
         .custom-scrollbar::-webkit-scrollbar { width: 5px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
         
+        /* Force container to ignore mobile browser UI scaling issues */
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+        }
+
         @media (max-height: 600px) and (orientation: landscape) {
           .p-10 { padding: 1.5rem !important; }
           nav { margin-top: 0.5rem !important; }
