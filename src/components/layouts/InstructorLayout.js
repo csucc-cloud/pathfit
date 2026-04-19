@@ -182,9 +182,10 @@ export default function InstructorLayout({ children }) {
         }
 
         @media (max-height: 500px) {
-          .p-10 { padding: 0.5rem !important; }
-          nav { margin-top: 0 !important; }
-          .pb-10 { padding-bottom: 1rem !important; }
+          aside { overflow-y: auto !important; }
+          aside > div:first-child { padding: 0.5rem 0.75rem !important; }
+          aside nav { margin-top: 0 !important; flex: 1; min-height: 0; }
+          aside > div:last-child { padding: 0.25rem 0.75rem !important; position: sticky; bottom: 0; }
         }
       `}</style>
     </div>
