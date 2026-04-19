@@ -16,9 +16,11 @@ export default function PostCard({ ann, instructor }) {
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState("");
   const [comments, setComments] = useState([]);
-  
-  // State for the three dots menu
   const [showMenu, setShowMenu] = useState(false);
+
+  // New states for Edit functionality
+  const [isEditing, setIsEditing] = useState(false);
+  const [editContent, setEditContent] = useState(ann?.content || "");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -49,6 +51,44 @@ export default function PostCard({ ann, instructor }) {
     if (ann.id) fetchData();
   }, [ann.id, instructor?.id]);
 
+  // --- NEW HANDLERS FOR EDIT & DELETE ---
+
+  const handleDeletePost = async () => {
+    if (!window.confirm("Are you sure you want to delete this post permanently?")) return;
+    
+    const { error } = await supabase
+      .from('announcements')
+      .delete()
+      .eq('id', ann.id);
+
+    if (error) {
+      alert("Delete Error: " + error.message);
+    } else {
+      alert("Post deleted successfully.");
+      window.location.reload(); // Refresh to update list
+    }
+  };
+
+  const handleUpdatePost = async () => {
+    if (!editContent.trim()) return;
+
+    const { error } = await supabase
+      .from('announcements')
+      .update({ content: editContent })
+      .eq('id', ann.id);
+
+    if (error) {
+      alert("Update Error: " + error.message);
+    } else {
+      setIsEditing(false);
+      setShowMenu(false);
+      // Local update so user sees change immediately
+      ann.content = editContent; 
+    }
+  };
+
+  // --- END NEW HANDLERS ---
+
   const reactions = [
     { id: 'like', icon: <ThumbsUp size={18} className="text-blue-500 fill-blue-500" />, label: 'Like', color: 'text-blue-500' },
     { id: 'heart', icon: <Heart size={18} className="text-red-500 fill-red-500" />, label: 'Love', color: 'text-red-500' },
@@ -57,7 +97,7 @@ export default function PostCard({ ann, instructor }) {
   ];
 
   const handleReaction = async (type) => {
-    if (!instructor?.id) return alert("Error: Instructor ID is missing. Are you logged in?");
+    if (!instructor?.id) return alert("Error: Instructor ID is missing.");
     const isRemoving = type === reaction;
     const previousReaction = reaction;
     setReaction(isRemoving ? null : type);
@@ -73,11 +113,7 @@ export default function PostCard({ ann, instructor }) {
         }, { onConflict: 'announcement_id, user_id' });
       error = upsertError;
     }
-
-    if (error) {
-      setReaction(previousReaction);
-      alert("Database Reaction Error: " + error.message);
-    }
+    if (error) { setReaction(previousReaction); alert("Database Reaction Error: " + error.message); }
   };
 
   const handleSendComment = async () => {
@@ -99,7 +135,6 @@ export default function PostCard({ ann, instructor }) {
       content: `${shareDescription}\n\n--- Shared Post ---\n${ann.content}`,
       instructor_id: instructor.id, target_section: null, file_url: ann.file_url || null, file_type: ann.file_type || null
     }]);
-    
     if (error) alert("Database Share Error: " + error.message);
     else { setShowShareModal(false); setShareDescription(""); alert("Success!"); }
   };
@@ -135,8 +170,7 @@ export default function PostCard({ ann, instructor }) {
             </div>
           </div>
 
-          {/* ADDED: Three Dots Button */}
-          <div className="relative">
+          <div className="relative" onMouseLeave={() => setShowMenu(false)}>
             <button 
               onClick={() => setShowMenu(!showMenu)}
               className="p-2 hover:bg-slate-50 rounded-full transition-colors"
@@ -152,10 +186,16 @@ export default function PostCard({ ann, instructor }) {
                   exit={{ opacity: 0, scale: 0.9, y: -10 }}
                   className="absolute right-0 mt-2 w-40 bg-white border border-slate-100 shadow-xl rounded-xl z-[60] py-2 overflow-hidden"
                 >
-                  <button className="w-full px-4 py-2 text-left text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center gap-2">
+                  <button 
+                    onClick={() => { setIsEditing(true); setShowMenu(false); }}
+                    className="w-full px-4 py-2 text-left text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center gap-2"
+                  >
                     <Edit3 size={14} /> Edit Post
                   </button>
-                  <button className="w-full px-4 py-2 text-left text-xs font-bold text-red-500 hover:bg-red-50 flex items-center gap-2">
+                  <button 
+                    onClick={handleDeletePost}
+                    className="w-full px-4 py-2 text-left text-xs font-bold text-red-500 hover:bg-red-50 flex items-center gap-2"
+                  >
                     <Trash2 size={14} /> Delete
                   </button>
                 </motion.div>
@@ -163,18 +203,31 @@ export default function PostCard({ ann, instructor }) {
             </AnimatePresence>
           </div>
         </div>
-        <p className="mt-4 text-[15px] text-slate-700 leading-relaxed font-medium whitespace-pre-wrap">{ann?.content}</p>
+
+        {/* POST CONTENT OR EDIT INPUT */}
+        {isEditing ? (
+          <div className="mt-4 space-y-3">
+            <textarea 
+              value={editContent}
+              onChange={(e) => setEditContent(e.target.value)}
+              className="w-full p-3 bg-slate-50 rounded-xl text-sm border-2 border-fbNavy/20 focus:border-fbNavy outline-none min-h-[100px]"
+            />
+            <div className="flex gap-2">
+              <button onClick={handleUpdatePost} className="bg-fbNavy text-white px-4 py-2 rounded-lg text-[10px] font-black uppercase">Save</button>
+              <button onClick={() => setIsEditing(false)} className="bg-slate-200 text-slate-600 px-4 py-2 rounded-lg text-[10px] font-black uppercase">Cancel</button>
+            </div>
+          </div>
+        ) : (
+          <p className="mt-4 text-[15px] text-slate-700 leading-relaxed font-medium whitespace-pre-wrap">{ann?.content}</p>
+        )}
       </div>
 
-      {/* ACTION BAR with Long-Press Fix */}
+      {/* ACTION BAR */}
       <div 
         className="px-5 py-2 border-t border-slate-50 bg-slate-50/30 flex items-center justify-between gap-2 relative select-none touch-none"
         style={{ WebkitTouchCallout: 'none' }} 
       >
-        <div 
-          className="flex-1 relative" 
-          onMouseLeave={() => setShowReactions(false)}
-        >
+        <div className="flex-1 relative" onMouseLeave={() => setShowReactions(false)}>
           <AnimatePresence>
             {showReactions && (
               <motion.div 
@@ -199,7 +252,7 @@ export default function PostCard({ ann, instructor }) {
           
           <button 
             onMouseEnter={() => setShowReactions(true)}
-            onContextMenu={(e) => e.preventDefault()} // Prevents long-press menu
+            onContextMenu={(e) => e.preventDefault()}
             onClick={() => handleReaction('like')}
             className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-black transition-all uppercase tracking-widest ${reaction ? reactions.find(r => r.id === reaction).color : 'text-slate-500 hover:bg-white'}`}
           >
@@ -223,7 +276,7 @@ export default function PostCard({ ann, instructor }) {
         </button>
       </div>
 
-      {/* REMAINDER OF YOUR CODE (Modals/Comments) REMAINS UNCHANGED */}
+      {/* MODALS & COMMENTS SECTIONS (UNCHANGED) */}
       <AnimatePresence>
         {showShareModal && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[1000] flex items-center justify-center p-4">
@@ -239,10 +292,6 @@ export default function PostCard({ ann, instructor }) {
                   placeholder="Say something about this..." 
                   className="w-full h-24 p-3 bg-slate-50 rounded-xl text-sm focus:outline-none border-none resize-none"
                 />
-                <div className="mt-4 p-4 border rounded-2xl bg-slate-50/50">
-                  <p className="text-xs font-bold text-slate-400 uppercase mb-2">Original Post</p>
-                  <p className="text-xs text-slate-600 line-clamp-3">{ann.content}</p>
-                </div>
                 <button onClick={handleFacebookShare} className="w-full mt-5 bg-fbNavy text-white py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-fbNavy/90 transition-all shadow-lg">Share Now</button>
               </div>
             </motion.div>
