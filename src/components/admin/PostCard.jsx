@@ -19,24 +19,33 @@ export default function PostCard({ ann, instructor }) {
   // Load data from Supabase on mount
   useEffect(() => {
     const fetchData = async () => {
-      // Fetch Comments
-      const { data: comms } = await supabase
-        .from('comments')
-        .select('*')
-        .eq('announcement_id', ann.id)
-        .order('created_at', { ascending: false });
-      if (comms) setComments(comms.map(c => ({ id: c.id, text: c.content, user: c.user_full_name, created_at: c.created_at })));
+      try {
+        // Fetch Comments
+        const { data: comms, error: commError } = await supabase
+          .from('comments')
+          .select('*')
+          .eq('announcement_id', ann.id)
+          .order('created_at', { ascending: false });
+        
+        if (comms) setComments(comms.map(c => ({ id: c.id, text: c.content, user: c.user_full_name, created_at: c.created_at })));
+        if (commError) alert("Fetch Comments Error: " + commError.message);
 
-      // Fetch User's Reaction
-      const { data: react } = await supabase
-        .from('reactions')
-        .select('type')
-        .eq('announcement_id', ann.id)
-        .eq('user_id', instructor?.id)
-        .single();
-      if (react) setReaction(react.type);
+        // Fetch User's Reaction
+        if (instructor?.id) {
+          const { data: react, error: reactError } = await supabase
+            .from('reactions')
+            .select('type')
+            .eq('announcement_id', ann.id)
+            .eq('user_id', instructor.id)
+            .maybeSingle(); // Changed .single() to .maybeSingle() to prevent 406 errors
+          
+          if (react) setReaction(react.type);
+        }
+      } catch (e) {
+        alert("System Error: " + e.message);
+      }
     };
-    if (ann.id && instructor?.id) fetchData();
+    if (ann.id) fetchData();
   }, [ann.id, instructor?.id]);
 
   const reactions = [
@@ -47,23 +56,43 @@ export default function PostCard({ ann, instructor }) {
   ];
 
   const handleReaction = async (type) => {
+    if (!instructor?.id) return alert("Error: Instructor ID is missing. Are you logged in?");
+    
     const isRemoving = type === reaction;
+    const previousReaction = reaction;
+    
+    // Optimistic Update (Immediate UI change)
     setReaction(isRemoving ? null : type);
     setShowReactions(false);
 
+    let error;
     if (isRemoving) {
-      await supabase.from('reactions').delete().eq('announcement_id', ann.id).eq('user_id', instructor.id);
+      const { error: delError } = await supabase
+        .from('reactions')
+        .delete()
+        .eq('announcement_id', ann.id)
+        .eq('user_id', instructor.id);
+      error = delError;
     } else {
-      await supabase.from('reactions').upsert({ 
-        announcement_id: ann.id, 
-        user_id: instructor.id, 
-        type: type 
-      }, { onConflict: 'announcement_id, user_id' });
+      const { error: upsertError } = await supabase
+        .from('reactions')
+        .upsert({ 
+          announcement_id: ann.id, 
+          user_id: instructor.id, 
+          type: type 
+        }, { onConflict: 'announcement_id, user_id' });
+      error = upsertError;
+    }
+
+    if (error) {
+      setReaction(previousReaction); // Rollback on error
+      alert("Database Reaction Error: " + error.message);
     }
   };
 
   const handleSendComment = async () => {
-    if (!commentText.trim()) return;
+    if (!commentText.trim() || !instructor?.id) return;
+    
     const { data, error } = await supabase.from('comments').insert([{
       announcement_id: ann.id,
       user_id: instructor.id,
@@ -71,25 +100,32 @@ export default function PostCard({ ann, instructor }) {
       user_full_name: instructor.full_name
     }]).select().single();
 
-    if (data) {
+    if (error) {
+      alert("Database Comment Error: " + error.message);
+    } else if (data) {
       setComments([{ id: data.id, text: data.content, user: data.user_full_name, created_at: data.created_at }, ...comments]);
       setCommentText("");
     }
   };
 
   const handleFacebookShare = async () => {
-    // Logic to "duplicate" with description in Supabase
-    const { data } = await supabase.from('announcements').insert([{
+    if (!instructor?.id) return alert("Error: Instructor ID missing");
+
+    const { error } = await supabase.from('announcements').insert([{
       content: `${shareDescription}\n\n--- Shared Post ---\n${ann.content}`,
       instructor_id: instructor.id,
-      target_section: ann.target_section,
-      file_url: ann.file_url,
-      file_type: ann.file_type
+      target_section: ann.target_section || "General",
+      file_url: ann.file_url || null,
+      file_type: ann.file_type || null
     }]);
     
-    setShowShareModal(false);
-    setShareDescription("");
-    alert("Post shared to your timeline!");
+    if (error) {
+      alert("Database Share Error: " + error.message);
+    } else {
+      setShowShareModal(false);
+      setShareDescription("");
+      alert("Success! The announcement has been shared to your timeline.");
+    }
   };
 
   return (
@@ -140,7 +176,7 @@ export default function PostCard({ ann, instructor }) {
                 exit={{ opacity: 0, y: 20, scale: 0.5 }}
                 className="absolute left-0 bg-white shadow-2xl border border-slate-100 rounded-full p-1.5 flex gap-1 z-50"
               >
-                {reactions.map((r, i) => (
+                {reactions.map((r) => (
                   <motion.button 
                     key={r.id} 
                     whileHover={{ scale: 1.4, y: -5 }}
@@ -184,7 +220,7 @@ export default function PostCard({ ann, instructor }) {
       {/* FACEBOOK STYLE SHARE MODAL */}
       <AnimatePresence>
         {showShareModal && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[999] flex items-center justify-center p-4">
             <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl">
               <div className="p-4 border-b flex justify-between items-center">
                 <h3 className="font-black text-slate-800 uppercase text-sm">Share Post</h3>
