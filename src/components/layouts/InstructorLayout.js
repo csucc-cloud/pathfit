@@ -1,43 +1,49 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { supabase } from '../../lib/supabaseClient'; 
-import { 
- LayoutDashboard, 
- Users, 
- ClipboardCheck, 
- BarChart, 
- Settings, 
- LogOut,
- Zap,
- Menu,
- X,
- Copyright,
- HelpCircle
+import { supabase } from '../../lib/supabaseClient';
+import {
+  LayoutDashboard,
+  Users,
+  ClipboardCheck,
+  BarChart,
+  Settings,
+  LogOut,
+  Zap,
+  Menu,
+  X,
+  Copyright,
+  MoreHorizontal,
+  Bell,
 } from 'lucide-react';
 
 export default function InstructorLayout({ children }) {
   const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  
+  const [user, setUser] = useState(null);
+
   useEffect(() => {
     const handleRouteChange = () => setIsSidebarOpen(false);
     router.events.on('routeChangeStart', handleRouteChange);
     return () => router.events.off('routeChangeStart', handleRouteChange);
   }, [router]);
 
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setUser(data?.user ?? null));
+  }, []);
+
   const menuItems = [
-    { name: 'Ann. Feed', icon: <LayoutDashboard size={20} />, path: '/admin' },
-    { name: 'My Classes', icon: <Users size={20} />, path: '/admin/classes' },
-    { name: 'Approvals', icon: <ClipboardCheck size={20} />, path: '/admin/approvals' },
-    { name: 'Analytics', icon: <BarChart size={20} />, path: '/admin/analytics' },
-    { name: 'Settings', icon: <Settings size={20} />, path: '/admin/settings' },
+    { name: 'Ann. Feed',  icon: <LayoutDashboard size={17} />, path: '/admin' },
+    { name: 'My Classes', icon: <Users size={17} />,           path: '/admin/classes' },
+    { name: 'Approvals',  icon: <ClipboardCheck size={17} />,  path: '/admin/approvals' },
+    { name: 'Analytics',  icon: <BarChart size={17} />,        path: '/admin/analytics' },
+    { name: 'Settings',   icon: <Settings size={17} />,        path: '/admin/settings' },
   ];
 
   const handleSignOut = async () => {
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
-      router.push('/login'); 
+      router.push('/login');
     } catch (err) {
       console.error('Error:', err.message);
     }
@@ -48,118 +54,147 @@ export default function InstructorLayout({ children }) {
     return router.pathname.startsWith(path);
   };
 
+  const initials = user?.email
+    ? user.email.slice(0, 2).toUpperCase()
+    : 'IN';
+
+  const displayName = user?.user_metadata?.full_name
+    || user?.email?.split('@')[0]
+    || 'Instructor';
+
   return (
-    <div className="flex h-[100dvh] w-full bg-[#F8F9FD] font-sans selection:bg-fbOrange/30 overflow-hidden">
-      
-      {/* MOBILE TOP BAR */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 md:h-20 bg-fbNavy/95 backdrop-blur-xl flex items-center justify-between px-6 md:px-10 z-[60] border-b border-white/10 shadow-lg">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-fbOrange rounded-xl flex items-center justify-center shadow-lg shadow-fbOrange/30">
-            <Zap size={18} className="text-white fill-white" />
+    <div className="flex h-[100dvh] w-full bg-[#EEF0F6] font-sans overflow-hidden">
+
+      {/* ── MOBILE TOP BAR ── */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-[#0B1120]/95 backdrop-blur-xl flex items-center justify-between px-5 z-[60] border-b border-white/10">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 bg-fbOrange rounded-lg flex items-center justify-center" style={{ transform: 'rotate(-6deg)' }}>
+            <Zap size={15} className="text-white fill-white" />
           </div>
-          <h2 className="font-black italic text-white uppercase tracking-tighter text-lg">PATHFIT</h2>
+          <span className="font-black italic text-white uppercase tracking-tight text-base">
+            PATH<span className="text-fbOrange">FIT</span>
+          </span>
         </div>
-        <button 
+        <button
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          className="w-11 h-11 flex items-center justify-center bg-white/10 rounded-xl text-fbOrange transition-all active:scale-90"
+          className="w-9 h-9 flex items-center justify-center bg-white/10 rounded-lg text-fbOrange active:scale-90 transition-transform"
         >
-          {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
+          {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
       </div>
 
-      {/* MOBILE OVERLAY */}
-      <div 
-        className={`fixed inset-0 bg-fbNavy/80 backdrop-blur-md z-[45] lg:hidden transition-opacity duration-500 ${
+      {/* ── OVERLAY ── */}
+      <div
+        className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-[45] lg:hidden transition-opacity duration-300 ${
           isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
         onClick={() => setIsSidebarOpen(false)}
       />
 
-      {/* SIDEBAR */}
+      {/* ── SIDEBAR ── */}
       <aside className={`
-        fixed inset-y-0 left-0 z-50 w-[300px] bg-fbNavy text-white flex flex-col transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)]
-        ${isSidebarOpen ? 'translate-x-0 shadow-2xl shadow-black/50' : '-translate-x-full lg:translate-x-0'}
+        fixed inset-y-0 left-0 z-50 w-[260px] bg-[#0B1120] text-white flex flex-col
+        transition-transform duration-300 ease-in-out
+        ${isSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'}
         lg:sticky lg:top-0 lg:h-screen
       `}>
-        {/* LOGO AREA */}
-        <div id="sidebar-logo" className="p-10 lg:p-10 flex items-center gap-4 shrink-0">
-          <div id="sidebar-logo-icon" className="w-11 h-11 bg-fbOrange rounded-2xl flex items-center justify-center shadow-2xl shadow-fbOrange/40 transform -rotate-6">
-            <Zap size={24} className="text-white fill-white" />
+
+        {/* Logo */}
+        <div id="sidebar-logo" className="flex items-center gap-3 px-5 py-6 border-b border-white/5 shrink-0">
+          <div
+            id="sidebar-logo-icon"
+            className="w-9 h-9 bg-fbOrange rounded-xl flex items-center justify-center shadow-lg shadow-fbOrange/30 shrink-0"
+            style={{ transform: 'rotate(-6deg)' }}
+          >
+            <Zap size={18} className="text-white fill-white" />
           </div>
-          <div className="flex flex-col">
-            <h2 className="font-black italic tracking-tighter text-2xl uppercase leading-none">
+          <div>
+            <p className="font-black italic tracking-tight text-xl uppercase leading-none">
               PATH<span className="text-fbOrange">FIT</span>
-            </h2>
-            <span id="sidebar-logo-subtitle" className="text-[10px] opacity-50 font-black uppercase mt-1 tracking-[0.2em]">Instructor</span>
+            </p>
+            <p id="sidebar-logo-subtitle" className="text-[9px] text-white/30 font-semibold uppercase tracking-[0.18em] mt-0.5">
+              Instructor Portal
+            </p>
           </div>
         </div>
 
-        {/* NAVIGATION AREA - Sign Out now included in the scrollable list */}
-        <nav id="sidebar-nav" className="flex-1 min-h-0 px-6 mt-4 overflow-y-auto custom-scrollbar">
-          <div className="space-y-3 pb-10">
+        {/* Nav */}
+        <nav id="sidebar-nav" className="flex-1 min-h-0 overflow-y-auto px-3 py-4 custom-scrollbar">
+          <p className="text-[9px] text-white/25 font-bold uppercase tracking-[0.14em] px-3 mb-2">Menu</p>
+
+          <div className="space-y-0.5" id="sidebar-nav-inner">
             {menuItems.map((item) => {
               const active = isActive(item.path);
               return (
                 <button
                   key={item.name}
-                  onClick={() => {
-                    router.push(item.path);
-                    setIsSidebarOpen(false);
-                  }}
-                  className={`sidebar-nav-btn group relative w-full flex items-center gap-4 px-6 py-4 rounded-[20px] font-black text-[13px] uppercase tracking-widest transition-all duration-300 ${
-                    active 
-                    ? 'bg-fbOrange text-white shadow-xl shadow-fbOrange/30 translate-x-1' 
-                    : 'text-white/40 hover:text-white hover:bg-white/5'
+                  onClick={() => { router.push(item.path); setIsSidebarOpen(false); }}
+                  className={`sidebar-nav-btn group relative w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-[12px] uppercase tracking-wider transition-all duration-200 ${
+                    active
+                      ? 'bg-fbOrange text-white shadow-lg shadow-fbOrange/20'
+                      : 'text-white/40 hover:text-white hover:bg-white/5'
                   }`}
                 >
-                  <span className={`transition-transform duration-300 ${active ? 'scale-110' : 'group-hover:scale-110 group-hover:text-fbOrange'}`}>
+                  <span className={`shrink-0 transition-transform duration-200 ${active ? '' : 'group-hover:text-fbOrange'}`}>
                     {item.icon}
                   </span>
                   {item.name}
-                  {active && (
-                    <div className="absolute right-4 w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
-                  )}
+                  {active && <div className="absolute right-3 w-1.5 h-1.5 bg-white rounded-full opacity-80" />}
                 </button>
               );
             })}
+          </div>
 
-            {/* SIGN OUT BUTTON - Moved inside nav under Settings */}
-            <div className="pt-4 mt-4 border-t border-white/5">
-              <button 
-                onClick={handleSignOut}
-                className="w-full flex items-center gap-4 px-6 py-4 rounded-[20px] font-black text-[13px] uppercase tracking-widest text-red-400/50 hover:bg-red-500/10 hover:text-red-400 transition-all group"
-              >
-                <LogOut size={20} className="group-hover:-translate-x-1 transition-transform" />
-                Sign Out
-              </button>
-            </div>
+          {/* Divider + Sign Out inside nav so it always scrolls into view */}
+          <div className="mt-4 pt-4 border-t border-white/5">
+            <p className="text-[9px] text-white/25 font-bold uppercase tracking-[0.14em] px-3 mb-2">Account</p>
+            <button
+              onClick={handleSignOut}
+              className="sidebar-nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-semibold text-[12px] uppercase tracking-wider text-red-400/50 hover:bg-red-500/10 hover:text-red-400 transition-all duration-200 group"
+            >
+              <LogOut size={17} className="shrink-0 group-hover:-translate-x-0.5 transition-transform" />
+              Sign Out
+            </button>
           </div>
         </nav>
+
+        {/* User card pinned to bottom */}
+        <div className="px-3 pb-4 shrink-0 border-t border-white/5 pt-3">
+          <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/5">
+            <div className="w-8 h-8 rounded-lg bg-fbOrange flex items-center justify-center text-[11px] font-black text-white shrink-0">
+              {initials}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[12px] font-semibold text-white truncate">{displayName}</p>
+              <p className="text-[9px] text-white/35 uppercase tracking-wide">Instructor</p>
+            </div>
+            <MoreHorizontal size={14} className="text-white/30 shrink-0" />
+          </div>
+        </div>
       </aside>
 
-      {/* MAIN CONTENT AREA */}
-      <main className="flex-1 flex flex-col min-w-0 transition-all duration-500 relative h-[100dvh] overflow-y-auto bg-[#F8F9FD]">
-        <div className="flex-1 w-full max-w-7xl mx-auto px-5 sm:px-10 lg:px-14 py-10 pt-28 lg:pt-14">
-          <div className="animate-in fade-in slide-in-from-bottom-8 duration-1000 fill-mode-both">
+      {/* ── MAIN ── */}
+      <main className="flex-1 flex flex-col min-w-0 h-[100dvh] overflow-y-auto bg-[#EEF0F6]">
+        <div className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 py-8 pt-24 lg:pt-8">
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both">
             {children}
           </div>
         </div>
 
-        {/* REFINED FOOTER */}
-        <footer className="w-full border-t border-slate-200/60 bg-white/80 backdrop-blur-md py-8 px-10 mt-auto shrink-0">
-          <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-            <div className="flex items-center gap-3 text-slate-400 order-2 md:order-1">
-              <Copyright size={16} />
-              <span className="text-[11px] font-black uppercase tracking-[0.15em]">
-                2026 PATHFIT • Learning Management System
+        <footer className="w-full border-t border-slate-200/60 bg-white/70 backdrop-blur-md py-6 px-8 mt-auto shrink-0">
+          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div className="flex items-center gap-2 text-slate-400 order-2 sm:order-1">
+              <Copyright size={13} />
+              <span className="text-[10px] font-bold uppercase tracking-[0.15em]">
+                2026 PATHFIT · Learning Management System
               </span>
             </div>
-            <div className="flex items-center gap-8 order-1 md:order-2">
-              <button className="text-[11px] font-black text-slate-500 hover:text-fbOrange transition-colors uppercase tracking-widest">Privacy</button>
-              <button className="text-[11px] font-black text-slate-500 hover:text-fbOrange transition-colors uppercase tracking-widest">Support</button>
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 rounded-full border border-emerald-100">
+            <div className="flex items-center gap-6 order-1 sm:order-2">
+              <button className="text-[10px] font-bold text-slate-400 hover:text-fbOrange transition-colors uppercase tracking-widest">Privacy</button>
+              <button className="text-[10px] font-bold text-slate-400 hover:text-fbOrange transition-colors uppercase tracking-widest">Support</button>
+              <div className="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 rounded-full border border-emerald-100">
                 <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-tighter">v2.4.0</span>
+                <span className="text-[9px] font-bold text-emerald-600 uppercase tracking-tight">v2.4.0</span>
               </div>
             </div>
           </div>
@@ -167,16 +202,21 @@ export default function InstructorLayout({ children }) {
       </main>
 
       <style jsx global>{`
-        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
+
         html, body {
-          height: 100%;
-          margin: 0;
-          padding: 0;
-          overflow: hidden;
-          position: fixed;
-          width: 100%;
+          height: 100%; margin: 0; padding: 0;
+          overflow: hidden; position: fixed; width: 100%;
+        }
+
+        @media screen and (orientation: landscape) and (max-height: 500px) {
+          #sidebar-logo { padding: 0.5rem 0.75rem !important; }
+          #sidebar-logo-icon { width: 1.75rem !important; height: 1.75rem !important; }
+          #sidebar-logo-subtitle { display: none !important; }
+          #sidebar-nav { padding-top: 0.25rem !important; padding-bottom: 0.25rem !important; }
+          .sidebar-nav-btn { padding-top: 0.35rem !important; padding-bottom: 0.35rem !important; }
         }
       `}</style>
     </div>
