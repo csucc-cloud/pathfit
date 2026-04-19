@@ -51,7 +51,7 @@ export default function InstructorLayout({ children }) {
   return (
     <div className="flex h-[100dvh] w-full bg-[#F8F9FD] font-sans selection:bg-fbOrange/30 overflow-hidden">
       
-      {/* MOBILE TOP BAR - Fixed Height & High Z-Index */}
+      {/* MOBILE TOP BAR */}
       <div className="lg:hidden fixed top-0 left-0 right-0 h-16 md:h-20 bg-fbNavy/95 backdrop-blur-xl flex items-center justify-between px-6 md:px-10 z-[60] border-b border-white/10 shadow-lg">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 bg-fbOrange rounded-xl flex items-center justify-center shadow-lg shadow-fbOrange/30">
@@ -83,20 +83,20 @@ export default function InstructorLayout({ children }) {
       `}>
         {/* LOGO AREA */}
         <div id="sidebar-logo" className="p-10 lg:p-10 flex items-center gap-4 shrink-0">
-          <div id="sidebar-logo-icon" className="w-11 h-11 lg:w-11 lg:h-11 bg-fbOrange rounded-2xl flex items-center justify-center shadow-2xl shadow-fbOrange/40 transform -rotate-6">
+          <div id="sidebar-logo-icon" className="w-11 h-11 bg-fbOrange rounded-2xl flex items-center justify-center shadow-2xl shadow-fbOrange/40 transform -rotate-6">
             <Zap size={24} className="text-white fill-white" />
           </div>
           <div className="flex flex-col">
-            <h2 className="font-black italic tracking-tighter text-2xl lg:text-2xl uppercase leading-none">
+            <h2 className="font-black italic tracking-tighter text-2xl uppercase leading-none">
               PATH<span className="text-fbOrange">FIT</span>
             </h2>
-            <span id="sidebar-logo-subtitle" className="text-[10px] opacity-50 font-black uppercase mt-1 tracking-[0.2em] lg:block">Instructor</span>
+            <span id="sidebar-logo-subtitle" className="text-[10px] opacity-50 font-black uppercase mt-1 tracking-[0.2em]">Instructor</span>
           </div>
         </div>
 
         {/* NAVIGATION AREA */}
-        <nav className="flex-1 min-h-0 px-6 lg:px-6 mt-4 lg:mt-4 overflow-y-auto custom-scrollbar" id="sidebar-nav">
-          <div className="space-y-3 lg:space-y-3 pb-4" id="sidebar-nav-inner">
+        <nav id="sidebar-nav" className="flex-1 min-h-0 px-6 mt-4 overflow-y-auto custom-scrollbar">
+          <div className="space-y-3 pb-4">
             {menuItems.map((item) => {
               const active = isActive(item.path);
               return (
@@ -106,7 +106,7 @@ export default function InstructorLayout({ children }) {
                     router.push(item.path);
                     setIsSidebarOpen(false);
                   }}
-                  className={`sidebar-nav-btn group relative w-full flex items-center gap-4 px-6 py-4 lg:py-4 rounded-[20px] font-black text-[13px] uppercase tracking-widest transition-all duration-300 ${
+                  className={`sidebar-nav-btn group relative w-full flex items-center gap-4 px-6 py-4 rounded-[20px] font-black text-[13px] uppercase tracking-widest transition-all duration-300 ${
                     active 
                     ? 'bg-fbOrange text-white shadow-xl shadow-fbOrange/30 translate-x-1' 
                     : 'text-white/40 hover:text-white hover:bg-white/5'
@@ -126,10 +126,10 @@ export default function InstructorLayout({ children }) {
         </nav>
 
         {/* SIGN OUT AREA */}
-        <div id="sidebar-signout" className="p-8 lg:p-8 border-t border-white/5 bg-fbNavy shrink-0">
+        <div id="sidebar-signout" className="p-8 border-t border-white/5 bg-fbNavy shrink-0">
           <button 
             onClick={handleSignOut}
-            className="w-full flex items-center gap-4 px-6 py-5 lg:py-5 rounded-[20px] font-black text-[12px] uppercase tracking-widest text-red-400/50 hover:bg-red-500/10 hover:text-red-400 transition-all group"
+            className="w-full flex items-center gap-4 px-6 py-5 rounded-[20px] font-black text-[12px] uppercase tracking-widest text-red-400/50 hover:bg-red-500/10 hover:text-red-400 transition-all group"
           >
             <LogOut size={20} className="group-hover:-translate-x-1 transition-transform" />
             Sign Out
@@ -154,7 +154,6 @@ export default function InstructorLayout({ children }) {
                 2026 PATHFIT • EDUOS SYSTEM
               </span>
             </div>
-            
             <div className="flex items-center gap-8 order-1 md:order-2">
               <button className="text-[11px] font-black text-slate-500 hover:text-fbOrange transition-colors uppercase tracking-widest">Privacy</button>
               <button className="text-[11px] font-black text-slate-500 hover:text-fbOrange transition-colors uppercase tracking-widest">Support</button>
@@ -171,7 +170,6 @@ export default function InstructorLayout({ children }) {
         .custom-scrollbar::-webkit-scrollbar { width: 5px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
-        
         html, body {
           height: 100%;
           margin: 0;
@@ -179,40 +177,6 @@ export default function InstructorLayout({ children }) {
           overflow: hidden;
           position: fixed;
           width: 100%;
-        }
-
-        /* LANDSCAPE FIX — using real CSS, not Tailwind landscape: variant */
-        @media screen and (orientation: landscape) and (max-height: 500px) {
-          #sidebar-logo {
-            padding: 0.5rem 0.75rem !important;
-          }
-          #sidebar-logo-icon {
-            width: 2rem !important;
-            height: 2rem !important;
-          }
-          #sidebar-logo-subtitle {
-            display: none !important;
-          }
-          #sidebar-nav {
-            margin-top: 0 !important;
-            padding-left: 0.75rem !important;
-            padding-right: 0.75rem !important;
-          }
-          #sidebar-nav-inner {
-            row-gap: 0.1rem !important;
-          }
-          .sidebar-nav-btn {
-            padding-top: 0.4rem !important;
-            padding-bottom: 0.4rem !important;
-          }
-          #sidebar-signout {
-            padding: 0.4rem 0.75rem !important;
-            margin-top: 0 !important;
-          }
-          #sidebar-signout button {
-            padding-top: 0.4rem !important;
-            padding-bottom: 0.4rem !important;
-          }
         }
       `}</style>
     </div>
