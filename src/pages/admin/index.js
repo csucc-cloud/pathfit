@@ -10,7 +10,7 @@ import {
   X, FileText, Image as ImageIcon, MessageSquare, 
   Globe, ShieldCheck, Activity, Terminal, Share2, ThumbsUp, MoreHorizontal,
   Paperclip, Clock, Calendar, Zap, Sparkles, Filter, BarChart3, LayoutDashboard,
-  Settings, Bell
+  Settings, Bell, HelpCircle, Copyright
 } from 'lucide-react';
 
 const v = { hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } };
@@ -91,7 +91,8 @@ export default function AdminDashboard() {
 
   return (
     <RoleGuard allowedRole="instructor">
-      <div className="min-h-screen bg-[#FDFDFD] text-slate-900 font-sans selection:bg-fbNavy/10">
+      {/* Wrapper using Flexbox to handle the Footer position */}
+      <div className="flex flex-col min-h-screen bg-[#FDFDFD] text-slate-900 font-sans selection:bg-fbNavy/10">
         
         {/* TOP NAVIGATION BAR */}
         <header className="sticky top-0 z-40 w-full bg-white/70 backdrop-blur-md border-b border-slate-100 px-6 py-3">
@@ -139,7 +140,8 @@ export default function AdminDashboard() {
           </div>
         </header>
 
-        <main className="max-w-[1600px] mx-auto p-6">
+        {/* MAIN: flex-1 ensures this section takes up all space between header and footer */}
+        <main className="flex-1 max-w-[1600px] w-full mx-auto p-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             
             {/* LEFT SIDEBAR: NAVIGATION & SECTIONS */}
@@ -170,7 +172,6 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              {/* STATS QUICK VIEW */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm">
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Nodes</p>
@@ -265,8 +266,8 @@ export default function AdminDashboard() {
             </section>
 
             {/* RIGHT SIDEBAR: STUDENT REGISTRY */}
-            <aside className="lg:col-span-3 space-y-6">
-              <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 h-[calc(100vh-140px)] flex flex-col">
+            <aside className="lg:col-span-3">
+              <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 h-[calc(100vh-140px)] flex flex-col sticky top-24">
                 <div className="flex justify-between items-center mb-6">
                   <h3 className="text-sm font-bold text-slate-800">Student Registry</h3>
                   <Users size={18} className="text-slate-300"/>
@@ -316,9 +317,32 @@ export default function AdminDashboard() {
                 </button>
               </div>
             </aside>
-
           </div>
         </main>
+
+        {/* FOOTER SECTION */}
+        <footer className="w-full border-t border-slate-100 bg-white py-6 px-8 mt-12">
+          <div className="max-w-[1600px] mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="flex items-center gap-2 text-slate-400">
+              <Copyright size={14} />
+              <span className="text-xs font-medium">2026 EDUOS Learning Management System.</span>
+            </div>
+            
+            <div className="flex items-center gap-6">
+              <button className="text-xs font-semibold text-slate-500 hover:text-fbNavy transition-colors">Privacy Policy</button>
+              <button className="text-xs font-semibold text-slate-500 hover:text-fbNavy transition-colors">Terms of Service</button>
+              <button className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-fbNavy transition-colors">
+                <HelpCircle size={14} />
+                Support
+              </button>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <div className="h-2 w-2 rounded-full bg-emerald-500" />
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">v2.4.0-stable</span>
+            </div>
+          </div>
+        </footer>
 
         <CreateSectionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onRefresh={fetchData} />
         
