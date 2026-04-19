@@ -92,11 +92,11 @@ export default function AdminDashboard() {
         initial="hidden" 
         animate="visible" 
         variants={{visible:{transition:{staggerChildren:0.05}}}} 
-        className="max-w-[1500px] mx-auto p-4 md:p-6 space-y-6 font-sans lg:h-[100dvh] flex flex-col overflow-x-hidden"
+        className="max-w-[1500px] mx-auto p-4 md:p-6 space-y-6 font-sans lg:h-[100dvh] flex flex-col overflow-x-hidden pt-2 lg:pt-6"
       >
         
-        {/* HEADER - GLASSMORPHISM (Inclusive Padding for Mobile) */}
-        <header className="flex justify-between items-center bg-white/80 backdrop-blur-md p-4 md:p-5 rounded-2xl shadow-sm border border-white/20 z-50 shrink-0 mt-2 lg:mt-0">
+        {/* HEADER - GLASSMORPHISM (Adjusted for top spacing) */}
+        <header className="flex justify-between items-center bg-white/80 backdrop-blur-md p-4 md:p-5 rounded-2xl shadow-sm border border-white/20 z-50 shrink-0 mt-4 md:mt-6 lg:mt-0">
           <div className="flex items-center gap-3 md:gap-4">
             <h1 className="text-lg md:text-xl font-black text-fbNavy tracking-tighter flex items-center gap-2">
                 <div className="p-2 bg-fbNavy rounded-xl text-white shadow-lg shadow-fbNavy/20"><Terminal size={18}/></div>
