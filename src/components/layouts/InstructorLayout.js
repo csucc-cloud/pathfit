@@ -75,13 +75,13 @@ export default function InstructorLayout({ children }) {
         onClick={() => setIsSidebarOpen(false)}
       />
 
-      {/* SIDEBAR - Engineered for Mobile Heights */}
+      {/* SIDEBAR - Structured to never hide the Sign Out button */}
       <aside className={`
         fixed inset-y-0 left-0 z-50 w-[300px] bg-fbNavy text-white flex flex-col transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)]
         ${isSidebarOpen ? 'translate-x-0 shadow-2xl shadow-black/50' : '-translate-x-full lg:translate-x-0'}
         lg:sticky lg:h-screen
       `}>
-        {/* LOGO AREA */}
+        {/* LOGO AREA - Fixed */}
         <div className="p-10 flex items-center gap-4 shrink-0">
           <div className="w-11 h-11 bg-fbOrange rounded-2xl flex items-center justify-center shadow-2xl shadow-fbOrange/40 transform -rotate-6">
             <Zap size={24} className="text-white fill-white" />
@@ -94,7 +94,7 @@ export default function InstructorLayout({ children }) {
           </div>
         </div>
 
-        {/* NAVIGATION AREA - Flex-1 with min-h-0 allows internal scrolling */}
+        {/* NAVIGATION AREA - Scrollable Middle */}
         <nav className="flex-1 min-h-0 px-6 mt-4 overflow-y-auto custom-scrollbar">
           <div className="space-y-3 pb-10">
             {menuItems.map((item) => {
@@ -125,8 +125,8 @@ export default function InstructorLayout({ children }) {
           </div>
         </nav>
 
-        {/* SIGN OUT AREA */}
-        <div className="p-8 mt-auto border-t border-white/5 bg-fbNavy/50 backdrop-blur-xl shrink-0">
+        {/* SIGN OUT AREA - Locked at bottom with shrink-0 */}
+        <div className="p-8 border-t border-white/5 bg-fbNavy shrink-0 mt-auto">
           <button 
             onClick={handleSignOut}
             className="w-full flex items-center gap-4 px-6 py-5 rounded-[20px] font-black text-[12px] uppercase tracking-widest text-red-400/50 hover:bg-red-500/10 hover:text-red-400 transition-all group"
@@ -137,12 +137,8 @@ export default function InstructorLayout({ children }) {
         </div>
       </aside>
 
-      {/* MAIN CONTENT AREA - Smooth Scrolling & Proper Offsets */}
-      <main className={`
-        flex-1 flex flex-col min-w-0 transition-all duration-500 relative
-        h-[100dvh] overflow-y-auto bg-[#F8F9FD]
-      `}>
-        {/* Content Container - Responsive padding for mobile/desktop */}
+      {/* MAIN CONTENT AREA */}
+      <main className="flex-1 flex flex-col min-w-0 transition-all duration-500 relative h-[100dvh] overflow-y-auto bg-[#F8F9FD]">
         <div className="flex-1 w-full max-w-7xl mx-auto px-5 sm:px-10 lg:px-14 py-10 pt-28 lg:pt-14">
           <div className="animate-in fade-in slide-in-from-bottom-8 duration-1000 fill-mode-both">
             {children}
@@ -150,7 +146,7 @@ export default function InstructorLayout({ children }) {
         </div>
 
         {/* REFINED FOOTER */}
-        <footer className="w-full border-t border-slate-200/60 bg-white/80 backdrop-blur-md py-8 px-10 mt-auto">
+        <footer className="w-full border-t border-slate-200/60 bg-white/80 backdrop-blur-md py-8 px-10 mt-auto shrink-0">
           <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="flex items-center gap-3 text-slate-400 order-2 md:order-1">
               <Copyright size={16} />
@@ -174,10 +170,9 @@ export default function InstructorLayout({ children }) {
       <style jsx global>{`
         .custom-scrollbar::-webkit-scrollbar { width: 5px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.05); border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.1); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
         
-        /* Landscape specific height fixes */
         @media (max-height: 600px) and (orientation: landscape) {
           .p-10 { padding: 1.5rem !important; }
           nav { margin-top: 0.5rem !important; }
