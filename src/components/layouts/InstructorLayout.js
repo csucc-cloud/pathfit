@@ -126,7 +126,7 @@ export default function InstructorLayout({ children }) {
         </nav>
 
         {/* SIGN OUT AREA - Optimized for landscape */}
-        <div className="p-8 landscape:p-3 lg:p-8 border-t border-white/5 bg-fbNavy shrink-0 mt-auto">
+        <div className="signout-area p-8 landscape:p-3 lg:p-8 border-t border-white/5 bg-fbNavy shrink-0 mt-auto">
           <button 
             onClick={handleSignOut}
             className="w-full flex items-center gap-4 px-6 py-5 landscape:py-2 lg:py-5 rounded-[20px] font-black text-[12px] uppercase tracking-widest text-red-400/50 hover:bg-red-500/10 hover:text-red-400 transition-all group"
@@ -182,10 +182,16 @@ export default function InstructorLayout({ children }) {
         }
 
         @media (max-height: 500px) {
-          aside { overflow-y: auto !important; }
-          aside > div:first-child { padding: 0.5rem 0.75rem !important; }
-          aside nav { margin-top: 0 !important; flex: 1; min-height: 0; }
-          aside > div:last-child { padding: 0.25rem 0.75rem !important; position: sticky; bottom: 0; }
+          .signout-area {
+            position: fixed !important;
+            bottom: 0 !important;
+            left: 0 !important;
+            width: 300px !important;
+            padding: 0.5rem 0.75rem !important;
+            margin-top: 0 !important;
+            z-index: 51 !important;
+            background: #0f172a !important;
+          }
         }
       `}</style>
     </div>
