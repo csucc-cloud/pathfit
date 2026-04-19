@@ -19,9 +19,13 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [announcements, setAnnouncements] = useState([]); 
   const [instructor, setInstructor] = useState(null);
-  const [searchTerm, setSearchTerm] = useState(""), [announcement, setAnnouncement] = useState(""); 
-  const [targetSection, setTargetSection] = useState("all"), [sections, setSections] = useState([]); 
-  const [isPosting, setIsPosting] = useState(false), [file, setFile] = useState(null), [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [announcement, setAnnouncement] = useState(""); 
+  const [targetSection, setTargetSection] = useState("all");
+  const [sections, setSections] = useState([]); 
+  const [isPosting, setIsPosting] = useState(false);
+  const [file, setFile] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const fileInputRef = useRef(null);
 
   const fetchData = async () => {
@@ -48,6 +52,7 @@ export default function AdminDashboard() {
   useEffect(() => { fetchData(); }, []);
 
   const filtered = students.filter(s => s.student_id?.toLowerCase().includes(searchTerm.toLowerCase()) || s.full_name?.toLowerCase().includes(searchTerm.toLowerCase()));
+  
   const handleExport = () => downloadCSV(filtered.map(s => ({ ID: s.student_id, Name: s.full_name, Section: s.section_code })), `Student_Registry`);
 
   const handlePost = async () => {
@@ -85,267 +90,242 @@ export default function AdminDashboard() {
 
   return (
     <RoleGuard allowedRole="instructor">
-      {/* ADVANCED AMBIENT BACKGROUND */}
-      <div className="fixed inset-0 -z-10 bg-[#F1F5F9] overflow-hidden">
+      {/* BACKGROUND ELEMENTS */}
+      <div className="fixed inset-0 -z-10 bg-[#F8FAFC] overflow-hidden">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-fbNavy/5 rounded-full blur-[120px] animate-pulse" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-fbOrange/5 rounded-full blur-[120px]" />
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.02] mix-blend-overlay" />
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.03] mix-blend-overlay" />
       </div>
       
       <motion.div 
         initial="hidden" 
         animate="visible" 
         variants={{visible:{transition:{staggerChildren:0.05}}}} 
-        className="max-w-[1600px] mx-auto p-4 md:p-6 space-y-6 font-sans lg:h-[100dvh] flex flex-col overflow-x-hidden pt-2 lg:pt-6"
+        className="max-w-[1600px] mx-auto p-4 md:p-6 lg:h-screen flex flex-col gap-6"
       >
         
-        {/* NEUMORPHIC HEADER */}
-        <header className="flex justify-between items-center bg-white/70 backdrop-blur-xl p-4 md:p-5 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/40 z-50 shrink-0 mt-4 md:mt-6 lg:mt-0">
-          <div className="flex items-center gap-4">
+        {/* HEADER */}
+        <header className="flex justify-between items-center bg-white/80 backdrop-blur-xl p-4 md:px-8 md:py-5 rounded-[2.5rem] shadow-sm border border-white/60 shrink-0">
+          <div className="flex items-center gap-5">
             <div className="relative group">
-                <div className="absolute -inset-1 bg-gradient-to-r from-fbNavy to-fbOrange rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-                <div className="relative p-3 bg-fbNavy rounded-xl text-white shadow-xl">
+                <div className="absolute -inset-1 bg-gradient-to-r from-fbNavy to-fbOrange rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-500"></div>
+                <div className="relative p-3 bg-fbNavy rounded-xl text-white shadow-lg">
                     <Terminal size={20} className="group-hover:rotate-12 transition-transform"/>
                 </div>
             </div>
             <div>
-                <h1 className="text-xl md:text-2xl font-black text-fbNavy tracking-tight flex items-center gap-2 leading-none">
-                    EDU<span className="text-fbOrange tracking-widest">OS</span>
+                <h1 className="text-xl md:text-2xl font-black text-fbNavy tracking-tight flex items-center gap-1">
+                    EDU<span className="text-fbOrange">OS</span>
                 </h1>
-                <div className="flex items-center gap-2 mt-1">
-                    <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Core Node Active</span>
+                <div className="flex items-center gap-2">
+                    <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">System Operational</span>
                 </div>
             </div>
           </div>
 
           <div className="flex items-center gap-6">
-             <div className="hidden lg:flex items-center gap-8 mr-4">
-                <div className="text-center">
-                    <p className="text-[10px] font-black text-slate-400 uppercase">Students</p>
-                    <p className="text-sm font-bold text-fbNavy">{students.length}</p>
-                </div>
-                <div className="text-center">
-                    <p className="text-[10px] font-black text-slate-400 uppercase">Sections</p>
+             <div className="hidden lg:flex items-center gap-8">
+                <div className="text-right">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Nodes</p>
                     <p className="text-sm font-bold text-fbNavy">{sections.length}</p>
                 </div>
+                <div className="text-right">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Entities</p>
+                    <p className="text-sm font-bold text-fbNavy">{students.length}</p>
+                </div>
              </div>
-             <div className="h-10 w-[1px] bg-slate-200/60 hidden sm:block" />
-             <div className="flex items-center gap-3 bg-slate-50/50 p-1.5 pr-4 rounded-2xl border border-slate-100">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-fbNavy to-slate-800 p-[2px] shadow-inner">
-                    <div className="w-full h-full rounded-[10px] overflow-hidden bg-white">
-                        {instructor?.avatar_url ? <img src={instructor.avatar_url} className="w-full h-full object-cover" alt="avatar"/> : <div className="w-full h-full flex items-center justify-center font-bold bg-fbNavy text-white">{instructor?.full_name?.[0]}</div>}
-                    </div>
+             <div className="h-8 w-px bg-slate-200 hidden sm:block" />
+             <div className="flex items-center gap-3 bg-slate-50/80 px-3 py-2 rounded-2xl border border-slate-100">
+                <div className="w-9 h-9 rounded-xl overflow-hidden ring-2 ring-white shadow-sm">
+                    {instructor?.avatar_url ? (
+                      <img src={instructor.avatar_url} className="w-full h-full object-cover" alt="avatar"/>
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center font-bold bg-fbNavy text-white text-xs">
+                        {instructor?.full_name?.[0]}
+                      </div>
+                    )}
                 </div>
                 <div className="text-left hidden sm:block">
                     <p className="text-xs font-black text-fbNavy leading-none">{instructor?.full_name}</p>
-                    <p className="text-[10px] font-bold text-fbOrange uppercase tracking-tight mt-1">Lead Instructor</p>
+                    <p className="text-[9px] font-bold text-fbOrange uppercase mt-1">Lead Admin</p>
                 </div>
              </div>
           </div>
         </header>
 
-        <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 overflow-y-auto lg:overflow-hidden min-h-0 pb-10 lg:pb-0">
+        {/* MAIN GRID */}
+        <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 overflow-hidden min-h-0">
           
-          {/* MAIN COMMUNICATION STREAM */}
-          <div className="lg:col-span-8 xl:col-span-8 flex flex-col space-y-6 lg:overflow-hidden min-h-0 order-1">
+          {/* LEFT: FEED */}
+          <div className="lg:col-span-8 flex flex-col gap-6 overflow-hidden">
             
-            {/* FLOATING COMPOSER */}
-            <motion.div variants={v} className="bg-white/80 backdrop-blur-md rounded-[2.5rem] p-6 shadow-xl shadow-fbNavy/5 border border-white shrink-0 relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
-                <Sparkles size={120} className="text-fbNavy" />
-              </div>
-              
-              <div className="flex gap-5 mb-6">
-                <div className="w-14 h-14 rounded-2xl bg-slate-100 shrink-0 overflow-hidden border-4 border-white shadow-xl hidden xs:block ring-1 ring-slate-100">
-                  {instructor?.avatar_url ? <img src={instructor.avatar_url} className="w-full h-full object-cover" alt="user"/> : <div className="w-full h-full flex items-center justify-center bg-slate-200 text-slate-500 font-bold">{instructor?.full_name?.[0]}</div>}
+            {/* COMPOSER */}
+            <motion.div variants={v} className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100 shrink-0 relative overflow-hidden">
+              <div className="flex gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-slate-100 shrink-0 overflow-hidden border border-slate-200 hidden sm:flex items-center justify-center">
+                  {instructor?.avatar_url ? (
+                    <img src={instructor.avatar_url} className="w-full h-full object-cover" alt="user"/>
+                  ) : (
+                    <span className="text-slate-400 font-black">{instructor?.full_name?.[0]}</span>
+                  )}
                 </div>
-                <div className="flex-1 relative">
+                <div className="flex-1">
                     <textarea 
                         value={announcement} 
                         onChange={(e)=>setAnnouncement(e.target.value)} 
-                        className="w-full p-6 bg-slate-50/80 rounded-[2rem] text-sm font-medium border-2 border-transparent focus:border-fbNavy/10 focus:bg-white focus:ring-[12px] focus:ring-fbNavy/5 transition-all outline-none resize-none min-h-[120px] shadow-inner" 
-                        placeholder={`Broadcast a new update, Prof. ${instructor?.full_name?.split(' ')[1] || instructor?.full_name?.split(' ')[0]}...`} 
+                        className="w-full p-4 bg-slate-50 rounded-2xl text-sm font-medium border-2 border-transparent focus:bg-white focus:border-fbNavy/5 transition-all outline-none resize-none min-h-[100px]" 
+                        placeholder={`Initialize broadcast, Prof. ${instructor?.full_name?.split(' ')[0]}...`} 
                     />
-                    <div className="absolute bottom-4 right-6 flex items-center gap-2 text-slate-300 pointer-events-none italic text-[10px]">
-                        <Zap size={10}/> Instant Sync Enabled
-                    </div>
                 </div>
               </div>
 
-              {/* DYNAMIC FILE CHIP */}
               {file && (
-                <motion.div initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="mb-6 xs:ml-20 p-4 bg-gradient-to-r from-fbOrange/10 to-transparent border-l-4 border-fbOrange rounded-r-2xl flex items-center justify-between group">
-                    <div className="flex items-center gap-4">
-                        <div className="p-3 bg-fbOrange text-white rounded-xl shadow-lg shadow-fbOrange/30">
-                            <FileText size={20}/>
-                        </div>
-                        <div>
-                            <p className="text-xs font-black text-slate-800">{file.name}</p>
-                            <p className="text-[10px] text-fbOrange font-bold uppercase tracking-widest mt-0.5">Media Pipeline Locked</p>
-                        </div>
+                <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="mt-4 sm:ml-16 p-3 bg-fbOrange/5 border border-fbOrange/20 rounded-2xl flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <FileText size={18} className="text-fbOrange"/>
+                        <span className="text-xs font-bold text-slate-700 truncate max-w-[200px]">{file.name}</span>
                     </div>
-                    <button onClick={()=>setFile(null)} className="p-2 bg-white hover:bg-red-50 text-red-400 rounded-full shadow-sm transition-all">
-                        <X size={20}/>
+                    <button onClick={()=>setFile(null)} className="p-1 hover:bg-white rounded-lg text-red-400 transition-colors">
+                        <X size={16}/>
                     </button>
                 </motion.div>
               )}
 
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <button onClick={()=>fileInputRef.current.click()} className="group flex items-center gap-3 px-5 py-3 bg-white hover:bg-emerald-50 rounded-2xl text-slate-600 text-[11px] font-black uppercase tracking-tighter transition-all border border-slate-100 hover:border-emerald-200 hover:text-emerald-600">
-                    <ImageIcon size={18} className="text-emerald-500 group-hover:scale-110 transition-transform"/> 
-                    <span>Add Resources</span>
+              <div className="flex flex-wrap items-center justify-between gap-4 mt-4">
+                <div className="flex items-center gap-2">
+                  <button onClick={()=>fileInputRef.current.click()} className="flex items-center gap-2 px-4 py-2.5 hover:bg-slate-50 rounded-xl text-slate-500 text-[11px] font-black uppercase transition-all border border-slate-100">
+                    <ImageIcon size={16} className="text-emerald-500"/> 
+                    <span>Media</span>
                   </button>
                   
-                  <div className="relative group">
-                    <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                        <Globe size={14} className="text-fbNavy/40"/>
-                    </div>
+                  <div className="relative">
+                    <Globe size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
                     <select 
                         value={targetSection} 
                         onChange={(e)=>setTargetSection(e.target.value)} 
-                        className="appearance-none bg-slate-50 hover:bg-white text-[11px] font-black uppercase tracking-tighter rounded-2xl pl-10 pr-10 py-3 border border-slate-100 outline-none transition-all cursor-pointer shadow-sm hover:shadow-md"
+                        className="appearance-none bg-white text-[11px] font-black uppercase rounded-xl pl-9 pr-8 py-2.5 border border-slate-100 outline-none cursor-pointer hover:bg-slate-50 transition-colors"
                     >
-                        <option value="all">Global Broadcast</option>
-                        {sections.map(s => <option key={s.id} value={s.section_code}>Section {s.section_code}</option>)}
+                        <option value="all">Global</option>
+                        {sections.map(s => <option key={s.id} value={s.section_code}>{s.section_code}</option>)}
                     </select>
-                    <ChevronRight size={14} className="absolute right-4 top-1/2 -translate-y-1/2 rotate-90 text-slate-400 pointer-events-none group-hover:text-fbNavy transition-colors"/>
                   </div>
                 </div>
 
                 <button 
                     onClick={handlePost} 
                     disabled={isPosting || (!announcement.trim() && !file)} 
-                    className={`group relative flex items-center gap-3 px-8 py-4 rounded-2xl text-[12px] font-black uppercase tracking-[0.15em] transition-all shadow-2xl overflow-hidden ${
+                    className={`flex items-center gap-3 px-6 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all ${
                         isPosting || (!announcement.trim() && !file) 
                         ? 'bg-slate-100 text-slate-400 cursor-not-allowed' 
-                        : 'bg-fbNavy text-white hover:shadow-fbNavy/40 active:scale-95'
+                        : 'bg-fbNavy text-white hover:bg-slate-800 shadow-md active:scale-95'
                     }`}
                 >
-                    <div className="absolute inset-0 bg-gradient-to-r from-fbOrange to-fbNavy opacity-0 group-hover:opacity-20 transition-opacity" />
-                    {isPosting ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />}
-                    <span>{isPosting ? 'Broadcasting...' : 'Publish Update'}</span>
+                    {isPosting ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
+                    <span>{isPosting ? 'Sending...' : 'Post Update'}</span>
                 </button>
               </div>
               <input type="file" ref={fileInputRef} className="hidden" onChange={(e)=>setFile(e.target.files[0])}/>
             </motion.div>
 
-            {/* FEED WITH SKEUOMORPHIC DEPTH */}
-            <div className="flex-1 lg:overflow-y-auto pr-2 space-y-6 custom-scrollbar lg:pb-10">
+            {/* SCROLLABLE FEED */}
+            <div className="flex-1 overflow-y-auto pr-2 space-y-4 custom-scrollbar">
               {announcements.length === 0 && !loading && (
-                <div className="flex flex-col items-center justify-center py-24 bg-white/40 rounded-[3rem] border-2 border-dashed border-slate-200">
-                    <div className="p-6 bg-white rounded-full shadow-xl mb-6">
-                        <Activity size={48} className="text-slate-200"/>
-                    </div>
-                    <p className="text-sm font-black text-slate-400 uppercase tracking-widest italic">Signal Flatline: No Activity</p>
+                <div className="flex flex-col items-center justify-center py-20 bg-white/50 rounded-[2.5rem] border-2 border-dashed border-slate-200">
+                    <Activity size={40} className="text-slate-300 mb-4"/>
+                    <p className="text-xs font-black text-slate-400 uppercase tracking-widest">No transmissions found</p>
                 </div>
               )}
-
               {announcements.map(ann => (
-                <div key={ann.id} className="transform hover:-translate-y-1 transition-transform duration-300">
+                <div key={ann.id} className="hover:-translate-y-0.5 transition-transform">
                     <PostCard ann={ann} instructor={instructor} />
                 </div>
               ))}
             </div>
           </div>
 
-          {/* RIGHT COMMAND PANEL */}
-          <div className="lg:col-span-4 xl:col-span-4 flex flex-col space-y-8 lg:overflow-hidden min-h-0 order-2">
+          {/* RIGHT: COMMANDS & REGISTRY */}
+          <div className="lg:col-span-4 flex flex-col gap-6 overflow-hidden">
             
-            {/* SECTIONS - RADIAL GLASS DESIGN */}
-            <div className="bg-gradient-to-br from-fbNavy to-[#1a2b4b] rounded-[2.5rem] p-6 shadow-2xl shadow-fbNavy/20 text-white shrink-0">
-              <div className="flex justify-between items-center mb-6">
+            {/* ACTIVE SECTIONS */}
+            <div className="bg-fbNavy rounded-[2.5rem] p-6 shadow-lg text-white shrink-0">
+              <div className="flex justify-between items-center mb-5">
                 <div>
-                    <h3 className="text-[11px] font-black text-white/40 uppercase tracking-[0.3em]">Command</h3>
-                    <h3 className="text-lg font-black tracking-tight">Active Nodes</h3>
+                    <h3 className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em]">Deployment</h3>
+                    <h3 className="text-lg font-black italic">Nodes</h3>
                 </div>
-                <button onClick={()=>setIsModalOpen(true)} className="p-3 bg-white/10 hover:bg-fbOrange text-white rounded-2xl transition-all backdrop-blur-md border border-white/10 group">
-                    <Plus size={22} className="group-rotate-90 transition-transform"/>
+                <button onClick={()=>setIsModalOpen(true)} className="p-2.5 bg-white/10 hover:bg-fbOrange text-white rounded-xl transition-all border border-white/10 group">
+                    <Plus size={20} className="group-hover:rotate-90 transition-transform"/>
                 </button>
               </div>
               
-              <div className="grid grid-cols-2 lg:grid-cols-1 gap-3">
+              <div className="grid grid-cols-1 gap-2 max-h-[180px] overflow-y-auto custom-scrollbar pr-1">
                 {sections.map(s => (
                   <motion.div 
-                    whileHover={{ x: 10 }}
+                    whileHover={{ x: 4 }}
                     key={s.id} 
-                    className="flex items-center justify-between group cursor-pointer p-4 bg-white/5 hover:bg-white/10 rounded-2xl transition-all border border-white/5"
+                    className="flex items-center justify-between p-3 bg-white/5 hover:bg-white/10 rounded-xl transition-all border border-white/5"
                   >
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 bg-fbOrange rounded-xl flex items-center justify-center font-black text-sm shadow-lg shadow-fbOrange/20">{s.section_code[0]}</div>
-                      <div>
-                        <span className="text-xs font-black uppercase tracking-widest block">{s.section_code}</span>
-                        <span className="text-[9px] text-white/50 font-bold">Online Registry</span>
-                      </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-fbOrange rounded-lg flex items-center justify-center font-black text-xs">{s.section_code[0]}</div>
+                      <span className="text-xs font-black tracking-widest uppercase">{s.section_code}</span>
                     </div>
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center group-hover:bg-white group-hover:text-fbNavy transition-all">
-                        <ChevronRight size={18} />
-                    </div>
+                    <ChevronRight size={14} className="text-white/30" />
                   </motion.div>
                 ))}
               </div>
             </div>
 
-            {/* REGISTRY - LIST VIEW */}
-            <div className="bg-white rounded-[2.5rem] p-7 shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-slate-50 flex flex-col lg:flex-1 lg:overflow-hidden min-h-[500px] lg:min-h-0 relative">
-                <div className="flex justify-between items-end mb-6 shrink-0">
+            {/* STUDENT REGISTRY */}
+            <div className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100 flex flex-col flex-1 overflow-hidden min-h-[400px]">
+                <div className="flex justify-between items-center mb-6 shrink-0">
                     <div>
-                        <h2 className="text-xs font-black text-fbOrange uppercase tracking-[0.2em] mb-1 italic">Intel</h2>
-                        <h2 className="text-xl font-black text-fbNavy tracking-tighter">Student Body</h2>
+                        <h2 className="text-[10px] font-black text-fbOrange uppercase tracking-widest">Registry</h2>
+                        <h2 className="text-lg font-black text-fbNavy tracking-tight">Active Students</h2>
                     </div>
-                    <div className="p-3 bg-slate-50 rounded-2xl text-fbNavy">
-                        <Users size={20}/>
-                    </div>
+                    <Users size={20} className="text-slate-300"/>
                 </div>
                 
-                <div className="flex flex-col flex-1 lg:overflow-hidden space-y-6">
+                <div className="flex flex-col gap-4 flex-1 overflow-hidden">
                     <div className="relative shrink-0">
                         <input 
                             type="text" 
-                            placeholder="Search identities..." 
+                            placeholder="Search UID or Name..." 
                             onChange={(e)=>setSearchTerm(e.target.value)} 
-                            className="w-full bg-slate-50 border-2 border-transparent rounded-2xl py-4 pl-12 pr-4 text-xs font-bold focus:bg-white focus:border-fbNavy/5 focus:ring-4 focus:ring-fbNavy/5 transition-all outline-none shadow-inner"
+                            className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3 pl-10 pr-4 text-xs font-bold focus:bg-white transition-all outline-none"
                         />
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18}/>
-                        <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                            <Filter size={14} className="text-slate-300"/>
-                        </div>
+                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16}/>
                     </div>
                     
-                    <button onClick={handleExport} className="group w-full py-4 bg-white border-2 border-fbNavy/10 text-fbNavy rounded-2xl hover:bg-fbNavy hover:text-white transition-all text-[11px] font-black uppercase tracking-[0.2em] shadow-lg shadow-fbNavy/5 active:scale-95 shrink-0 flex items-center justify-center gap-3">
-                        <FileDown size={16} className="group-hover:bounce" />
-                        Intelligence Export
+                    <button onClick={handleExport} className="w-full py-3 bg-slate-50 hover:bg-fbNavy hover:text-white border border-slate-100 text-fbNavy rounded-xl transition-all text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2">
+                        <FileDown size={14} />
+                        Export Data
                     </button>
 
-                    <div className="lg:overflow-y-auto pr-2 flex-1 space-y-3 custom-scrollbar min-h-0">
+                    <div className="overflow-y-auto pr-1 space-y-2 flex-1 custom-scrollbar">
                         <AnimatePresence mode="popLayout">
                         {filtered.map(s => (
                             <motion.div 
                                 layout
-                                initial={{opacity:0, scale:0.95}} 
-                                animate={{opacity:1, scale:1}} 
-                                exit={{opacity:0, scale:0.95}}
+                                initial={{opacity:0}} 
+                                animate={{opacity:1}} 
+                                exit={{opacity:0}}
                                 key={s.id} 
-                                className="bg-slate-50/40 p-4 rounded-[1.5rem] border border-slate-100/50 shrink-0 group hover:bg-white hover:shadow-2xl hover:shadow-fbNavy/10 transition-all duration-300"
+                                className="p-3 hover:bg-slate-50 rounded-2xl border border-transparent hover:border-slate-100 transition-all group"
                             >
-                                <div className="flex items-center gap-4">
-                                    <div className="relative shrink-0">
-                                        <div className="w-12 h-12 rounded-2xl bg-white border-2 border-slate-100 flex items-center justify-center overflow-hidden group-hover:border-fbOrange transition-all duration-500 shadow-sm">
-                                            {s.avatar_url ? <img src={s.avatar_url} className="w-full h-full object-cover" alt="student"/> : <div className="text-xs font-black text-fbNavy">{s.full_name?.[0]}</div>}
-                                        </div>
-                                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full" />
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center overflow-hidden shrink-0">
+                                        {s.avatar_url ? <img src={s.avatar_url} className="w-full h-full object-cover" alt="s"/> : <span className="text-xs font-black text-fbNavy">{s.full_name?.[0]}</span>}
                                     </div>
-                                    <div className="overflow-hidden min-w-0 flex-1">
-                                        <h4 className="text-xs font-black text-slate-800 truncate uppercase tracking-tight group-hover:text-fbNavy transition-colors">{s.full_name}</h4>
-                                        <div className="flex items-center gap-2 mt-1">
-                                            <span className="px-2 py-0.5 bg-fbOrange/10 text-fbOrange text-[8px] font-black rounded-md">{s.student_id}</span>
-                                            <span className="text-[10px] font-bold text-slate-400">●</span>
-                                            <span className="text-[10px] font-black text-slate-400 tracking-tighter uppercase">{s.section_code}</span>
+                                    <div className="min-w-0 flex-1">
+                                        <h4 className="text-[11px] font-black text-slate-800 truncate uppercase tracking-tight">{s.full_name}</h4>
+                                        <div className="flex items-center gap-2 mt-0.5">
+                                            <span className="text-[9px] font-bold text-fbOrange">{s.student_id}</span>
+                                            <span className="text-[9px] font-black text-slate-400 uppercase">{s.section_code}</span>
                                         </div>
                                     </div>
-                                    <button className="opacity-0 group-hover:opacity-100 p-2 text-slate-300 hover:text-fbNavy transition-all">
-                                        <MoreHorizontal size={18}/>
+                                    <button className="opacity-0 group-hover:opacity-100 p-1 text-slate-300 hover:text-fbNavy transition-all">
+                                        <MoreHorizontal size={16}/>
                                     </button>
                                 </div>
                             </motion.div>
@@ -362,17 +342,10 @@ export default function AdminDashboard() {
       <CreateSectionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onRefresh={fetchData} />
       
       <style jsx>{`
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; border: 2px solid transparent; background-clip: content-box; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; border: 2px solid transparent; background-clip: content-box; }
-        
-        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
-        .group:hover .bounce { animation: bounce 1s infinite; }
-
-        @media (max-width: 1024px) {
-          .custom-scrollbar { overflow-y: visible !important; }
-        }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
       `}</style>
     </RoleGuard>
   );
