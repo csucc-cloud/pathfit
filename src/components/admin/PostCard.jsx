@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ThumbsUp, MessageSquare, Share2, MoreHorizontal, 
   ShieldCheck, Globe, Clock, FileText, Send, X,
-  Heart, Flame, ThumbsDown, Copy, Facebook, Twitter
+  Heart, Flame, ThumbsDown, Copy, Facebook, Twitter,
+  Trash2, Edit3
 } from 'lucide-react';
 import { supabase } from '../../lib/supabaseClient';
 
@@ -15,12 +16,13 @@ export default function PostCard({ ann, instructor }) {
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState("");
   const [comments, setComments] = useState([]);
+  
+  // State for the three dots menu
+  const [showMenu, setShowMenu] = useState(false);
 
-  // Load data from Supabase on mount
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch Comments
         const { data: comms, error: commError } = await supabase
           .from('comments')
           .select('*')
@@ -30,7 +32,6 @@ export default function PostCard({ ann, instructor }) {
         if (comms) setComments(comms.map(c => ({ id: c.id, text: c.content, user: c.user_full_name, created_at: c.created_at })));
         if (commError) alert("Fetch Comments Error: " + commError.message);
 
-        // Fetch User's Reaction
         if (instructor?.id) {
           const { data: react, error: reactError } = await supabase
             .from('reactions')
@@ -57,52 +58,36 @@ export default function PostCard({ ann, instructor }) {
 
   const handleReaction = async (type) => {
     if (!instructor?.id) return alert("Error: Instructor ID is missing. Are you logged in?");
-    
     const isRemoving = type === reaction;
     const previousReaction = reaction;
-    
-    // Optimistic Update (Immediate UI change)
     setReaction(isRemoving ? null : type);
     setShowReactions(false);
 
     let error;
     if (isRemoving) {
-      const { error: delError } = await supabase
-        .from('reactions')
-        .delete()
-        .eq('announcement_id', ann.id)
-        .eq('user_id', instructor.id);
+      const { error: delError } = await supabase.from('reactions').delete().eq('announcement_id', ann.id).eq('user_id', instructor.id);
       error = delError;
     } else {
-      const { error: upsertError } = await supabase
-        .from('reactions')
-        .upsert({ 
-          announcement_id: ann.id, 
-          user_id: instructor.id, 
-          type: type 
+      const { error: upsertError } = await supabase.from('reactions').upsert({ 
+          announcement_id: ann.id, user_id: instructor.id, type: type 
         }, { onConflict: 'announcement_id, user_id' });
       error = upsertError;
     }
 
     if (error) {
-      setReaction(previousReaction); // Rollback on error
+      setReaction(previousReaction);
       alert("Database Reaction Error: " + error.message);
     }
   };
 
   const handleSendComment = async () => {
     if (!commentText.trim() || !instructor?.id) return;
-    
     const { data, error } = await supabase.from('comments').insert([{
-      announcement_id: ann.id,
-      user_id: instructor.id,
-      content: commentText,
-      user_full_name: instructor.full_name
+      announcement_id: ann.id, user_id: instructor.id, content: commentText, user_full_name: instructor.full_name
     }]).select().single();
 
-    if (error) {
-      alert("Database Comment Error: " + error.message);
-    } else if (data) {
+    if (error) alert("Database Comment Error: " + error.message);
+    else if (data) {
       setComments([{ id: data.id, text: data.content, user: data.user_full_name, created_at: data.created_at }, ...comments]);
       setCommentText("");
     }
@@ -110,24 +95,13 @@ export default function PostCard({ ann, instructor }) {
 
   const handleFacebookShare = async () => {
     if (!instructor?.id) return alert("Error: Instructor ID missing");
-
-    // Using null for target_section to avoid the Foreign Key Constraint error 
-    // unless the section "General" is explicitly registered in your sections table.
     const { error } = await supabase.from('announcements').insert([{
       content: `${shareDescription}\n\n--- Shared Post ---\n${ann.content}`,
-      instructor_id: instructor.id,
-      target_section: null, 
-      file_url: ann.file_url || null,
-      file_type: ann.file_type || null
+      instructor_id: instructor.id, target_section: null, file_url: ann.file_url || null, file_type: ann.file_type || null
     }]);
     
-    if (error) {
-      alert("Database Share Error: " + error.message);
-    } else {
-      setShowShareModal(false);
-      setShareDescription("");
-      alert("Success! The announcement has been shared to your timeline.");
-    }
+    if (error) alert("Database Share Error: " + error.message);
+    else { setShowShareModal(false); setShareDescription(""); alert("Success!"); }
   };
 
   return (
@@ -136,7 +110,6 @@ export default function PostCard({ ann, instructor }) {
       animate={{ opacity: 1, y: 0 }} 
       className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-md transition-all duration-300 mb-4"
     >
-      {/* POST HEADER & CONTENT */}
       <div className="p-5">
         <div className="flex justify-between items-start">
           <div className="flex gap-4">
@@ -161,15 +134,47 @@ export default function PostCard({ ann, instructor }) {
               </div>
             </div>
           </div>
+
+          {/* ADDED: Three Dots Button */}
+          <div className="relative">
+            <button 
+              onClick={() => setShowMenu(!showMenu)}
+              className="p-2 hover:bg-slate-50 rounded-full transition-colors"
+            >
+              <MoreHorizontal size={20} className="text-slate-400" />
+            </button>
+            
+            <AnimatePresence>
+              {showMenu && (
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.9, y: -10 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9, y: -10 }}
+                  className="absolute right-0 mt-2 w-40 bg-white border border-slate-100 shadow-xl rounded-xl z-[60] py-2 overflow-hidden"
+                >
+                  <button className="w-full px-4 py-2 text-left text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center gap-2">
+                    <Edit3 size={14} /> Edit Post
+                  </button>
+                  <button className="w-full px-4 py-2 text-left text-xs font-bold text-red-500 hover:bg-red-50 flex items-center gap-2">
+                    <Trash2 size={14} /> Delete
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
         <p className="mt-4 text-[15px] text-slate-700 leading-relaxed font-medium whitespace-pre-wrap">{ann?.content}</p>
       </div>
 
-      {/* ACTION BAR */}
-      <div className="px-5 py-2 border-t border-slate-50 bg-slate-50/30 flex items-center justify-between gap-2 relative">
-        
-        {/* REACTION SYSTEM */}
-        <div className="flex-1 relative" onMouseLeave={() => setShowReactions(false)}>
+      {/* ACTION BAR with Long-Press Fix */}
+      <div 
+        className="px-5 py-2 border-t border-slate-50 bg-slate-50/30 flex items-center justify-between gap-2 relative select-none touch-none"
+        style={{ WebkitTouchCallout: 'none' }} 
+      >
+        <div 
+          className="flex-1 relative" 
+          onMouseLeave={() => setShowReactions(false)}
+        >
           <AnimatePresence>
             {showReactions && (
               <motion.div 
@@ -182,8 +187,6 @@ export default function PostCard({ ann, instructor }) {
                   <motion.button 
                     key={r.id} 
                     whileHover={{ scale: 1.4, y: -5 }}
-                    whileTap={{ scale: 0.8 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 10 }}
                     onClick={() => handleReaction(r.id)}
                     className="p-2 hover:bg-slate-50 rounded-full"
                   >
@@ -196,6 +199,7 @@ export default function PostCard({ ann, instructor }) {
           
           <button 
             onMouseEnter={() => setShowReactions(true)}
+            onContextMenu={(e) => e.preventDefault()} // Prevents long-press menu
             onClick={() => handleReaction('like')}
             className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-black transition-all uppercase tracking-widest ${reaction ? reactions.find(r => r.id === reaction).color : 'text-slate-500 hover:bg-white'}`}
           >
@@ -219,7 +223,7 @@ export default function PostCard({ ann, instructor }) {
         </button>
       </div>
 
-      {/* SHARE MODAL */}
+      {/* REMAINDER OF YOUR CODE (Modals/Comments) REMAINS UNCHANGED */}
       <AnimatePresence>
         {showShareModal && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[1000] flex items-center justify-center p-4">
@@ -246,7 +250,6 @@ export default function PostCard({ ann, instructor }) {
         )}
       </AnimatePresence>
 
-      {/* COMMENTS SECTION */}
       <AnimatePresence>
         {showComments && (
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="border-t border-slate-100 bg-slate-50/50 overflow-hidden">
