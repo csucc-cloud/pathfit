@@ -94,11 +94,12 @@ export default function AdminDashboard() {
 
   return (
     <RoleGuard allowedRole="instructor">
-      <div className="flex flex-col min-h-screen bg-[#F8FAFC] text-slate-900 font-sans selection:bg-fbNavy/10">
+      {/* Container changed to w-full and px-0 to maximize edges */}
+      <div className="flex flex-col min-h-screen bg-[#F8FAFC] text-slate-900 font-sans selection:bg-fbNavy/10 w-full overflow-x-hidden">
         
-        {/* REFINED STICKY HEADER */}
-        <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-xl border-b border-slate-200/60 px-6 py-3">
-          <div className="max-w-[1600px] mx-auto flex justify-between items-center">
+        {/* REFINED STICKY HEADER - max-w-full */}
+        <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-xl border-b border-slate-200/60 px-4 sm:px-8 py-4">
+          <div className="max-w-full mx-auto flex justify-between items-center">
             <div className="flex items-center gap-10">
               <div className="flex items-center gap-2.5">
                 <div className="bg-fbNavy p-2 rounded-xl shadow-sm">
@@ -142,8 +143,9 @@ export default function AdminDashboard() {
           </div>
         </header>
 
-        <main className="flex-1 max-w-[1600px] w-full mx-auto p-6">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* MAIN CONTENT - Changed max-w-[1600px] to max-w-full */}
+        <main className="flex-1 max-w-full w-full mx-auto p-4 sm:p-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-10">
             
             {/* LEFT SIDEBAR: INTEGRATED NODES */}
             <aside className="lg:col-span-3 space-y-6">
@@ -212,7 +214,7 @@ export default function AdminDashboard() {
                     <textarea 
                       value={announcement} 
                       onChange={(e)=>setAnnouncement(e.target.value)} 
-                      className="w-full p-0 py-3 bg-transparent text-[15px] font-medium border-none focus:ring-0 outline-none resize-none min-h-[100px] placeholder:text-slate-400" 
+                      className="w-full p-0 py-3 bg-transparent text-[15px] font-medium border-none focus:ring-0 outline-none resize-none min-h-[120px] placeholder:text-slate-400" 
                       placeholder={`What's the update, ${instructor?.full_name?.split(' ')[0]}?`} 
                     />
                   </div>
@@ -291,7 +293,7 @@ export default function AdminDashboard() {
 
             {/* RIGHT SIDEBAR: REFINED STUDENT REGISTRY */}
             <aside className="lg:col-span-3">
-              <div className="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-200/60 h-[calc(100vh-140px)] flex flex-col sticky top-24 overflow-hidden">
+              <div className="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-200/60 h-[calc(100vh-140px)] min-h-[600px] flex flex-col sticky top-24 overflow-hidden">
                 <div className="flex justify-between items-center mb-6">
                   <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Registry</h3>
                   <div className="flex items-center gap-1.5 px-2 py-1 bg-fbOrange/10 rounded-lg">
