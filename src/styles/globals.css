@@ -100,3 +100,10 @@ aside {
 aside::-webkit-scrollbar {
   display: none;
 }
+
+/* Add this to your globals.css or a style tag */
+.no-system-menu {
+  -webkit-touch-callout: none; /* Prevents iOS/Android context menu */
+  -webkit-user-select: none;   /* Prevents text selection during long press */
+  user-select: none;
+}
