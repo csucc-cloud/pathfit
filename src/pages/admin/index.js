@@ -9,7 +9,8 @@ import {
   Users, Search, FileDown, Eye, Loader2, Plus, Send, ChevronRight, 
   X, FileText, Image as ImageIcon, MessageSquare, 
   Globe, ShieldCheck, Activity, Terminal, Share2, ThumbsUp, MoreHorizontal,
-  Paperclip, Clock, Calendar, Zap, Sparkles, Filter, BarChart3
+  Paperclip, Clock, Calendar, Zap, Sparkles, Filter, BarChart3, LayoutDashboard,
+  Settings, Bell
 } from 'lucide-react';
 
 const v = { hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } };
@@ -90,263 +91,244 @@ export default function AdminDashboard() {
 
   return (
     <RoleGuard allowedRole="instructor">
-      {/* BACKGROUND ELEMENTS */}
-      <div className="fixed inset-0 -z-10 bg-[#F8FAFC] overflow-hidden">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-fbNavy/5 rounded-full blur-[120px] animate-pulse" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-fbOrange/5 rounded-full blur-[120px]" />
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.03] mix-blend-overlay" />
-      </div>
-      
-      <motion.div 
-        initial="hidden" 
-        animate="visible" 
-        variants={{visible:{transition:{staggerChildren:0.05}}}} 
-        className="max-w-[1600px] mx-auto p-4 md:p-6 lg:h-screen flex flex-col gap-6"
-      >
+      <div className="min-h-screen bg-[#FDFDFD] text-slate-900 font-sans selection:bg-fbNavy/10">
         
-        {/* HEADER */}
-        <header className="flex justify-between items-center bg-white/80 backdrop-blur-xl p-4 md:px-8 md:py-5 rounded-[2.5rem] shadow-sm border border-white/60 shrink-0">
-          <div className="flex items-center gap-5">
-            <div className="relative group">
-                <div className="absolute -inset-1 bg-gradient-to-r from-fbNavy to-fbOrange rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-500"></div>
-                <div className="relative p-3 bg-fbNavy rounded-xl text-white shadow-lg">
-                    <Terminal size={20} className="group-hover:rotate-12 transition-transform"/>
+        {/* TOP NAVIGATION BAR */}
+        <header className="sticky top-0 z-40 w-full bg-white/70 backdrop-blur-md border-b border-slate-100 px-6 py-3">
+          <div className="max-w-[1600px] mx-auto flex justify-between items-center">
+            <div className="flex items-center gap-8">
+              <div className="flex items-center gap-2">
+                <div className="bg-fbNavy p-1.5 rounded-lg">
+                  <Terminal size={18} className="text-white" />
                 </div>
-            </div>
-            <div>
-                <h1 className="text-xl md:text-2xl font-black text-fbNavy tracking-tight flex items-center gap-1">
-                    EDU<span className="text-fbOrange">OS</span>
+                <h1 className="text-xl font-bold tracking-tight text-fbNavy">
+                  EDU<span className="text-fbOrange">OS</span>
                 </h1>
-                <div className="flex items-center gap-2">
-                    <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">System Operational</span>
-                </div>
+              </div>
+              
+              <nav className="hidden md:flex items-center gap-1">
+                <button className="px-4 py-2 text-sm font-semibold text-fbNavy bg-slate-100 rounded-lg">Dashboard</button>
+                <button className="px-4 py-2 text-sm font-medium text-slate-500 hover:text-fbNavy transition-colors">Analytics</button>
+                <button className="px-4 py-2 text-sm font-medium text-slate-500 hover:text-fbNavy transition-colors">Schedule</button>
+              </nav>
             </div>
-          </div>
 
-          <div className="flex items-center gap-6">
-             <div className="hidden lg:flex items-center gap-8">
-                <div className="text-right">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Nodes</p>
-                    <p className="text-sm font-bold text-fbNavy">{sections.length}</p>
+            <div className="flex items-center gap-4">
+              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-emerald-50 rounded-full border border-emerald-100">
+                <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">System Live</span>
+              </div>
+              <button className="p-2 text-slate-400 hover:text-fbNavy transition-colors"><Bell size={20}/></button>
+              <div className="h-6 w-px bg-slate-200" />
+              <div className="flex items-center gap-3 pl-2">
+                <div className="text-right hidden sm:block">
+                  <p className="text-xs font-bold text-slate-900 leading-none">{instructor?.full_name}</p>
+                  <p className="text-[10px] font-medium text-fbOrange mt-1">Lead Instructor</p>
                 </div>
-                <div className="text-right">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Entities</p>
-                    <p className="text-sm font-bold text-fbNavy">{students.length}</p>
+                <div className="w-9 h-9 rounded-full ring-2 ring-slate-100 overflow-hidden bg-slate-200 shadow-sm">
+                  {instructor?.avatar_url ? (
+                    <img src={instructor.avatar_url} className="w-full h-full object-cover" alt="avatar"/>
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center font-bold bg-fbNavy text-white text-xs">
+                      {instructor?.full_name?.[0]}
+                    </div>
+                  )}
                 </div>
-             </div>
-             <div className="h-8 w-px bg-slate-200 hidden sm:block" />
-             <div className="flex items-center gap-3 bg-slate-50/80 px-3 py-2 rounded-2xl border border-slate-100">
-                <div className="w-9 h-9 rounded-xl overflow-hidden ring-2 ring-white shadow-sm">
-                    {instructor?.avatar_url ? (
-                      <img src={instructor.avatar_url} className="w-full h-full object-cover" alt="avatar"/>
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center font-bold bg-fbNavy text-white text-xs">
-                        {instructor?.full_name?.[0]}
-                      </div>
-                    )}
-                </div>
-                <div className="text-left hidden sm:block">
-                    <p className="text-xs font-black text-fbNavy leading-none">{instructor?.full_name}</p>
-                    <p className="text-[9px] font-bold text-fbOrange uppercase mt-1">Lead Admin</p>
-                </div>
-             </div>
+              </div>
+            </div>
           </div>
         </header>
 
-        {/* MAIN GRID */}
-        <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 overflow-hidden min-h-0">
-          
-          {/* LEFT: FEED */}
-          <div className="lg:col-span-8 flex flex-col gap-6 overflow-hidden">
+        <main className="max-w-[1600px] mx-auto p-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             
-            {/* COMPOSER */}
-            <motion.div variants={v} className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100 shrink-0 relative overflow-hidden">
-              <div className="flex gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-slate-100 shrink-0 overflow-hidden border border-slate-200 hidden sm:flex items-center justify-center">
-                  {instructor?.avatar_url ? (
-                    <img src={instructor.avatar_url} className="w-full h-full object-cover" alt="user"/>
-                  ) : (
-                    <span className="text-slate-400 font-black">{instructor?.full_name?.[0]}</span>
-                  )}
+            {/* LEFT SIDEBAR: NAVIGATION & SECTIONS */}
+            <aside className="lg:col-span-3 space-y-6">
+              <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest px-1">Active Nodes</h3>
+                  <button onClick={()=>setIsModalOpen(true)} className="p-1.5 text-fbNavy hover:bg-slate-50 rounded-lg transition-all border border-slate-100">
+                    <Plus size={18} />
+                  </button>
                 </div>
-                <div className="flex-1">
-                    <textarea 
-                        value={announcement} 
-                        onChange={(e)=>setAnnouncement(e.target.value)} 
-                        className="w-full p-4 bg-slate-50 rounded-2xl text-sm font-medium border-2 border-transparent focus:bg-white focus:border-fbNavy/5 transition-all outline-none resize-none min-h-[100px]" 
-                        placeholder={`Initialize broadcast, Prof. ${instructor?.full_name?.split(' ')[0]}...`} 
-                    />
+                <div className="space-y-1.5">
+                  {sections.map(s => (
+                    <motion.div 
+                      whileHover={{ x: 4 }}
+                      key={s.id} 
+                      className="flex items-center justify-between p-3.5 hover:bg-slate-50 rounded-2xl cursor-pointer transition-all border border-transparent hover:border-slate-100 group"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-slate-100 text-fbNavy group-hover:bg-fbNavy group-hover:text-white rounded-xl flex items-center justify-center font-bold text-xs transition-colors">
+                          {s.section_code[0]}
+                        </div>
+                        <span className="text-sm font-semibold text-slate-700">{s.section_code}</span>
+                      </div>
+                      <ChevronRight size={14} className="text-slate-300 group-hover:text-fbNavy transition-colors" />
+                    </motion.div>
+                  ))}
                 </div>
               </div>
 
-              {file && (
-                <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="mt-4 sm:ml-16 p-3 bg-fbOrange/5 border border-fbOrange/20 rounded-2xl flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <FileText size={18} className="text-fbOrange"/>
-                        <span className="text-xs font-bold text-slate-700 truncate max-w-[200px]">{file.name}</span>
-                    </div>
-                    <button onClick={()=>setFile(null)} className="p-1 hover:bg-white rounded-lg text-red-400 transition-colors">
-                        <X size={16}/>
-                    </button>
-                </motion.div>
-              )}
+              {/* STATS QUICK VIEW */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Nodes</p>
+                  <p className="text-2xl font-black text-fbNavy mt-1">{sections.length}</p>
+                </div>
+                <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Students</p>
+                  <p className="text-2xl font-black text-fbNavy mt-1">{students.length}</p>
+                </div>
+              </div>
+            </aside>
 
-              <div className="flex flex-wrap items-center justify-between gap-4 mt-4">
-                <div className="flex items-center gap-2">
-                  <button onClick={()=>fileInputRef.current.click()} className="flex items-center gap-2 px-4 py-2.5 hover:bg-slate-50 rounded-xl text-slate-500 text-[11px] font-black uppercase transition-all border border-slate-100">
-                    <ImageIcon size={16} className="text-emerald-500"/> 
-                    <span>Media</span>
-                  </button>
-                  
-                  <div className="relative">
-                    <Globe size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
-                    <select 
-                        value={targetSection} 
-                        onChange={(e)=>setTargetSection(e.target.value)} 
-                        className="appearance-none bg-white text-[11px] font-black uppercase rounded-xl pl-9 pr-8 py-2.5 border border-slate-100 outline-none cursor-pointer hover:bg-slate-50 transition-colors"
-                    >
-                        <option value="all">Global</option>
-                        {sections.map(s => <option key={s.id} value={s.section_code}>{s.section_code}</option>)}
-                    </select>
+            {/* MIDDLE: FEED & COMPOSER */}
+            <section className="lg:col-span-6 space-y-6">
+              <motion.div initial="hidden" animate="visible" variants={v} className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
+                <div className="flex gap-4">
+                  <div className="w-10 h-10 rounded-full bg-slate-100 hidden sm:flex items-center justify-center border border-slate-200 shrink-0">
+                    {instructor?.avatar_url ? (
+                      <img src={instructor.avatar_url} className="w-full h-full rounded-full object-cover" alt="u"/>
+                    ) : (
+                      <span className="text-slate-400 text-xs font-bold">{instructor?.full_name?.[0]}</span>
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <textarea 
+                      value={announcement} 
+                      onChange={(e)=>setAnnouncement(e.target.value)} 
+                      className="w-full p-0 py-2 bg-transparent text-sm font-medium border-none focus:ring-0 outline-none resize-none min-h-[80px]" 
+                      placeholder={`Share an update with your students...`} 
+                    />
                   </div>
                 </div>
 
-                <button 
+                {file && (
+                  <div className="mt-4 p-3 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <FileText size={18} className="text-fbNavy"/>
+                      <span className="text-xs font-semibold text-slate-600 truncate max-w-[200px]">{file.name}</span>
+                    </div>
+                    <button onClick={()=>setFile(null)} className="p-1 hover:bg-slate-200 rounded-full text-slate-400 transition-colors">
+                      <X size={14}/>
+                    </button>
+                  </div>
+                )}
+
+                <div className="flex items-center justify-between mt-6 pt-4 border-t border-slate-50">
+                  <div className="flex items-center gap-2">
+                    <button onClick={()=>fileInputRef.current.click()} className="p-2.5 text-slate-500 hover:text-fbNavy hover:bg-slate-50 rounded-xl transition-all">
+                      <ImageIcon size={20}/>
+                    </button>
+                    <div className="h-6 w-px bg-slate-100 mx-1" />
+                    <div className="relative">
+                      <Globe size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"/>
+                      <select 
+                        value={targetSection} 
+                        onChange={(e)=>setTargetSection(e.target.value)} 
+                        className="appearance-none bg-slate-50 text-[11px] font-bold uppercase rounded-xl pl-9 pr-8 py-2 border-none outline-none cursor-pointer hover:bg-slate-100 transition-colors"
+                      >
+                        <option value="all">Global Broadcast</option>
+                        {sections.map(s => <option key={s.id} value={s.section_code}>{s.section_code}</option>)}
+                      </select>
+                    </div>
+                  </div>
+
+                  <button 
                     onClick={handlePost} 
                     disabled={isPosting || (!announcement.trim() && !file)} 
-                    className={`flex items-center gap-3 px-6 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all ${
-                        isPosting || (!announcement.trim() && !file) 
-                        ? 'bg-slate-100 text-slate-400 cursor-not-allowed' 
-                        : 'bg-fbNavy text-white hover:bg-slate-800 shadow-md active:scale-95'
+                    className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                      isPosting || (!announcement.trim() && !file) 
+                      ? 'bg-slate-100 text-slate-400 cursor-not-allowed' 
+                      : 'bg-fbNavy text-white hover:shadow-lg hover:shadow-fbNavy/20 active:scale-95'
                     }`}
-                >
-                    {isPosting ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
-                    <span>{isPosting ? 'Sending...' : 'Post Update'}</span>
-                </button>
-              </div>
-              <input type="file" ref={fileInputRef} className="hidden" onChange={(e)=>setFile(e.target.files[0])}/>
-            </motion.div>
-
-            {/* SCROLLABLE FEED */}
-            <div className="flex-1 overflow-y-auto pr-2 space-y-4 custom-scrollbar">
-              {announcements.length === 0 && !loading && (
-                <div className="flex flex-col items-center justify-center py-20 bg-white/50 rounded-[2.5rem] border-2 border-dashed border-slate-200">
-                    <Activity size={40} className="text-slate-300 mb-4"/>
-                    <p className="text-xs font-black text-slate-400 uppercase tracking-widest">No transmissions found</p>
-                </div>
-              )}
-              {announcements.map(ann => (
-                <div key={ann.id} className="hover:-translate-y-0.5 transition-transform">
-                    <PostCard ann={ann} instructor={instructor} />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* RIGHT: COMMANDS & REGISTRY */}
-          <div className="lg:col-span-4 flex flex-col gap-6 overflow-hidden">
-            
-            {/* ACTIVE SECTIONS */}
-            <div className="bg-fbNavy rounded-[2.5rem] p-6 shadow-lg text-white shrink-0">
-              <div className="flex justify-between items-center mb-5">
-                <div>
-                    <h3 className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em]">Deployment</h3>
-                    <h3 className="text-lg font-black italic">Nodes</h3>
-                </div>
-                <button onClick={()=>setIsModalOpen(true)} className="p-2.5 bg-white/10 hover:bg-fbOrange text-white rounded-xl transition-all border border-white/10 group">
-                    <Plus size={20} className="group-hover:rotate-90 transition-transform"/>
-                </button>
-              </div>
-              
-              <div className="grid grid-cols-1 gap-2 max-h-[180px] overflow-y-auto custom-scrollbar pr-1">
-                {sections.map(s => (
-                  <motion.div 
-                    whileHover={{ x: 4 }}
-                    key={s.id} 
-                    className="flex items-center justify-between p-3 bg-white/5 hover:bg-white/10 rounded-xl transition-all border border-white/5"
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-fbOrange rounded-lg flex items-center justify-center font-black text-xs">{s.section_code[0]}</div>
-                      <span className="text-xs font-black tracking-widest uppercase">{s.section_code}</span>
-                    </div>
-                    <ChevronRight size={14} className="text-white/30" />
-                  </motion.div>
+                    {isPosting ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
+                    <span>{isPosting ? 'Posting...' : 'Post Update'}</span>
+                  </button>
+                </div>
+                <input type="file" ref={fileInputRef} className="hidden" onChange={(e)=>setFile(e.target.files[0])}/>
+              </motion.div>
+
+              <div className="space-y-4">
+                {announcements.length === 0 && !loading && (
+                  <div className="text-center py-20 bg-white rounded-3xl border border-slate-100">
+                    <Activity size={32} className="text-slate-200 mx-auto mb-3"/>
+                    <p className="text-sm font-medium text-slate-400">No announcements posted yet.</p>
+                  </div>
+                )}
+                {announcements.map(ann => (
+                  <PostCard key={ann.id} ann={ann} instructor={instructor} />
                 ))}
               </div>
-            </div>
+            </section>
 
-            {/* STUDENT REGISTRY */}
-            <div className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100 flex flex-col flex-1 overflow-hidden min-h-[400px]">
-                <div className="flex justify-between items-center mb-6 shrink-0">
-                    <div>
-                        <h2 className="text-[10px] font-black text-fbOrange uppercase tracking-widest">Registry</h2>
-                        <h2 className="text-lg font-black text-fbNavy tracking-tight">Active Students</h2>
-                    </div>
-                    <Users size={20} className="text-slate-300"/>
+            {/* RIGHT SIDEBAR: STUDENT REGISTRY */}
+            <aside className="lg:col-span-3 space-y-6">
+              <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 h-[calc(100vh-140px)] flex flex-col">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-sm font-bold text-slate-800">Student Registry</h3>
+                  <Users size={18} className="text-slate-300"/>
                 </div>
-                
-                <div className="flex flex-col gap-4 flex-1 overflow-hidden">
-                    <div className="relative shrink-0">
-                        <input 
-                            type="text" 
-                            placeholder="Search UID or Name..." 
-                            onChange={(e)=>setSearchTerm(e.target.value)} 
-                            className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3 pl-10 pr-4 text-xs font-bold focus:bg-white transition-all outline-none"
-                        />
-                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16}/>
-                    </div>
-                    
-                    <button onClick={handleExport} className="w-full py-3 bg-slate-50 hover:bg-fbNavy hover:text-white border border-slate-100 text-fbNavy rounded-xl transition-all text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2">
-                        <FileDown size={14} />
-                        Export Data
-                    </button>
 
-                    <div className="overflow-y-auto pr-1 space-y-2 flex-1 custom-scrollbar">
-                        <AnimatePresence mode="popLayout">
-                        {filtered.map(s => (
-                            <motion.div 
-                                layout
-                                initial={{opacity:0}} 
-                                animate={{opacity:1}} 
-                                exit={{opacity:0}}
-                                key={s.id} 
-                                className="p-3 hover:bg-slate-50 rounded-2xl border border-transparent hover:border-slate-100 transition-all group"
-                            >
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center overflow-hidden shrink-0">
-                                        {s.avatar_url ? <img src={s.avatar_url} className="w-full h-full object-cover" alt="s"/> : <span className="text-xs font-black text-fbNavy">{s.full_name?.[0]}</span>}
-                                    </div>
-                                    <div className="min-w-0 flex-1">
-                                        <h4 className="text-[11px] font-black text-slate-800 truncate uppercase tracking-tight">{s.full_name}</h4>
-                                        <div className="flex items-center gap-2 mt-0.5">
-                                            <span className="text-[9px] font-bold text-fbOrange">{s.student_id}</span>
-                                            <span className="text-[9px] font-black text-slate-400 uppercase">{s.section_code}</span>
-                                        </div>
-                                    </div>
-                                    <button className="opacity-0 group-hover:opacity-100 p-1 text-slate-300 hover:text-fbNavy transition-all">
-                                        <MoreHorizontal size={16}/>
-                                    </button>
-                                </div>
-                            </motion.div>
-                        ))}
-                        </AnimatePresence>
-                    </div>
+                <div className="relative mb-4">
+                  <input 
+                    type="text" 
+                    placeholder="Search students..." 
+                    onChange={(e)=>setSearchTerm(e.target.value)} 
+                    className="w-full bg-slate-50 border-none rounded-2xl py-2.5 pl-10 pr-4 text-xs font-medium focus:bg-white focus:ring-1 ring-slate-100 transition-all outline-none"
+                  />
+                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={14}/>
                 </div>
-            </div>
+
+                <div className="overflow-y-auto flex-1 custom-scrollbar space-y-2 pr-1">
+                  <AnimatePresence mode="popLayout">
+                    {filtered.map(s => (
+                      <motion.div 
+                        layout initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}
+                        key={s.id} 
+                        className="p-3 hover:bg-slate-50 rounded-2xl border border-transparent transition-all group cursor-default"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-xl bg-white border border-slate-100 flex items-center justify-center overflow-hidden shrink-0 shadow-sm">
+                            {s.avatar_url ? <img src={s.avatar_url} className="w-full h-full object-cover" alt="s"/> : <span className="text-xs font-bold text-fbNavy">{s.full_name?.[0]}</span>}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <h4 className="text-[11px] font-bold text-slate-800 truncate uppercase">{s.full_name}</h4>
+                            <div className="flex items-center gap-2">
+                              <span className="text-[9px] font-bold text-fbOrange tracking-tighter">{s.student_id}</span>
+                              <span className="text-[9px] font-bold text-slate-400">{s.section_code}</span>
+                            </div>
+                          </div>
+                          <button className="opacity-0 group-hover:opacity-100 p-1 text-slate-300 hover:text-fbNavy transition-all">
+                            <MoreHorizontal size={14}/>
+                          </button>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </div>
+
+                <button onClick={handleExport} className="mt-6 w-full py-3 bg-slate-900 hover:bg-black text-white rounded-2xl transition-all text-[11px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg shadow-slate-200">
+                  <FileDown size={14} />
+                  Export Data
+                </button>
+              </div>
+            </aside>
 
           </div>
-        </div>
+        </main>
 
-      </motion.div>
-      <CreateSectionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onRefresh={fetchData} />
-      
-      <style jsx>{`
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
-      `}</style>
+        <CreateSectionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onRefresh={fetchData} />
+        
+        <style jsx global>{`
+          .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+          .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+          .custom-scrollbar::-webkit-scrollbar-thumb { background: #F1F5F9; border-radius: 10px; }
+          .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #E2E8F0; }
+        `}</style>
+      </div>
     </RoleGuard>
   );
 }
