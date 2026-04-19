@@ -37,7 +37,7 @@ export default function PostCard({ ann, instructor }) {
             .select('type')
             .eq('announcement_id', ann.id)
             .eq('user_id', instructor.id)
-            .maybeSingle(); // Changed .single() to .maybeSingle() to prevent 406 errors
+            .maybeSingle(); 
           
           if (react) setReaction(react.type);
         }
@@ -111,10 +111,12 @@ export default function PostCard({ ann, instructor }) {
   const handleFacebookShare = async () => {
     if (!instructor?.id) return alert("Error: Instructor ID missing");
 
+    // Using null for target_section to avoid the Foreign Key Constraint error 
+    // unless the section "General" is explicitly registered in your sections table.
     const { error } = await supabase.from('announcements').insert([{
       content: `${shareDescription}\n\n--- Shared Post ---\n${ann.content}`,
       instructor_id: instructor.id,
-      target_section: ann.target_section || "General",
+      target_section: null, 
       file_url: ann.file_url || null,
       file_type: ann.file_type || null
     }]);
@@ -132,7 +134,7 @@ export default function PostCard({ ann, instructor }) {
     <motion.div 
       initial={{ opacity: 0, y: 10 }} 
       animate={{ opacity: 1, y: 0 }} 
-      className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-md transition-all duration-300"
+      className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-md transition-all duration-300 mb-4"
     >
       {/* POST HEADER & CONTENT */}
       <div className="p-5">
@@ -217,10 +219,10 @@ export default function PostCard({ ann, instructor }) {
         </button>
       </div>
 
-      {/* FACEBOOK STYLE SHARE MODAL */}
+      {/* SHARE MODAL */}
       <AnimatePresence>
         {showShareModal && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[999] flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[1000] flex items-center justify-center p-4">
             <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl">
               <div className="p-4 border-b flex justify-between items-center">
                 <h3 className="font-black text-slate-800 uppercase text-sm">Share Post</h3>
@@ -237,7 +239,7 @@ export default function PostCard({ ann, instructor }) {
                   <p className="text-xs font-bold text-slate-400 uppercase mb-2">Original Post</p>
                   <p className="text-xs text-slate-600 line-clamp-3">{ann.content}</p>
                 </div>
-                <button onClick={handleFacebookShare} className="w-full mt-5 bg-fbNavy text-white py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-fbNavy/90 transition-all">Share Now</button>
+                <button onClick={handleFacebookShare} className="w-full mt-5 bg-fbNavy text-white py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-fbNavy/90 transition-all shadow-lg">Share Now</button>
               </div>
             </motion.div>
           </div>
@@ -250,8 +252,8 @@ export default function PostCard({ ann, instructor }) {
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="border-t border-slate-100 bg-slate-50/50 overflow-hidden">
             <div className="p-4 space-y-4">
               <div className="flex gap-3">
-                <div className="w-8 h-8 rounded-lg bg-slate-200 shrink-0 overflow-hidden">
-                    {instructor?.avatar_url && <img src={instructor.avatar_url} className="w-full h-full object-cover" alt="me" />}
+                <div className="w-8 h-8 rounded-lg bg-fbNavy text-white flex items-center justify-center text-[10px] font-bold overflow-hidden shrink-0 shadow-sm">
+                    {instructor?.avatar_url ? <img src={instructor.avatar_url} className="w-full h-full object-cover" alt="me" /> : instructor?.full_name?.[0]}
                 </div>
                 <div className="flex-1 relative">
                     <input 
