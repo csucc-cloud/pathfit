@@ -4,7 +4,7 @@ import {
   ThumbsUp, MessageSquare, Share2, MoreHorizontal, 
   ShieldCheck, Globe, Clock, FileText, Send, X,
   Heart, Flame, ThumbsDown, Copy, Facebook, Twitter,
-  Trash2, Edit3
+  Trash2, Edit3, Loader2
 } from 'lucide-react';
 import { supabase } from '../../lib/supabaseClient';
 
@@ -18,9 +18,12 @@ export default function PostCard({ ann, instructor }) {
   const [comments, setComments] = useState([]);
   const [showMenu, setShowMenu] = useState(false);
 
-  // New states for Edit functionality
+  // New states for Edit/Delete functionality
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(ann?.content || "");
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -51,11 +54,12 @@ export default function PostCard({ ann, instructor }) {
     if (ann.id) fetchData();
   }, [ann.id, instructor?.id]);
 
-  // --- NEW HANDLERS FOR EDIT & DELETE ---
+  // --- HANDLERS FOR EDIT & DELETE ---
 
   const handleDeletePost = async () => {
-    if (!window.confirm("Are you sure you want to delete this post permanently?")) return;
+    if (!window.confirm("Are you sure you want to delete this post?")) return;
     
+    setIsDeleting(true);
     const { error } = await supabase
       .from('announcements')
       .delete()
@@ -63,15 +67,17 @@ export default function PostCard({ ann, instructor }) {
 
     if (error) {
       alert("Delete Error: " + error.message);
+      setIsDeleting(false);
     } else {
-      alert("Post deleted successfully.");
-      window.location.reload(); // Refresh to update list
+      // Fade out the component instead of reloading
+      setIsVisible(false);
     }
   };
 
   const handleUpdatePost = async () => {
     if (!editContent.trim()) return;
 
+    setIsUpdating(true);
     const { error } = await supabase
       .from('announcements')
       .update({ content: editContent })
@@ -79,15 +85,14 @@ export default function PostCard({ ann, instructor }) {
 
     if (error) {
       alert("Update Error: " + error.message);
+      setIsUpdating(false);
     } else {
       setIsEditing(false);
+      setIsUpdating(false);
       setShowMenu(false);
-      // Local update so user sees change immediately
       ann.content = editContent; 
     }
   };
-
-  // --- END NEW HANDLERS ---
 
   const reactions = [
     { id: 'like', icon: <ThumbsUp size={18} className="text-blue-500 fill-blue-500" />, label: 'Like', color: 'text-blue-500' },
@@ -140,204 +145,232 @@ export default function PostCard({ ann, instructor }) {
   };
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 10 }} 
-      animate={{ opacity: 1, y: 0 }} 
-      className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-md transition-all duration-300 mb-4"
-    >
-      <div className="p-5">
-        <div className="flex justify-between items-start">
-          <div className="flex gap-4">
-            <div className="w-11 h-11 rounded-xl bg-fbNavy flex items-center justify-center text-white text-sm font-bold overflow-hidden shadow-inner">
-               {instructor?.avatar_url ? <img src={instructor.avatar_url} className="w-full h-full object-cover" alt="prof"/> : instructor?.full_name?.[0]}
+    <AnimatePresence>
+      {isVisible && (
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }} 
+          animate={{ opacity: isDeleting ? 0.5 : 1, y: 0 }} 
+          exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
+          className={`bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-md transition-all duration-300 mb-4 ${isDeleting ? 'pointer-events-none grayscale-[0.5]' : ''}`}
+        >
+          {/* Deleting Overlay */}
+          {isDeleting && (
+            <div className="absolute inset-0 z-[70] bg-white/60 backdrop-blur-[1px] flex items-center justify-center flex-col gap-2">
+              <Loader2 className="animate-spin text-fbNavy" size={24} />
+              <span className="text-[10px] font-black uppercase tracking-widest text-fbNavy">Deleting Post...</span>
             </div>
-            <div>
-              <h4 className="text-sm font-black text-slate-900 flex items-center gap-2">
-                {instructor?.full_name} 
-                <div className="flex items-center gap-1 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
-                    <ShieldCheck size={12} className="text-blue-500 fill-blue-500 text-white"/>
-                    <span className="text-[9px] text-blue-600 uppercase font-black">Verified</span>
+          )}
+
+          <div className="p-5">
+            <div className="flex justify-between items-start">
+              <div className="flex gap-4">
+                <div className="w-11 h-11 rounded-xl bg-fbNavy flex items-center justify-center text-white text-sm font-bold overflow-hidden shadow-inner">
+                   {instructor?.avatar_url ? <img src={instructor.avatar_url} className="w-full h-full object-cover" alt="prof"/> : instructor?.full_name?.[0]}
                 </div>
-              </h4>
-              <div className="flex items-center gap-3 mt-1">
-                <p className="text-[10px] text-slate-400 font-bold flex items-center gap-1">
-                    <Clock size={12}/> {ann?.created_at ? new Date(ann.created_at).toLocaleDateString() : 'Just now'}
-                </p>
-                <p className="text-[10px] text-fbOrange font-black uppercase flex items-center gap-1">
-                    <Globe size={12}/> {ann?.target_section || "Global Access"}
-                </p>
+                <div>
+                  <h4 className="text-sm font-black text-slate-900 flex items-center gap-2">
+                    {instructor?.full_name} 
+                    <div className="flex items-center gap-1 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
+                        <ShieldCheck size={12} className="text-blue-500 fill-blue-500 text-white"/>
+                        <span className="text-[9px] text-blue-600 uppercase font-black">Verified</span>
+                    </div>
+                  </h4>
+                  <div className="flex items-center gap-3 mt-1">
+                    <p className="text-[10px] text-slate-400 font-bold flex items-center gap-1">
+                        <Clock size={12}/> {ann?.created_at ? new Date(ann.created_at).toLocaleDateString() : 'Just now'}
+                    </p>
+                    <p className="text-[10px] text-fbOrange font-black uppercase flex items-center gap-1">
+                        <Globe size={12}/> {ann?.target_section || "Global Access"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="relative" onMouseLeave={() => setShowMenu(false)}>
+                <button 
+                  onClick={() => setShowMenu(!showMenu)}
+                  className="p-2 hover:bg-slate-50 rounded-full transition-colors"
+                >
+                  <MoreHorizontal size={20} className="text-slate-400" />
+                </button>
+                
+                <AnimatePresence>
+                  {showMenu && (
+                    <motion.div 
+                      initial={{ opacity: 0, scale: 0.9, y: -10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.9, y: -10 }}
+                      className="absolute right-0 mt-2 w-40 bg-white border border-slate-100 shadow-xl rounded-xl z-[60] py-2 overflow-hidden"
+                    >
+                      <button 
+                        onClick={() => { setIsEditing(true); setShowMenu(false); }}
+                        className="w-full px-4 py-2 text-left text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center gap-2"
+                      >
+                        <Edit3 size={14} /> Edit Post
+                      </button>
+                      <button 
+                        onClick={handleDeletePost}
+                        className="w-full px-4 py-2 text-left text-xs font-bold text-red-500 hover:bg-red-50 flex items-center gap-2"
+                      >
+                        <Trash2 size={14} /> Delete
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
+
+            {/* POST CONTENT OR EDIT INPUT */}
+            {isEditing ? (
+              <div className="mt-4 space-y-3">
+                <textarea 
+                  value={editContent}
+                  disabled={isUpdating}
+                  onChange={(e) => setEditContent(e.target.value)}
+                  className="w-full p-3 bg-slate-50 rounded-xl text-sm border-2 border-fbNavy/20 focus:border-fbNavy outline-none min-h-[100px] transition-all"
+                />
+                <div className="flex gap-2">
+                  <button 
+                    disabled={isUpdating}
+                    onClick={handleUpdatePost} 
+                    className="bg-fbNavy text-white px-4 py-2 rounded-lg text-[10px] font-black uppercase flex items-center gap-2 disabled:opacity-50"
+                  >
+                    {isUpdating && <Loader2 size={12} className="animate-spin"/>}
+                    {isUpdating ? 'Saving...' : 'Save'}
+                  </button>
+                  <button 
+                    disabled={isUpdating}
+                    onClick={() => setIsEditing(false)} 
+                    className="bg-slate-200 text-slate-600 px-4 py-2 rounded-lg text-[10px] font-black uppercase"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <p className="mt-4 text-[15px] text-slate-700 leading-relaxed font-medium whitespace-pre-wrap">{ann?.content}</p>
+            )}
           </div>
 
-          <div className="relative" onMouseLeave={() => setShowMenu(false)}>
+          {/* ACTION BAR */}
+          <div 
+            className="px-5 py-2 border-t border-slate-50 bg-slate-50/30 flex items-center justify-between gap-2 relative select-none touch-none"
+            style={{ WebkitTouchCallout: 'none' }} 
+          >
+            <div className="flex-1 relative" onMouseLeave={() => setShowReactions(false)}>
+              <AnimatePresence>
+                {showReactions && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 20, scale: 0.5 }} 
+                    animate={{ opacity: 1, y: -55, scale: 1 }} 
+                    exit={{ opacity: 0, y: 20, scale: 0.5 }}
+                    className="absolute left-0 bg-white shadow-2xl border border-slate-100 rounded-full p-1.5 flex gap-1 z-50"
+                  >
+                    {reactions.map((r) => (
+                      <motion.button 
+                        key={r.id} 
+                        whileHover={{ scale: 1.4, y: -5 }}
+                        onClick={() => handleReaction(r.id)}
+                        className="p-2 hover:bg-slate-50 rounded-full"
+                      >
+                        {r.icon}
+                      </motion.button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              
+              <button 
+                onMouseEnter={() => setShowReactions(true)}
+                onContextMenu={(e) => e.preventDefault()}
+                onClick={() => handleReaction('like')}
+                className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-black transition-all uppercase tracking-widest ${reaction ? reactions.find(r => r.id === reaction).color : 'text-slate-500 hover:bg-white'}`}
+              >
+                {reaction ? reactions.find(r => r.id === reaction).icon : <ThumbsUp size={16}/>}
+                {reaction ? reactions.find(r => r.id === reaction).label : 'Like'}
+              </button>
+            </div>
+            
             <button 
-              onClick={() => setShowMenu(!showMenu)}
-              className="p-2 hover:bg-slate-50 rounded-full transition-colors"
+              onClick={() => setShowComments(!showComments)}
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 hover:bg-white hover:shadow-sm rounded-xl text-slate-500 hover:text-fbNavy text-xs font-black uppercase"
             >
-              <MoreHorizontal size={20} className="text-slate-400" />
+              <MessageSquare size={16}/> Comment
             </button>
             
-            <AnimatePresence>
-              {showMenu && (
-                <motion.div 
-                  initial={{ opacity: 0, scale: 0.9, y: -10 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.9, y: -10 }}
-                  className="absolute right-0 mt-2 w-40 bg-white border border-slate-100 shadow-xl rounded-xl z-[60] py-2 overflow-hidden"
-                >
-                  <button 
-                    onClick={() => { setIsEditing(true); setShowMenu(false); }}
-                    className="w-full px-4 py-2 text-left text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center gap-2"
-                  >
-                    <Edit3 size={14} /> Edit Post
-                  </button>
-                  <button 
-                    onClick={handleDeletePost}
-                    className="w-full px-4 py-2 text-left text-xs font-bold text-red-500 hover:bg-red-50 flex items-center gap-2"
-                  >
-                    <Trash2 size={14} /> Delete
-                  </button>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            <button 
+              onClick={() => setShowShareModal(true)}
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 hover:bg-white hover:shadow-sm rounded-xl text-slate-500 hover:text-fbNavy text-xs font-black uppercase"
+            >
+              <Share2 size={16}/> Share
+            </button>
           </div>
-        </div>
 
-        {/* POST CONTENT OR EDIT INPUT */}
-        {isEditing ? (
-          <div className="mt-4 space-y-3">
-            <textarea 
-              value={editContent}
-              onChange={(e) => setEditContent(e.target.value)}
-              className="w-full p-3 bg-slate-50 rounded-xl text-sm border-2 border-fbNavy/20 focus:border-fbNavy outline-none min-h-[100px]"
-            />
-            <div className="flex gap-2">
-              <button onClick={handleUpdatePost} className="bg-fbNavy text-white px-4 py-2 rounded-lg text-[10px] font-black uppercase">Save</button>
-              <button onClick={() => setIsEditing(false)} className="bg-slate-200 text-slate-600 px-4 py-2 rounded-lg text-[10px] font-black uppercase">Cancel</button>
-            </div>
-          </div>
-        ) : (
-          <p className="mt-4 text-[15px] text-slate-700 leading-relaxed font-medium whitespace-pre-wrap">{ann?.content}</p>
-        )}
-      </div>
-
-      {/* ACTION BAR */}
-      <div 
-        className="px-5 py-2 border-t border-slate-50 bg-slate-50/30 flex items-center justify-between gap-2 relative select-none touch-none"
-        style={{ WebkitTouchCallout: 'none' }} 
-      >
-        <div className="flex-1 relative" onMouseLeave={() => setShowReactions(false)}>
+          {/* SHARE MODAL */}
           <AnimatePresence>
-            {showReactions && (
-              <motion.div 
-                initial={{ opacity: 0, y: 20, scale: 0.5 }} 
-                animate={{ opacity: 1, y: -55, scale: 1 }} 
-                exit={{ opacity: 0, y: 20, scale: 0.5 }}
-                className="absolute left-0 bg-white shadow-2xl border border-slate-100 rounded-full p-1.5 flex gap-1 z-50"
-              >
-                {reactions.map((r) => (
-                  <motion.button 
-                    key={r.id} 
-                    whileHover={{ scale: 1.4, y: -5 }}
-                    onClick={() => handleReaction(r.id)}
-                    className="p-2 hover:bg-slate-50 rounded-full"
-                  >
-                    {r.icon}
-                  </motion.button>
-                ))}
+            {showShareModal && (
+              <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[1000] flex items-center justify-center p-4">
+                <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl">
+                  <div className="p-4 border-b flex justify-between items-center">
+                    <h3 className="font-black text-slate-800 uppercase text-sm">Share Post</h3>
+                    <button onClick={() => setShowShareModal(false)}><X size={20}/></button>
+                  </div>
+                  <div className="p-5">
+                    <textarea 
+                      value={shareDescription}
+                      onChange={(e) => setEditContent(e.target.value)}
+                      placeholder="Say something about this..." 
+                      className="w-full h-24 p-3 bg-slate-50 rounded-xl text-sm focus:outline-none border-none resize-none"
+                    />
+                    <button onClick={handleFacebookShare} className="w-full mt-5 bg-fbNavy text-white py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-fbNavy/90 transition-all shadow-lg">Share Now</button>
+                  </div>
+                </motion.div>
+              </div>
+            )}
+          </AnimatePresence>
+
+          {/* COMMENTS SECTION */}
+          <AnimatePresence>
+            {showComments && (
+              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="border-t border-slate-100 bg-slate-50/50 overflow-hidden">
+                <div className="p-4 space-y-4">
+                  <div className="flex gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-fbNavy text-white flex items-center justify-center text-[10px] font-bold shrink-0">
+                        {instructor?.avatar_url ? <img src={instructor.avatar_url} className="w-full h-full object-cover" alt="me" /> : instructor?.full_name?.[0]}
+                    </div>
+                    <div className="flex-1 relative">
+                        <input 
+                          type="text" 
+                          value={commentText}
+                          onChange={(e) => setCommentText(e.target.value)}
+                          placeholder="Write a comment..." 
+                          className="w-full bg-white border border-slate-200 rounded-xl py-2 px-4 pr-10 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-fbNavy/10"
+                        />
+                        <button onClick={handleSendComment} className="absolute right-2 top-1/2 -translate-y-1/2 text-fbNavy hover:text-fbOrange transition-colors">
+                            <Send size={16} />
+                        </button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    {comments.map(c => (
+                      <div key={c.id} className="flex gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-fbNavy text-white flex items-center justify-center text-[10px] font-bold shrink-0">
+                            {c.user?.[0]}
+                        </div>
+                        <div className="bg-white p-3 rounded-2xl rounded-tl-none border border-slate-100 shadow-sm flex-1">
+                            <p className="text-[10px] font-black text-fbNavy uppercase">{c.user}</p>
+                            <p className="text-xs text-slate-700 mt-0.5">{c.text}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
-          
-          <button 
-            onMouseEnter={() => setShowReactions(true)}
-            onContextMenu={(e) => e.preventDefault()}
-            onClick={() => handleReaction('like')}
-            className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-black transition-all uppercase tracking-widest ${reaction ? reactions.find(r => r.id === reaction).color : 'text-slate-500 hover:bg-white'}`}
-          >
-            {reaction ? reactions.find(r => r.id === reaction).icon : <ThumbsUp size={16}/>}
-            {reaction ? reactions.find(r => r.id === reaction).label : 'Like'}
-          </button>
-        </div>
-        
-        <button 
-          onClick={() => setShowComments(!showComments)}
-          className="flex-1 flex items-center justify-center gap-2 py-2.5 hover:bg-white hover:shadow-sm rounded-xl text-slate-500 hover:text-fbNavy text-xs font-black uppercase"
-        >
-          <MessageSquare size={16}/> Comment
-        </button>
-        
-        <button 
-          onClick={() => setShowShareModal(true)}
-          className="flex-1 flex items-center justify-center gap-2 py-2.5 hover:bg-white hover:shadow-sm rounded-xl text-slate-500 hover:text-fbNavy text-xs font-black uppercase"
-        >
-          <Share2 size={16}/> Share
-        </button>
-      </div>
-
-      {/* MODALS & COMMENTS SECTIONS (UNCHANGED) */}
-      <AnimatePresence>
-        {showShareModal && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[1000] flex items-center justify-center p-4">
-            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl">
-              <div className="p-4 border-b flex justify-between items-center">
-                <h3 className="font-black text-slate-800 uppercase text-sm">Share Post</h3>
-                <button onClick={() => setShowShareModal(false)}><X size={20}/></button>
-              </div>
-              <div className="p-5">
-                <textarea 
-                  value={shareDescription}
-                  onChange={(e) => setShareDescription(e.target.value)}
-                  placeholder="Say something about this..." 
-                  className="w-full h-24 p-3 bg-slate-50 rounded-xl text-sm focus:outline-none border-none resize-none"
-                />
-                <button onClick={handleFacebookShare} className="w-full mt-5 bg-fbNavy text-white py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-fbNavy/90 transition-all shadow-lg">Share Now</button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {showComments && (
-          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="border-t border-slate-100 bg-slate-50/50 overflow-hidden">
-            <div className="p-4 space-y-4">
-              <div className="flex gap-3">
-                <div className="w-8 h-8 rounded-lg bg-fbNavy text-white flex items-center justify-center text-[10px] font-bold overflow-hidden shrink-0 shadow-sm">
-                    {instructor?.avatar_url ? <img src={instructor.avatar_url} className="w-full h-full object-cover" alt="me" /> : instructor?.full_name?.[0]}
-                </div>
-                <div className="flex-1 relative">
-                    <input 
-                      type="text" 
-                      value={commentText}
-                      onChange={(e) => setCommentText(e.target.value)}
-                      placeholder="Write a comment..." 
-                      className="w-full bg-white border border-slate-200 rounded-xl py-2 px-4 pr-10 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-fbNavy/10"
-                    />
-                    <button onClick={handleSendComment} className="absolute right-2 top-1/2 -translate-y-1/2 text-fbNavy hover:text-fbOrange transition-colors">
-                        <Send size={16} />
-                    </button>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                {comments.map(c => (
-                  <div key={c.id} className="flex gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-fbNavy text-white flex items-center justify-center text-[10px] font-bold shrink-0">
-                        {c.user?.[0]}
-                    </div>
-                    <div className="bg-white p-3 rounded-2xl rounded-tl-none border border-slate-100 shadow-sm flex-1">
-                        <p className="text-[10px] font-black text-fbNavy uppercase">{c.user}</p>
-                        <p className="text-xs text-slate-700 mt-0.5">{c.text}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
