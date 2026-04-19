@@ -94,9 +94,9 @@ export default function InstructorLayout({ children }) {
           </div>
         </div>
 
-        {/* NAVIGATION AREA */}
+        {/* NAVIGATION AREA - Sign Out now included in the scrollable list */}
         <nav id="sidebar-nav" className="flex-1 min-h-0 px-6 mt-4 overflow-y-auto custom-scrollbar">
-          <div className="space-y-3 pb-4">
+          <div className="space-y-3 pb-10">
             {menuItems.map((item) => {
               const active = isActive(item.path);
               return (
@@ -122,19 +122,19 @@ export default function InstructorLayout({ children }) {
                 </button>
               );
             })}
+
+            {/* SIGN OUT BUTTON - Moved inside nav under Settings */}
+            <div className="pt-4 mt-4 border-t border-white/5">
+              <button 
+                onClick={handleSignOut}
+                className="w-full flex items-center gap-4 px-6 py-4 rounded-[20px] font-black text-[13px] uppercase tracking-widest text-red-400/50 hover:bg-red-500/10 hover:text-red-400 transition-all group"
+              >
+                <LogOut size={20} className="group-hover:-translate-x-1 transition-transform" />
+                Sign Out
+              </button>
+            </div>
           </div>
         </nav>
-
-        {/* SIGN OUT AREA */}
-        <div id="sidebar-signout" className="p-8 border-t border-white/5 bg-fbNavy shrink-0">
-          <button 
-            onClick={handleSignOut}
-            className="w-full flex items-center gap-4 px-6 py-5 rounded-[20px] font-black text-[12px] uppercase tracking-widest text-red-400/50 hover:bg-red-500/10 hover:text-red-400 transition-all group"
-          >
-            <LogOut size={20} className="group-hover:-translate-x-1 transition-transform" />
-            Sign Out
-          </button>
-        </div>
       </aside>
 
       {/* MAIN CONTENT AREA */}
@@ -151,7 +151,7 @@ export default function InstructorLayout({ children }) {
             <div className="flex items-center gap-3 text-slate-400 order-2 md:order-1">
               <Copyright size={16} />
               <span className="text-[11px] font-black uppercase tracking-[0.15em]">
-                2026 PATHFIT • EDUOS SYSTEM
+                2026 PATHFIT • Learning Management System
               </span>
             </div>
             <div className="flex items-center gap-8 order-1 md:order-2">
@@ -159,7 +159,7 @@ export default function InstructorLayout({ children }) {
               <button className="text-[11px] font-black text-slate-500 hover:text-fbOrange transition-colors uppercase tracking-widest">Support</button>
               <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 rounded-full border border-emerald-100">
                 <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-tighter">v2.4.0 PRIME</span>
+                <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-tighter">v2.4.0</span>
               </div>
             </div>
           </div>
