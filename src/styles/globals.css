@@ -6,11 +6,8 @@
 @layer base {
   body {
     @apply bg-fbGray text-fbNavy antialiased;
-    /* Prevents the 'bouncy' scroll on mobile but keeps it smooth */
     overflow-x: hidden;
   }
-
-  /* Customizing the selection color to match your branding */
   ::selection {
     @apply bg-fbOrange/30 text-fbNavy;
   }
@@ -29,25 +26,20 @@
 }
 
 /* ===========================================================
-  SURGICAL MOBILE OVERRIDE (PROTECTS HEADER)
-  ===========================================================
+   SURGICAL MOBILE OVERRIDE (PROTECTS HEADER)
+   ===========================================================
 */
-
 @media (max-width: 1024px) {
-  /* 1. Kill the Sidebar Offset */
-  aside {
-    transform: translateX(-100%);
-    transition: transform 0.3s ease-in-out !important;
-  }
+  /* 1. Sidebar is controlled by React state (translate-x-0 / -translate-x-full).
+        DO NOT override transform here — it was killing the open state. */
 
   main {
     margin-left: 0 !important;
-    padding: 1rem !important;
     width: 100% !important;
+    /* Removed: padding: 1rem — this was overriding pt-28 needed for mobile topbar */
   }
 
-  /* 2. PROTECT THE BRANDING (Fixes the detached "P" and Orange Bar) */
-  /* We force the header to remain horizontal regardless of global flex rules */
+  /* 2. PROTECT THE BRANDING */
   header, 
   .fb-header-branding,
   [class*="Logo"], 
@@ -59,8 +51,6 @@
   }
 
   /* 3. STACK CONTENT ONLY INSIDE MAIN */
-  /* This ensures your profile cards and dashboard stats stack, 
-     but your header stays professional. */
   main .grid,
   main .flex-row,
   main .md\:flex-row {
@@ -74,7 +64,6 @@
     overflow-x: auto !important;
     -webkit-overflow-scrolling: touch;
   }
-
   table {
     min-width: 600px !important;
   }
@@ -93,6 +82,42 @@
   }
 }
 
+/* ===========================================================
+   LANDSCAPE MOBILE FIX
+   Tailwind's landscape: variant requires plugin config.
+   Using real CSS here instead to guarantee it works.
+   ===========================================================
+*/
+@media screen and (orientation: landscape) and (max-height: 500px) {
+  #sidebar-logo {
+    padding: 0.5rem 0.75rem !important;
+  }
+  #sidebar-logo-icon {
+    width: 2rem !important;
+    height: 2rem !important;
+  }
+  #sidebar-logo-subtitle {
+    display: none !important;
+  }
+  #sidebar-nav {
+    margin-top: 0 !important;
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+  .sidebar-nav-btn {
+    padding-top: 0.4rem !important;
+    padding-bottom: 0.4rem !important;
+  }
+  #sidebar-signout {
+    padding: 0.4rem 0.75rem !important;
+    margin-top: 0 !important;
+  }
+  #sidebar-signout button {
+    padding-top: 0.4rem !important;
+    padding-bottom: 0.4rem !important;
+  }
+}
+
 aside {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -101,9 +126,8 @@ aside::-webkit-scrollbar {
   display: none;
 }
 
-/* Add this to your globals.css or a style tag */
 .no-system-menu {
-  -webkit-touch-callout: none; /* Prevents iOS/Android context menu */
-  -webkit-user-select: none;   /* Prevents text selection during long press */
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
   user-select: none;
 }
