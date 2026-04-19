@@ -10,10 +10,13 @@ import {
   X, FileText, Image as ImageIcon, MessageSquare, 
   Globe, ShieldCheck, Activity, Terminal, Share2, ThumbsUp, MoreHorizontal,
   Paperclip, Clock, Calendar, Zap, Sparkles, Filter, BarChart3, LayoutDashboard,
-  Settings, Bell, HelpCircle, Copyright
+  Settings, Bell, HelpCircle, Copyright, TrendingUp
 } from 'lucide-react';
 
-const v = { hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } };
+const v = { 
+  hidden: { opacity: 0, y: 20 }, 
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } } 
+};
 
 export default function AdminDashboard() {
   const [students, setStudents] = useState([]);
@@ -91,15 +94,14 @@ export default function AdminDashboard() {
 
   return (
     <RoleGuard allowedRole="instructor">
-      {/* Wrapper using Flexbox to handle the Footer position */}
-      <div className="flex flex-col min-h-screen bg-[#FDFDFD] text-slate-900 font-sans selection:bg-fbNavy/10">
+      <div className="flex flex-col min-h-screen bg-[#F8FAFC] text-slate-900 font-sans selection:bg-fbNavy/10">
         
-        {/* TOP NAVIGATION BAR */}
-        <header className="sticky top-0 z-40 w-full bg-white/70 backdrop-blur-md border-b border-slate-100 px-6 py-3">
+        {/* REFINED STICKY HEADER */}
+        <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-xl border-b border-slate-200/60 px-6 py-3">
           <div className="max-w-[1600px] mx-auto flex justify-between items-center">
-            <div className="flex items-center gap-8">
-              <div className="flex items-center gap-2">
-                <div className="bg-fbNavy p-1.5 rounded-lg">
+            <div className="flex items-center gap-10">
+              <div className="flex items-center gap-2.5">
+                <div className="bg-fbNavy p-2 rounded-xl shadow-sm">
                   <Terminal size={18} className="text-white" />
                 </div>
                 <h1 className="text-xl font-bold tracking-tight text-fbNavy">
@@ -107,26 +109,26 @@ export default function AdminDashboard() {
                 </h1>
               </div>
               
-              <nav className="hidden md:flex items-center gap-1">
-                <button className="px-4 py-2 text-sm font-semibold text-fbNavy bg-slate-100 rounded-lg">Dashboard</button>
-                <button className="px-4 py-2 text-sm font-medium text-slate-500 hover:text-fbNavy transition-colors">Analytics</button>
-                <button className="px-4 py-2 text-sm font-medium text-slate-500 hover:text-fbNavy transition-colors">Schedule</button>
+              <nav className="hidden md:flex items-center gap-1 bg-slate-100/50 p-1 rounded-xl border border-slate-200/50">
+                <button className="px-4 py-1.5 text-xs font-bold text-fbNavy bg-white shadow-sm rounded-lg">Dashboard</button>
+                <button className="px-4 py-1.5 text-xs font-semibold text-slate-500 hover:text-fbNavy transition-colors">Analytics</button>
+                <button className="px-4 py-1.5 text-xs font-semibold text-slate-500 hover:text-fbNavy transition-colors">Schedule</button>
               </nav>
             </div>
 
             <div className="flex items-center gap-4">
-              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-emerald-50 rounded-full border border-emerald-100">
-                <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-emerald-50/50 rounded-full border border-emerald-100/50">
+                <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse" />
                 <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">System Live</span>
               </div>
-              <button className="p-2 text-slate-400 hover:text-fbNavy transition-colors"><Bell size={20}/></button>
-              <div className="h-6 w-px bg-slate-200" />
+              <button className="p-2 text-slate-400 hover:text-fbNavy hover:bg-slate-100 rounded-full transition-all"><Bell size={20}/></button>
+              <div className="h-8 w-px bg-slate-200" />
               <div className="flex items-center gap-3 pl-2">
                 <div className="text-right hidden sm:block">
                   <p className="text-xs font-bold text-slate-900 leading-none">{instructor?.full_name}</p>
-                  <p className="text-[10px] font-medium text-fbOrange mt-1">Lead Instructor</p>
+                  <p className="text-[10px] font-medium text-fbOrange mt-1 uppercase tracking-tighter">Lead Instructor</p>
                 </div>
-                <div className="w-9 h-9 rounded-full ring-2 ring-slate-100 overflow-hidden bg-slate-200 shadow-sm">
+                <div className="w-10 h-10 rounded-xl ring-2 ring-slate-100 overflow-hidden bg-slate-200 shadow-inner">
                   {instructor?.avatar_url ? (
                     <img src={instructor.avatar_url} className="w-full h-full object-cover" alt="avatar"/>
                   ) : (
@@ -140,31 +142,36 @@ export default function AdminDashboard() {
           </div>
         </header>
 
-        {/* MAIN: flex-1 ensures this section takes up all space between header and footer */}
         <main className="flex-1 max-w-[1600px] w-full mx-auto p-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             
-            {/* LEFT SIDEBAR: NAVIGATION & SECTIONS */}
+            {/* LEFT SIDEBAR: INTEGRATED NODES */}
             <aside className="lg:col-span-3 space-y-6">
-              <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm">
-                <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest px-1">Active Nodes</h3>
-                  <button onClick={()=>setIsModalOpen(true)} className="p-1.5 text-fbNavy hover:bg-slate-50 rounded-lg transition-all border border-slate-100">
-                    <Plus size={18} />
+              <div className="bg-white rounded-[2rem] p-6 border border-slate-200/60 shadow-sm relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                  <Activity size={80} className="text-fbNavy" />
+                </div>
+                <div className="flex justify-between items-center mb-6 relative z-10">
+                  <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Active Nodes</h3>
+                  <button onClick={()=>setIsModalOpen(true)} className="p-2 bg-fbNavy text-white hover:bg-fbNavy/90 rounded-xl transition-all shadow-md shadow-fbNavy/20">
+                    <Plus size={16} />
                   </button>
                 </div>
-                <div className="space-y-1.5">
+                <div className="space-y-2 relative z-10">
                   {sections.map(s => (
                     <motion.div 
-                      whileHover={{ x: 4 }}
+                      whileHover={{ x: 6 }}
                       key={s.id} 
-                      className="flex items-center justify-between p-3.5 hover:bg-slate-50 rounded-2xl cursor-pointer transition-all border border-transparent hover:border-slate-100 group"
+                      className="flex items-center justify-between p-3 hover:bg-slate-50/80 rounded-2xl cursor-pointer transition-all border border-transparent hover:border-slate-100 group"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-slate-100 text-fbNavy group-hover:bg-fbNavy group-hover:text-white rounded-xl flex items-center justify-center font-bold text-xs transition-colors">
+                        <div className="w-9 h-9 bg-slate-100 text-fbNavy group-hover:bg-fbNavy group-hover:text-white rounded-xl flex items-center justify-center font-bold text-xs transition-all shadow-sm">
                           {s.section_code[0]}
                         </div>
-                        <span className="text-sm font-semibold text-slate-700">{s.section_code}</span>
+                        <div className="flex flex-col">
+                          <span className="text-sm font-bold text-slate-700">{s.section_code}</span>
+                          <span className="text-[10px] text-emerald-500 font-bold uppercase tracking-tighter">Connected</span>
+                        </div>
                       </div>
                       <ChevronRight size={14} className="text-slate-300 group-hover:text-fbNavy transition-colors" />
                     </motion.div>
@@ -173,62 +180,76 @@ export default function AdminDashboard() {
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Nodes</p>
+                <div className="bg-white p-5 rounded-3xl border border-slate-200/60 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Nodes</p>
+                    <TrendingUp size={12} className="text-emerald-500" />
+                  </div>
                   <p className="text-2xl font-black text-fbNavy mt-1">{sections.length}</p>
                 </div>
-                <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Students</p>
+                <div className="bg-white p-5 rounded-3xl border border-slate-200/60 shadow-sm">
+                   <div className="flex items-center justify-between">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Students</p>
+                    <Users size={12} className="text-fbOrange" />
+                  </div>
                   <p className="text-2xl font-black text-fbNavy mt-1">{students.length}</p>
                 </div>
               </div>
             </aside>
 
-            {/* MIDDLE: FEED & COMPOSER */}
+            {/* MIDDLE: REFINED COMPOSER & FEED */}
             <section className="lg:col-span-6 space-y-6">
-              <motion.div initial="hidden" animate="visible" variants={v} className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
+              <motion.div initial="hidden" animate="visible" variants={v} className="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-200/60">
                 <div className="flex gap-4">
-                  <div className="w-10 h-10 rounded-full bg-slate-100 hidden sm:flex items-center justify-center border border-slate-200 shrink-0">
+                  <div className="w-12 h-12 rounded-2xl bg-slate-100 hidden sm:flex items-center justify-center border border-slate-200 shrink-0 shadow-inner">
                     {instructor?.avatar_url ? (
-                      <img src={instructor.avatar_url} className="w-full h-full rounded-full object-cover" alt="u"/>
+                      <img src={instructor.avatar_url} className="w-full h-full rounded-2xl object-cover" alt="u"/>
                     ) : (
-                      <span className="text-slate-400 text-xs font-bold">{instructor?.full_name?.[0]}</span>
+                      <span className="text-slate-400 text-sm font-bold">{instructor?.full_name?.[0]}</span>
                     )}
                   </div>
                   <div className="flex-1">
                     <textarea 
                       value={announcement} 
                       onChange={(e)=>setAnnouncement(e.target.value)} 
-                      className="w-full p-0 py-2 bg-transparent text-sm font-medium border-none focus:ring-0 outline-none resize-none min-h-[80px]" 
-                      placeholder={`Share an update with your students...`} 
+                      className="w-full p-0 py-3 bg-transparent text-[15px] font-medium border-none focus:ring-0 outline-none resize-none min-h-[100px] placeholder:text-slate-400" 
+                      placeholder={`What's the update, ${instructor?.full_name?.split(' ')[0]}?`} 
                     />
                   </div>
                 </div>
 
                 {file && (
-                  <div className="mt-4 p-3 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-between">
+                  <div className="mt-4 p-4 bg-fbNavy/5 border border-fbNavy/10 rounded-[1.5rem] flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <FileText size={18} className="text-fbNavy"/>
-                      <span className="text-xs font-semibold text-slate-600 truncate max-w-[200px]">{file.name}</span>
+                      <div className="p-2 bg-white rounded-lg shadow-sm">
+                        <FileText size={18} className="text-fbNavy"/>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[11px] font-bold text-fbNavy truncate max-w-[200px]">{file.name}</span>
+                        <span className="text-[9px] text-slate-400 uppercase font-bold tracking-tighter">Ready to upload</span>
+                      </div>
                     </div>
-                    <button onClick={()=>setFile(null)} className="p-1 hover:bg-slate-200 rounded-full text-slate-400 transition-colors">
+                    <button onClick={()=>setFile(null)} className="p-1.5 hover:bg-white rounded-full text-slate-400 transition-colors shadow-sm">
                       <X size={14}/>
                     </button>
                   </div>
                 )}
 
-                <div className="flex items-center justify-between mt-6 pt-4 border-t border-slate-50">
-                  <div className="flex items-center gap-2">
-                    <button onClick={()=>fileInputRef.current.click()} className="p-2.5 text-slate-500 hover:text-fbNavy hover:bg-slate-50 rounded-xl transition-all">
+                <div className="flex items-center justify-between mt-6 pt-5 border-t border-slate-100">
+                  <div className="flex items-center gap-1.5">
+                    <button onClick={()=>fileInputRef.current.click()} className="p-2.5 text-slate-500 hover:text-fbNavy hover:bg-slate-50 rounded-xl transition-all border border-transparent hover:border-slate-100">
                       <ImageIcon size={20}/>
                     </button>
-                    <div className="h-6 w-px bg-slate-100 mx-1" />
+                    <button className="p-2.5 text-slate-500 hover:text-fbNavy hover:bg-slate-50 rounded-xl transition-all border border-transparent hover:border-slate-100">
+                      <Paperclip size={20}/>
+                    </button>
+                    <div className="h-6 w-px bg-slate-200 mx-2" />
                     <div className="relative">
-                      <Globe size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"/>
+                      <Globe size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-fbNavy pointer-events-none"/>
                       <select 
                         value={targetSection} 
                         onChange={(e)=>setTargetSection(e.target.value)} 
-                        className="appearance-none bg-slate-50 text-[11px] font-bold uppercase rounded-xl pl-9 pr-8 py-2 border-none outline-none cursor-pointer hover:bg-slate-100 transition-colors"
+                        className="appearance-none bg-slate-50 text-[10px] font-black text-fbNavy uppercase rounded-xl pl-9 pr-8 py-2.5 border border-slate-100 outline-none cursor-pointer hover:bg-white transition-all shadow-sm"
                       >
                         <option value="all">Global Broadcast</option>
                         {sections.map(s => <option key={s.id} value={s.section_code}>{s.section_code}</option>)}
@@ -239,14 +260,14 @@ export default function AdminDashboard() {
                   <button 
                     onClick={handlePost} 
                     disabled={isPosting || (!announcement.trim() && !file)} 
-                    className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                    className={`flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-bold transition-all ${
                       isPosting || (!announcement.trim() && !file) 
                       ? 'bg-slate-100 text-slate-400 cursor-not-allowed' 
-                      : 'bg-fbNavy text-white hover:shadow-lg hover:shadow-fbNavy/20 active:scale-95'
+                      : 'bg-fbNavy text-white hover:shadow-lg hover:shadow-fbNavy/30 active:scale-[0.98]'
                     }`}
                   >
                     {isPosting ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
-                    <span>{isPosting ? 'Posting...' : 'Post Update'}</span>
+                    <span>{isPosting ? 'Broadcasting...' : 'Broadcast'}</span>
                   </button>
                 </div>
                 <input type="file" ref={fileInputRef} className="hidden" onChange={(e)=>setFile(e.target.files[0])}/>
@@ -254,9 +275,12 @@ export default function AdminDashboard() {
 
               <div className="space-y-4">
                 {announcements.length === 0 && !loading && (
-                  <div className="text-center py-20 bg-white rounded-3xl border border-slate-100">
-                    <Activity size={32} className="text-slate-200 mx-auto mb-3"/>
-                    <p className="text-sm font-medium text-slate-400">No announcements posted yet.</p>
+                  <div className="text-center py-24 bg-white rounded-[2rem] border border-dashed border-slate-200">
+                    <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100">
+                       <Zap size={24} className="text-slate-200"/>
+                    </div>
+                    <p className="text-sm font-bold text-slate-400 tracking-tight uppercase">Airwaves are silent.</p>
+                    <p className="text-xs text-slate-300 mt-1">Start by posting a global update.</p>
                   </div>
                 )}
                 {announcements.map(ann => (
@@ -265,44 +289,47 @@ export default function AdminDashboard() {
               </div>
             </section>
 
-            {/* RIGHT SIDEBAR: STUDENT REGISTRY */}
+            {/* RIGHT SIDEBAR: REFINED STUDENT REGISTRY */}
             <aside className="lg:col-span-3">
-              <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 h-[calc(100vh-140px)] flex flex-col sticky top-24">
+              <div className="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-200/60 h-[calc(100vh-140px)] flex flex-col sticky top-24 overflow-hidden">
                 <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-sm font-bold text-slate-800">Student Registry</h3>
-                  <Users size={18} className="text-slate-300"/>
+                  <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Registry</h3>
+                  <div className="flex items-center gap-1.5 px-2 py-1 bg-fbOrange/10 rounded-lg">
+                    <Users size={12} className="text-fbOrange"/>
+                    <span className="text-[10px] font-black text-fbOrange">{filtered.length}</span>
+                  </div>
                 </div>
 
-                <div className="relative mb-4">
+                <div className="relative mb-6">
                   <input 
                     type="text" 
-                    placeholder="Search students..." 
+                    placeholder="Quick search student..." 
                     onChange={(e)=>setSearchTerm(e.target.value)} 
-                    className="w-full bg-slate-50 border-none rounded-2xl py-2.5 pl-10 pr-4 text-xs font-medium focus:bg-white focus:ring-1 ring-slate-100 transition-all outline-none"
+                    className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-3 pl-11 pr-4 text-[13px] font-medium focus:bg-white focus:ring-4 focus:ring-fbNavy/5 transition-all outline-none"
                   />
-                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={14}/>
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16}/>
                 </div>
 
-                <div className="overflow-y-auto flex-1 custom-scrollbar space-y-2 pr-1">
+                <div className="overflow-y-auto flex-1 custom-scrollbar space-y-1 pr-1">
                   <AnimatePresence mode="popLayout">
                     {filtered.map(s => (
                       <motion.div 
-                        layout initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}
+                        layout initial={{opacity:0, scale:0.95}} animate={{opacity:1, scale:1}} exit={{opacity:0, scale:0.95}}
                         key={s.id} 
-                        className="p-3 hover:bg-slate-50 rounded-2xl border border-transparent transition-all group cursor-default"
+                        className="p-3 hover:bg-slate-50 rounded-2xl border border-transparent hover:border-slate-100 transition-all group cursor-default"
                       >
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-xl bg-white border border-slate-100 flex items-center justify-center overflow-hidden shrink-0 shadow-sm">
+                          <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center overflow-hidden shrink-0 shadow-sm group-hover:shadow-md transition-all">
                             {s.avatar_url ? <img src={s.avatar_url} className="w-full h-full object-cover" alt="s"/> : <span className="text-xs font-bold text-fbNavy">{s.full_name?.[0]}</span>}
                           </div>
                           <div className="min-w-0 flex-1">
-                            <h4 className="text-[11px] font-bold text-slate-800 truncate uppercase">{s.full_name}</h4>
-                            <div className="flex items-center gap-2">
-                              <span className="text-[9px] font-bold text-fbOrange tracking-tighter">{s.student_id}</span>
+                            <h4 className="text-xs font-bold text-slate-800 truncate uppercase tracking-tight">{s.full_name}</h4>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <span className="text-[9px] font-black text-fbOrange px-1.5 py-0.5 bg-fbOrange/5 rounded-md">{s.student_id}</span>
                               <span className="text-[9px] font-bold text-slate-400">{s.section_code}</span>
                             </div>
                           </div>
-                          <button className="opacity-0 group-hover:opacity-100 p-1 text-slate-300 hover:text-fbNavy transition-all">
+                          <button className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-300 hover:text-fbNavy hover:bg-white rounded-lg transition-all border border-transparent hover:border-slate-100 shadow-sm">
                             <MoreHorizontal size={14}/>
                           </button>
                         </div>
@@ -311,46 +338,22 @@ export default function AdminDashboard() {
                   </AnimatePresence>
                 </div>
 
-                <button onClick={handleExport} className="mt-6 w-full py-3 bg-slate-900 hover:bg-black text-white rounded-2xl transition-all text-[11px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg shadow-slate-200">
+                <button onClick={handleExport} className="mt-6 w-full py-4 bg-slate-900 hover:bg-black text-white rounded-2xl transition-all text-[11px] font-black uppercase tracking-widest flex items-center justify-center gap-2 shadow-xl shadow-slate-200 active:scale-[0.98]">
                   <FileDown size={14} />
-                  Export Data
+                  Export Node Data
                 </button>
               </div>
             </aside>
           </div>
         </main>
-
-        {/* FOOTER SECTION */}
-        <footer className="w-full border-t border-slate-100 bg-white py-6 px-8 mt-12">
-          <div className="max-w-[1600px] mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex items-center gap-2 text-slate-400">
-              <Copyright size={14} />
-              <span className="text-xs font-medium">2026 EDUOS Learning Management System.</span>
-            </div>
-            
-            <div className="flex items-center gap-6">
-              <button className="text-xs font-semibold text-slate-500 hover:text-fbNavy transition-colors">Privacy Policy</button>
-              <button className="text-xs font-semibold text-slate-500 hover:text-fbNavy transition-colors">Terms of Service</button>
-              <button className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-fbNavy transition-colors">
-                <HelpCircle size={14} />
-                Support
-              </button>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <div className="h-2 w-2 rounded-full bg-emerald-500" />
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">v2.4.0-stable</span>
-            </div>
-          </div>
-        </footer>
-
         <CreateSectionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onRefresh={fetchData} />
         
         <style jsx global>{`
-          .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+          .custom-scrollbar::-webkit-scrollbar { width: 5px; }
           .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-          .custom-scrollbar::-webkit-scrollbar-thumb { background: #F1F5F9; border-radius: 10px; }
-          .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #E2E8F0; }
+          .custom-scrollbar::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 20px; }
+          .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #CBD5E1; }
+          textarea::placeholder { font-weight: 500; opacity: 0.6; }
         `}</style>
       </div>
     </RoleGuard>
