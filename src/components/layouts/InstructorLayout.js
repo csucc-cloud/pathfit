@@ -35,8 +35,8 @@ export default function InstructorLayout({ children }) {
     { name: 'Ann. Feed',  icon: <LayoutDashboard size={17} />, path: '/admin' },
     { name: 'My Classes', icon: <Users size={17} />,           path: '/admin/classes' },
     { name: 'Approvals',  icon: <ClipboardCheck size={17} />,  path: '/admin/approvals' },
-    { name: 'Analytics',  icon: <BarChart size={17} />,        path: '/admin/analytics' },
-    { name: 'Settings',   icon: <Settings size={17} />,        path: '/admin/settings' },
+    { name: 'Analytics',  icon: <BarChart size={17} />,         path: '/admin/analytics' },
+    { name: 'Settings',   icon: <Settings size={17} />,         path: '/admin/settings' },
   ];
 
   const handleSignOut = async () => {
@@ -174,15 +174,18 @@ export default function InstructorLayout({ children }) {
       </aside>
 
       {/* ── MAIN ── */}
+      {/* Changed bg color here slightly to match dashboard or keep as is. Removed max-width constraints */}
       <main className="flex-1 flex flex-col min-w-0 h-[100dvh] overflow-y-auto bg-[#EEF0F6]">
-        <div className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 py-8 pt-24 lg:pt-8">
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both">
+        {/* UPDATED: Removed max-w-7xl and adjusted padding to maximize space */}
+        <div className="flex-1 w-full max-w-none mx-auto px-0 py-0 pt-16 lg:pt-0">
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both min-h-full">
             {children}
           </div>
         </div>
 
+        {/* UPDATED: Removed max-w-7xl from footer for edge-to-edge look */}
         <footer className="w-full border-t border-slate-200/60 bg-white/70 backdrop-blur-md py-6 px-8 mt-auto shrink-0">
-          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div className="max-w-none mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
             <div className="flex items-center gap-2 text-slate-400 order-2 sm:order-1">
               <Copyright size={13} />
               <span className="text-[10px] font-bold uppercase tracking-[0.15em]">
