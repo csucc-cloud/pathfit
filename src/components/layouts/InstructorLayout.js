@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { supabase } from '../../lib/supabaseClient'; 
 import { 
@@ -10,7 +10,9 @@ import {
   LogOut,
   Zap,
   Menu,
-  X 
+  X,
+  Copyright,
+  HelpCircle
 } from 'lucide-react';
 
 export default function InstructorLayout({ children }) {
@@ -141,13 +143,39 @@ export default function InstructorLayout({ children }) {
         pt-20 md:pt-28 lg:pt-0 
         h-[100dvh] overflow-y-auto
       `}>
-        {/* Responsive Content Container */}
-        <div className="w-full max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 py-8 md:py-12">
+        {/* Content Wrapper that expands to push footer down */}
+        <div className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 py-8 md:py-12">
           {/* Page Entrance Animation Wrapper */}
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both">
             {children}
           </div>
         </div>
+
+        {/* CONSOLIDATED FOOTER */}
+        <footer className="w-full border-t border-slate-100 bg-white/50 backdrop-blur-sm py-6 px-8 mt-auto">
+          <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="flex items-center gap-2 text-slate-400">
+              <Copyright size={14} />
+              <span className="text-[10px] md:text-xs font-medium uppercase tracking-widest">
+                2026 PATHFIT EDUOS • Built for Instructors
+              </span>
+            </div>
+            
+            <div className="flex items-center gap-6">
+              <button className="text-[10px] font-black text-slate-400 hover:text-fbOrange transition-colors uppercase tracking-widest">Privacy</button>
+              <button className="text-[10px] font-black text-slate-400 hover:text-fbOrange transition-colors uppercase tracking-widest">Terms</button>
+              <button className="flex items-center gap-1.5 text-[10px] font-black text-slate-400 hover:text-fbOrange transition-colors uppercase tracking-widest">
+                <HelpCircle size={14} />
+                Support
+              </button>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">v2.4.0-PRIME</span>
+            </div>
+          </div>
+        </footer>
       </main>
 
       {/* Global CSS for scrollbar containment */}
