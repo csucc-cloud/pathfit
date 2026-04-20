@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/router'; // Added router for linking
 import RoleGuard from '../../components/RoleGuard';
 import CreateSectionModal from '../../components/section/create';
 import PostCard from '../../components/admin/PostCard';
@@ -19,6 +20,7 @@ const v = {
 };
 
 export default function AdminDashboard() {
+  const router = useRouter(); // Initialized router
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [announcements, setAnnouncements] = useState([]); 
@@ -106,28 +108,34 @@ export default function AdminDashboard() {
                   <Terminal size={18} className="text-white" />
                 </div>
                 <h1 className="text-xl font-bold tracking-tight text-fbNavy">
-                  EDU<span className="text-fbOrange">OS</span>
+                  PATHFiT<span className="text-fbOrange">LMS</span>
                 </h1>
               </div>
               
               <nav className="hidden md:flex items-center gap-1 bg-slate-100/50 p-1 rounded-xl border border-slate-200/50">
                 <button className="px-4 py-1.5 text-xs font-bold text-fbNavy bg-white shadow-sm rounded-lg">Dashboard</button>
                 <button className="px-4 py-1.5 text-xs font-semibold text-slate-500 hover:text-fbNavy transition-colors">Analytics</button>
-                <button className="px-4 py-1.5 text-xs font-semibold text-slate-500 hover:text-fbNavy transition-colors">Schedule</button>
+                {/* UPDATED: Added onClick to redirect to your new schedule page */}
+                <button 
+                  onClick={() => router.push('/admin/annfed/sched')}
+                  className="px-4 py-1.5 text-xs font-semibold text-slate-500 hover:text-fbNavy transition-colors"
+                >
+                  Schedule
+                </button>
               </nav>
             </div>
 
             <div className="flex items-center gap-4">
               <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-emerald-50/50 rounded-full border border-emerald-100/50">
                 <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse" />
-                <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">System Live</span>
+                <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">Online</span>
               </div>
               <button className="p-2 text-slate-400 hover:text-fbNavy hover:bg-slate-100 rounded-full transition-all"><Bell size={20}/></button>
               <div className="h-8 w-px bg-slate-200" />
               <div className="flex items-center gap-3 pl-2">
                 <div className="text-right hidden sm:block">
                   <p className="text-xs font-bold text-slate-900 leading-none">{instructor?.full_name}</p>
-                  <p className="text-[10px] font-medium text-fbOrange mt-1 uppercase tracking-tighter">Lead Instructor</p>
+                  <p className="text-[10px] font-medium text-fbOrange mt-1 uppercase tracking-tighter">Instructor</p>
                 </div>
                 <div className="w-10 h-10 rounded-xl ring-2 ring-slate-100 overflow-hidden bg-slate-200 shadow-inner">
                   {instructor?.avatar_url ? (
@@ -154,7 +162,7 @@ export default function AdminDashboard() {
                   <Activity size={80} className="text-fbNavy" />
                 </div>
                 <div className="flex justify-between items-center mb-6 relative z-10">
-                  <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Active Nodes</h3>
+                  <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Active Sections</h3>
                   <button onClick={()=>setIsModalOpen(true)} className="p-2 bg-fbNavy text-white hover:bg-fbNavy/90 rounded-xl transition-all shadow-md shadow-fbNavy/20">
                     <Plus size={16} />
                   </button>
@@ -184,7 +192,7 @@ export default function AdminDashboard() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-white p-5 rounded-3xl border border-slate-200/60 shadow-sm">
                   <div className="flex items-center justify-between">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Nodes</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Sections</p>
                     <TrendingUp size={12} className="text-emerald-500" />
                   </div>
                   <p className="text-2xl font-black text-fbNavy mt-1">{sections.length}</p>
@@ -342,7 +350,7 @@ export default function AdminDashboard() {
 
                 <button onClick={handleExport} className="mt-6 w-full py-4 bg-slate-900 hover:bg-black text-white rounded-2xl transition-all text-[11px] font-black uppercase tracking-widest flex items-center justify-center gap-2 shadow-xl shadow-slate-200 active:scale-[0.98]">
                   <FileDown size={14} />
-                  Export Node Data
+                  Export Data
                 </button>
               </div>
             </aside>
