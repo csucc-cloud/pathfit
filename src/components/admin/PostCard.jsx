@@ -25,6 +25,9 @@ export default function PostCard({ ann, instructor }) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
 
+  // Shared Post State
+  const [sharedPost, setSharedPost] = useState(null);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -41,10 +44,23 @@ export default function PostCard({ ann, instructor }) {
           const { data: react } = await supabase.from('reactions').select('type').eq('announcement_id', ann.id).eq('user_id', instructor.id).maybeSingle(); 
           if (react) setReaction(react.type);
         }
+
+        // Logic to fetch the original post if this is a share
+        if (ann.parent_post_id) {
+          const { data: parentData } = await supabase
+            .from('announcements')
+            .select(`
+              *,
+              instructors (full_name, avatar_url)
+            `)
+            .eq('id', ann.parent_post_id)
+            .single();
+          if (parentData) setSharedPost(parentData);
+        }
       } catch (e) { console.error(e); }
     };
     if (ann.id) fetchData();
-  }, [ann.id, instructor?.id]);
+  }, [ann.id, instructor?.id, ann.parent_post_id]);
 
   const handleDeletePost = async () => {
     if (!window.confirm("Delete this announcement permanently?")) return;
@@ -89,8 +105,15 @@ export default function PostCard({ ann, instructor }) {
   };
 
   const handleFacebookShare = async () => {
-    await supabase.from('announcements').insert([{ content: `${shareDescription}\n\n${ann.content}`, instructor_id: instructor.id }]);
-    setShowShareModal(false);
+    // This creates a new announcement that points to the original one
+    const { error } = await supabase.from('announcements').insert([{ 
+      content: shareDescription, 
+      instructor_id: instructor.id,
+      parent_post_id: ann.id, // Linking back to original
+      target_section: ann.target_section
+    }]);
+    if (!error) setShowShareModal(false);
+    else alert(error.message);
   };
 
   return (
@@ -155,7 +178,42 @@ export default function PostCard({ ann, instructor }) {
               <>
                 <motion.p layout className="mt-5 text-[16px] text-slate-700 leading-relaxed font-medium whitespace-pre-wrap selection:bg-fbNavy selection:text-white">{ann?.content}</motion.p>
                 
-                {/* ATTACHMENT RENDERING SYSTEM */}
+                {/* NESTED SHARED POST CARD (The Facebook Style) */}
+                {sharedPost && (
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.98 }} 
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="mt-4 border border-slate-200 rounded-2xl overflow-hidden bg-slate-50/50 p-4 transition-all hover:bg-slate-50 group/shared"
+                  >
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-8 h-8 rounded-lg bg-fbNavy text-white flex items-center justify-center text-[10px] font-black">
+                        {sharedPost.instructors?.avatar_url ? (
+                          <img src={sharedPost.instructors.avatar_url} className="w-full h-full object-cover rounded-lg" />
+                        ) : sharedPost.instructors?.full_name?.[0]}
+                      </div>
+                      <div>
+                        <p className="text-xs font-black text-slate-800 uppercase tracking-tight">{sharedPost.instructors?.full_name}</p>
+                        <p className="text-[9px] font-bold text-slate-400">{new Date(sharedPost.created_at).toLocaleDateString()}</p>
+                      </div>
+                    </div>
+                    <p className="text-sm text-slate-600 mb-3 whitespace-pre-wrap">{sharedPost.content}</p>
+                    
+                    {sharedPost.file_url && (
+                      <div className="rounded-xl overflow-hidden border border-slate-200 bg-white">
+                        {['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(sharedPost.file_type?.toLowerCase()) ? (
+                          <img src={sharedPost.file_url} className="w-full h-auto max-h-[250px] object-cover" />
+                        ) : (
+                          <div className="p-3 flex items-center gap-3">
+                            <FileText size={18} className="text-fbNavy" />
+                            <span className="text-[10px] font-bold uppercase text-fbNavy">View Attached Resource</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+
+                {/* ATTACHMENT RENDERING SYSTEM (Directly on this post) */}
                 {ann.file_url && (
                   <motion.div 
                     initial={{ opacity: 0, y: 10 }} 
@@ -231,6 +289,38 @@ export default function PostCard({ ann, instructor }) {
               </button>
             </div>
           </div>
+
+          {/* SHARE MODAL COMPONENT */}
+          <AnimatePresence>
+            {showShareModal && (
+              <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-sm">
+                <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-white rounded-[2.5rem] w-full max-w-lg p-8 shadow-2xl overflow-hidden relative">
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-xl font-black text-fbNavy uppercase tracking-tight">Share Post</h3>
+                    <button onClick={() => setShowShareModal(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><X size={20} /></button>
+                  </div>
+                  
+                  <textarea 
+                    value={shareDescription} 
+                    onChange={(e) => setShareDescription(e.target.value)} 
+                    placeholder="Write a caption for this share..." 
+                    className="w-full p-4 bg-slate-50 border-none rounded-2xl text-sm min-h-[120px] mb-6 focus:ring-2 focus:ring-fbNavy/10"
+                  />
+                  
+                  {/* Preview of the post being shared */}
+                  <div className="border border-slate-200 rounded-2xl p-4 bg-slate-50/50 mb-6">
+                    <div className="flex gap-3 items-center mb-2">
+                       <div className="w-8 h-8 bg-fbNavy rounded-lg flex items-center justify-center text-white font-black text-[10px]">{instructor?.full_name?.[0]}</div>
+                       <p className="text-[10px] font-black text-fbNavy uppercase">{instructor?.full_name}</p>
+                    </div>
+                    <p className="text-xs text-slate-500 line-clamp-2">{ann.content}</p>
+                  </div>
+
+                  <button onClick={handleFacebookShare} className="w-full py-4 bg-fbNavy text-white rounded-2xl font-black uppercase tracking-widest hover:bg-fbOrange transition-all shadow-lg shadow-fbNavy/20">Post Share</button>
+                </motion.div>
+              </div>
+            )}
+          </AnimatePresence>
 
           <AnimatePresence>
             {showComments && (
