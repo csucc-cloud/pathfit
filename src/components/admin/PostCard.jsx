@@ -4,7 +4,7 @@ import {
   ThumbsUp, MessageSquare, Share2, MoreHorizontal, 
   ShieldCheck, Globe, Clock, FileText, Send, X,
   Heart, Flame, ThumbsDown, Copy, Facebook, Twitter,
-  Trash2, Edit3, Loader2, CheckCircle2
+  Trash2, Edit3, Loader2, CheckCircle2, ExternalLink
 } from 'lucide-react';
 import { supabase } from '../../lib/supabaseClient';
 
@@ -47,7 +47,7 @@ export default function PostCard({ ann, instructor }) {
   }, [ann.id, instructor?.id]);
 
   const handleDeletePost = async () => {
-    if (!window.confirm("Delete this memory forever?")) return;
+    if (!window.confirm("Delete this announcement permanently?")) return;
     setIsDeleting(true);
     const { error } = await supabase.from('announcements').delete().eq('id', ann.id);
     if (error) { setIsDeleting(false); alert(error.message); } 
@@ -120,7 +120,9 @@ export default function PostCard({ ann, instructor }) {
                   </h4>
                   <div className="flex items-center gap-2 mt-1 opacity-60">
                     <span className="text-[10px] font-bold flex items-center gap-1"><Clock size={12}/> {ann?.created_at ? new Date(ann.created_at).toLocaleDateString() : 'Just now'}</span>
-                    <span className="text-[10px] font-black uppercase text-fbOrange px-2 py-0.5 bg-orange-50 rounded-md">{ann?.target_section || "Global"}</span>
+                    <span className="text-[10px] font-black uppercase text-fbOrange px-2 py-0.5 bg-orange-50 rounded-md">
+                      Section: {ann?.target_section || "General"}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -130,7 +132,7 @@ export default function PostCard({ ann, instructor }) {
                 <AnimatePresence>
                   {showMenu && (
                     <motion.div initial={{ opacity: 0, y: 10, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="absolute right-0 mt-2 w-48 bg-white/80 backdrop-blur-xl border border-white shadow-2xl rounded-2xl z-[90] py-2 ring-1 ring-black/5">
-                      <button onClick={() => { setIsEditing(true); setShowMenu(false); }} className="w-full px-4 py-2.5 text-left text-xs font-bold text-slate-600 hover:bg-fbNavy hover:text-white flex items-center gap-3 transition-colors"><Edit3 size={16} /> Edit Details</button>
+                      <button onClick={() => { setIsEditing(true); setShowMenu(false); }} className="w-full px-4 py-2.5 text-left text-xs font-bold text-slate-600 hover:bg-fbNavy hover:text-white flex items-center gap-3 transition-colors"><Edit3 size={16} /> Edit Announcement</button>
                       <button onClick={handleDeletePost} className="w-full px-4 py-2.5 text-left text-xs font-bold text-rose-500 hover:bg-rose-500 hover:text-white flex items-center gap-3 transition-colors"><Trash2 size={16} /> Remove Post</button>
                     </motion.div>
                   )}
@@ -144,13 +146,55 @@ export default function PostCard({ ann, instructor }) {
                 <div className="flex gap-2">
                   <button onClick={handleUpdatePost} disabled={isUpdating} className="flex-1 bg-fbNavy text-white py-3 rounded-xl text-[11px] font-black uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg shadow-fbNavy/20">
                     {isUpdating ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
-                    {isUpdating ? 'Synchronizing...' : 'Update Post'}
+                    {isUpdating ? 'Updating...' : 'Save Changes'}
                   </button>
                   <button onClick={() => setIsEditing(false)} className="px-6 bg-slate-100 text-slate-500 rounded-xl text-[11px] font-black uppercase hover:bg-slate-200 transition-colors">Cancel</button>
                 </div>
               </motion.div>
             ) : (
-              <motion.p layout className="mt-5 text-[16px] text-slate-700 leading-relaxed font-medium whitespace-pre-wrap selection:bg-fbNavy selection:text-white">{ann?.content}</motion.p>
+              <>
+                <motion.p layout className="mt-5 text-[16px] text-slate-700 leading-relaxed font-medium whitespace-pre-wrap selection:bg-fbNavy selection:text-white">{ann?.content}</motion.p>
+                
+                {/* ATTACHMENT RENDERING SYSTEM */}
+                {ann.file_url && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }} 
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-6 border border-slate-100 rounded-[2rem] overflow-hidden bg-slate-50/50"
+                  >
+                    {['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ann.file_type?.toLowerCase()) ? (
+                      <div className="relative group cursor-zoom-in">
+                        <img 
+                          src={ann.file_url} 
+                          alt="Class Attachment" 
+                          className="w-full h-auto max-h-[500px] object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                        />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+                      </div>
+                    ) : (
+                      <a 
+                        href={ann.file_url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-between p-5 hover:bg-white transition-all group"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 bg-fbNavy/10 text-fbNavy rounded-2xl flex items-center justify-center shadow-inner">
+                            <FileText size={24} />
+                          </div>
+                          <div>
+                            <p className="text-xs font-black text-fbNavy uppercase tracking-widest">Attached Resource</p>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter mt-0.5">Format: {ann.file_type || 'Document'}</p>
+                          </div>
+                        </div>
+                        <div className="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center text-slate-400 group-hover:bg-fbNavy group-hover:text-white group-hover:border-fbNavy transition-all">
+                          <ExternalLink size={16} />
+                        </div>
+                      </a>
+                    )}
+                  </motion.div>
+                )}
+              </>
             )}
           </div>
 
@@ -167,7 +211,6 @@ export default function PostCard({ ann, instructor }) {
                   )}
                 </AnimatePresence>
                 
-                {/* FIXED REACTION BUTTON: Prevent Browser Context Menu */}
                 <button 
                   onMouseEnter={() => setShowReactions(true)} 
                   onContextMenu={(e) => e.preventDefault()}
@@ -180,7 +223,7 @@ export default function PostCard({ ann, instructor }) {
               </div>
               
               <button onClick={() => setShowComments(!showComments)} className="flex-1 flex items-center justify-center gap-2 py-3 hover:bg-white rounded-[20px] text-slate-400 hover:text-fbNavy text-[11px] font-black uppercase transition-all tracking-tighter">
-                <MessageSquare size={18}/> {comments.length > 0 ? `${comments.length} Thoughts` : 'Comment'}
+                <MessageSquare size={18}/> {comments.length > 0 ? `${comments.length} Comments` : 'Comment'}
               </button>
               
               <button onClick={() => setShowShareModal(true)} className="w-12 h-12 flex items-center justify-center hover:bg-white rounded-[20px] text-slate-400 hover:text-fbOrange transition-all">
@@ -198,7 +241,7 @@ export default function PostCard({ ann, instructor }) {
                         {instructor?.avatar_url ? <img src={instructor.avatar_url} className="w-full h-full object-cover rounded-xl" alt="m" /> : instructor?.full_name?.[0]}
                     </div>
                     <div className="flex-1 relative group">
-                        <input type="text" value={commentText} onChange={(e) => setCommentText(e.target.value)} placeholder="Share your thoughts..." className="w-full bg-white border border-slate-100 rounded-2xl py-3 px-5 pr-12 text-sm font-medium focus:outline-none focus:ring-4 focus:ring-fbNavy/5 transition-all shadow-sm" />
+                        <input type="text" value={commentText} onChange={(e) => setCommentText(e.target.value)} placeholder="Write a response..." className="w-full bg-white border border-slate-100 rounded-2xl py-3 px-5 pr-12 text-sm font-medium focus:outline-none focus:ring-4 focus:ring-fbNavy/5 transition-all shadow-sm" />
                         <button onClick={handleSendComment} className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-fbNavy text-white rounded-xl hover:bg-fbOrange transition-colors shadow-md"><Send size={14} /></button>
                     </div>
                   </div>
@@ -226,12 +269,11 @@ export default function PostCard({ ann, instructor }) {
                   <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }} className="w-12 h-12 border-4 border-fbNavy/10 border-t-fbNavy rounded-full" />
                   <Trash2 className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-fbNavy" size={20} />
                 </div>
-                <span className="text-[11px] font-black uppercase tracking-[0.2em] text-fbNavy animate-pulse">Eliminating Post...</span>
+                <span className="text-[11px] font-black uppercase tracking-[0.2em] text-fbNavy animate-pulse">Archiving Announcement...</span>
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Global Style for Prevention */}
           <style jsx global>{`
             .no-system-menu {
               -webkit-touch-callout: none !important;
