@@ -97,6 +97,7 @@ function PostEmbed({ post }) {
 }
 
 // ─── Share Modal ────────────────────────────────────────────────────────────
+// ─── Share Modal ────────────────────────────────────────────────────────────
 function ShareModal({ ann, instructor, sharedPost, onClose, onPosted }) {
   const [shareDescription, setShareDescription] = useState('');
   const [isPosting, setIsPosting] = useState(false);
@@ -104,24 +105,56 @@ function ShareModal({ ann, instructor, sharedPost, onClose, onPosted }) {
   const handlePost = async () => {
     if (!instructor?.id) return;
     setIsPosting(true);
-    const { error } = await supabase.from('announcements').insert([{
-      content:        shareDescription,
-      instructor_id:  instructor.id,
-      parent_post_id: ann.id,
-      target_section: ann.target_section,
-    }]);
+    
+    // THE FIX: We add .select(`*, instructors(*)`) to get the full object back immediately
+    const { data, error } = await supabase
+      .from('announcements')
+      .insert([{
+        content:        shareDescription,
+        instructor_id:  instructor.id,
+        parent_post_id: ann.id,
+        target_section: ann.target_section,
+      }])
+      .select(`
+        *,
+        instructors (
+          full_name,
+          avatar_url
+        )
+      `)
+      .single();
+
     setIsPosting(false);
-    if (error) { alert(error.message); return; }
+    
+    if (error) { 
+      alert(error.message); 
+      return; 
+    }
+
     setShareDescription('');
-    onPosted?.();
+    
+    // Pass the newly created post (with instructor data) back to the parent list
+    if (onPosted && data) {
+      onPosted(data); 
+    }
+    
     onClose();
   };
 
   // The post we show inside the modal is the original source:
-  // if this post itself is a share, show its parent; otherwise show this post.
   const embedPost = sharedPost
     ? sharedPost
-    : { content: ann.content, created_at: ann.created_at, target_section: ann.target_section, file_url: ann.file_url, file_type: ann.file_type, instructors: { full_name: instructor?.full_name, avatar_url: instructor?.avatar_url } };
+    : { 
+        content: ann.content, 
+        created_at: ann.created_at, 
+        target_section: ann.target_section, 
+        file_url: ann.file_url, 
+        file_type: ann.file_type, 
+        instructors: { 
+          full_name: instructor?.full_name, 
+          avatar_url: instructor?.avatar_url 
+        } 
+      };
 
   return (
     <AnimatePresence>
