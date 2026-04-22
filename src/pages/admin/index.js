@@ -96,13 +96,13 @@ export default function AdminDashboard() {
 
   return (
     <RoleGuard allowedRole="instructor">
-      {/* Container changed to w-full and px-0 to maximize edges */}
       <div className="flex flex-col min-h-screen bg-[#F8FAFC] text-slate-900 font-sans selection:bg-fbNavy/10 w-full overflow-x-hidden">
         
-        {/* REFINED STICKY HEADER - Fix alignment overlap */}
-        <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-xl border-b border-slate-200/60">
-          <div className="w-full px-4 sm:px-8 py-4 flex justify-between items-center">
+        {/* CORRECTED HEADER: Spans full width, ignoring side grid constraints */}
+        <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-xl border-b border-slate-200/60 shadow-sm">
+          <div className="w-full px-6 sm:px-10 py-4 flex justify-between items-center">
             <div className="flex items-center gap-10">
+              {/* This branding block now aligns better with the left sidebar start */}
               <div className="flex items-center gap-2.5 shrink-0">
                 <div className="bg-fbNavy p-2 rounded-xl shadow-sm">
                   <Terminal size={18} className="text-white" />
@@ -115,7 +115,6 @@ export default function AdminDashboard() {
               <nav className="hidden md:flex items-center gap-1 bg-slate-100/50 p-1 rounded-xl border border-slate-200/50">
                 <button className="px-4 py-1.5 text-xs font-bold text-fbNavy bg-white shadow-sm rounded-lg">Dashboard</button>
                 <button className="px-4 py-1.5 text-xs font-semibold text-slate-500 hover:text-fbNavy transition-colors">Analytics</button>
-                {/* UPDATED: Added onClick to redirect to your new schedule page */}
                 <button 
                   onClick={() => router.push('/admin/annfed/sched')}
                   className="px-4 py-1.5 text-xs font-semibold text-slate-500 hover:text-fbNavy transition-colors"
@@ -151,11 +150,11 @@ export default function AdminDashboard() {
           </div>
         </header>
 
-        {/* MAIN CONTENT - Changed max-w-[1600px] to max-w-full */}
-        <main className="flex-1 max-w-full w-full mx-auto p-4 sm:p-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-10">
+        {/* MAIN CONTENT: Ensured full width with responsive grid */}
+        <main className="flex-1 w-full p-4 sm:p-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
             
-            {/* LEFT SIDEBAR: INTEGRATED NODES */}
+            {/* LEFT SIDEBAR */}
             <aside className="lg:col-span-3 space-y-6">
               <div className="bg-white rounded-[2rem] p-6 border border-slate-200/60 shadow-sm relative overflow-hidden group">
                 <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
@@ -199,7 +198,7 @@ export default function AdminDashboard() {
                 </div>
                 <div className="bg-white p-5 rounded-3xl border border-slate-200/60 shadow-sm">
                    <div className="flex items-center justify-between">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Students</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Students</p>
                     <Users size={12} className="text-fbOrange" />
                   </div>
                   <p className="text-2xl font-black text-fbNavy mt-1">{students.length}</p>
@@ -207,7 +206,7 @@ export default function AdminDashboard() {
               </div>
             </aside>
 
-            {/* MIDDLE: REFINED COMPOSER & FEED */}
+            {/* MIDDLE FEED */}
             <section className="lg:col-span-6 space-y-6">
               <motion.div initial="hidden" animate="visible" variants={v} className="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-200/60">
                 <div className="flex gap-4">
@@ -299,7 +298,7 @@ export default function AdminDashboard() {
               </div>
             </section>
 
-            {/* RIGHT SIDEBAR: REFINED STUDENT REGISTRY */}
+            {/* RIGHT SIDEBAR: REGISTRY */}
             <aside className="lg:col-span-3">
               <div className="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-200/60 h-[calc(100vh-140px)] min-h-[600px] flex flex-col sticky top-24 overflow-hidden">
                 <div className="flex justify-between items-center mb-6">
