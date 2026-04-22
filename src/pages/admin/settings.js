@@ -12,6 +12,8 @@ import {
   Loader2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+// IMPORT THE NEW COMPONENT
+import SecuritySettings from './SecuritySettings'; 
 
 // Animation Variants for the whole page
 const containerVariants = {
@@ -35,6 +37,9 @@ export default function SettingsPage() {
   const [saved, setSaved] = useState(false);
   const fileInputRef = useRef(null);
   
+  // Tab State
+  const [activeTab, setActiveTab] = useState('profile');
+
   const [profile, setProfile] = useState({
     full_name: '',
     email: '',
@@ -230,73 +235,123 @@ export default function SettingsPage() {
             <p className="text-[10px] font-bold text-fbOrange uppercase tracking-widest relative z-10">{profile.department || 'Faculty'}</p>
           </motion.div>
 
+          {/* UPDATED NAVIGATION */}
           <nav className="bg-white rounded-[40px] p-4 border border-gray-100 shadow-sm space-y-2">
-            <SettingsTab icon={<User size={18} />} label="Profile Info" active />
-            <SettingsTab icon={<Shield size={18} />} label="Security" />
-            <SettingsTab icon={<Bell size={18} />} label="Notifications" />
+            <SettingsTab 
+              icon={<User size={18} />} 
+              label="Profile Info" 
+              active={activeTab === 'profile'} 
+              onClick={() => setActiveTab('profile')} 
+            />
+            <SettingsTab 
+              icon={<Shield size={18} />} 
+              label="Security" 
+              active={activeTab === 'security'} 
+              onClick={() => setActiveTab('security')} 
+            />
+            <SettingsTab 
+              icon={<Bell size={18} />} 
+              label="Notifications" 
+              active={activeTab === 'notifications'} 
+              onClick={() => setActiveTab('notifications')} 
+            />
           </nav>
         </motion.div>
 
         {/* MAIN FORM AREA */}
-        <motion.div variants={itemVariants} className="lg:col-span-2 space-y-8">
-          <div className="bg-white rounded-[45px] p-10 border border-gray-100 shadow-sm relative overflow-hidden">
-            <h3 className="font-black text-fbNavy uppercase italic text-lg mb-8 flex items-center gap-3">
-              <User className="text-fbOrange" /> Personal Registry
-            </h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <InputGroup label="Full Name" value={profile.full_name} onChange={(v) => setProfile({...profile, full_name: v})} />
-              <InputGroup label="Employee ID" value={profile.employee_id} onChange={(v) => setProfile({...profile, employee_id: v})} />
-              <InputGroup label="Email Address" value={profile.email} disabled />
-              <InputGroup label="Department" value={profile.department} onChange={(v) => setProfile({...profile, department: v})} />
-            </div>
-
-            <div className="mt-10 pt-10 border-t border-gray-50 flex flex-col sm:flex-row justify-between items-center gap-6">
-              <p className="text-[10px] font-bold text-gray-400 uppercase max-w-xs leading-relaxed">
-                Ensure your Employee ID matches your official faculty record.
-              </p>
-              <motion.button 
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={handleUpdate}
-                disabled={loading}
-                className="w-full sm:w-auto flex items-center justify-center gap-3 bg-fbNavy text-white px-10 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-fbOrange transition-all shadow-xl shadow-fbNavy/10 disabled:opacity-50"
+        <motion.div variants={itemVariants} className="lg:col-span-2">
+          <AnimatePresence mode="wait">
+            {activeTab === 'profile' && (
+              <motion.div
+                key="profile-tab"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="space-y-8"
               >
-                {loading ? <Loader2 className="animate-spin" size={18} /> : saved ? <><Check size={18}/> Updated</> : <><Save size={18}/> Commit Changes</>}
-              </motion.button>
-            </div>
-          </div>
+                <div className="bg-white rounded-[45px] p-10 border border-gray-100 shadow-sm relative overflow-hidden">
+                  <h3 className="font-black text-fbNavy uppercase italic text-lg mb-8 flex items-center gap-3">
+                    <User className="text-fbOrange" /> Personal Registry
+                  </h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <InputGroup label="Full Name" value={profile.full_name} onChange={(v) => setProfile({...profile, full_name: v})} />
+                    <InputGroup label="Employee ID" value={profile.employee_id} onChange={(v) => setProfile({...profile, employee_id: v})} />
+                    <InputGroup label="Email Address" value={profile.email} disabled />
+                    <InputGroup label="Department" value={profile.department} onChange={(v) => setProfile({...profile, department: v})} />
+                  </div>
 
-          {/* SECURITY SECTION */}
-          <motion.div 
-            variants={itemVariants}
-            className="bg-fbNavy rounded-[45px] p-10 text-white relative overflow-hidden group"
-          >
-            <div className="relative z-10">
-              <h3 className="font-black uppercase italic text-lg mb-6 flex items-center gap-3 text-fbOrange">
-                <Lock size={20} /> Security Gateway
-              </h3>
-              <div className="flex flex-col md:flex-row gap-6">
-                <motion.button whileHover={{ x: 5 }} className="bg-white/5 hover:bg-white/10 px-6 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all">
-                  Reset Password
-                </motion.button>
-                <motion.button whileHover={{ x: 5 }} className="bg-white/5 hover:bg-white/10 px-6 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all">
-                  Enable 2FA
-                </motion.button>
-              </div>
-            </div>
-            <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl group-hover:bg-fbOrange/20 transition-colors duration-700" />
-          </motion.div>
+                  <div className="mt-10 pt-10 border-t border-gray-50 flex flex-col sm:flex-row justify-between items-center gap-6">
+                    <p className="text-[10px] font-bold text-gray-400 uppercase max-w-xs leading-relaxed">
+                      Ensure your Employee ID matches your official faculty record.
+                    </p>
+                    <motion.button 
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={handleUpdate}
+                      disabled={loading}
+                      className="w-full sm:w-auto flex items-center justify-center gap-3 bg-fbNavy text-white px-10 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-fbOrange transition-all shadow-xl shadow-fbNavy/10 disabled:opacity-50"
+                    >
+                      {loading ? <Loader2 className="animate-spin" size={18} /> : saved ? <><Check size={18}/> Updated</> : <><Save size={18}/> Commit Changes</>}
+                    </motion.button>
+                  </div>
+                </div>
+
+                {/* QUICK SECURITY ACCESS */}
+                <motion.div 
+                  variants={itemVariants}
+                  className="bg-fbNavy rounded-[45px] p-10 text-white relative overflow-hidden group cursor-pointer"
+                  onClick={() => setActiveTab('security')}
+                >
+                  <div className="relative z-10">
+                    <h3 className="font-black uppercase italic text-lg mb-6 flex items-center gap-3 text-fbOrange">
+                      <Lock size={20} /> Security Gateway
+                    </h3>
+                    <div className="flex flex-col md:flex-row gap-6">
+                      <p className="text-xs text-white/60 font-medium max-w-sm">Quickly manage your authentication settings and session history.</p>
+                      <span className="ml-auto flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-fbOrange underline">Manage Security</span>
+                    </div>
+                  </div>
+                  <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl group-hover:bg-fbOrange/20 transition-colors duration-700" />
+                </motion.div>
+              </motion.div>
+            )}
+
+            {activeTab === 'security' && (
+              <motion.div
+                key="security-tab"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+              >
+                <SecuritySettings user={profile} />
+              </motion.div>
+            )}
+
+            {activeTab === 'notifications' && (
+              <motion.div
+                key="notif-tab"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="bg-white rounded-[45px] p-10 border border-gray-100 shadow-sm"
+              >
+                <h3 className="font-black text-fbNavy uppercase italic text-lg mb-8">Notification Settings</h3>
+                <p className="text-xs text-slate-400">Notification management feature coming soon to the Matrix.</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.div>
       </div>
     </motion.div>
   );
 }
 
-function SettingsTab({ icon, label, active }) {
+function SettingsTab({ icon, label, active, onClick }) {
   return (
     <motion.button 
       whileHover={{ x: 5 }}
+      onClick={onClick}
       className={`w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-bold text-xs transition-all ${active ? 'bg-fbGray text-fbNavy shadow-inner' : 'text-gray-400 hover:text-fbNavy'}`}
     >
       <span className={active ? 'text-fbOrange' : ''}>{icon}</span>
