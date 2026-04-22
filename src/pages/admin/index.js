@@ -99,15 +99,15 @@ export default function AdminDashboard() {
       {/* Container changed to w-full and px-0 to maximize edges */}
       <div className="flex flex-col min-h-screen bg-[#F8FAFC] text-slate-900 font-sans selection:bg-fbNavy/10 w-full overflow-x-hidden">
         
-        {/* REFINED STICKY HEADER - max-w-full */}
-        <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-xl border-b border-slate-200/60 px-4 sm:px-8 py-4">
-          <div className="max-w-full mx-auto flex justify-between items-center">
+        {/* REFINED STICKY HEADER - Fix alignment overlap */}
+        <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-xl border-b border-slate-200/60">
+          <div className="w-full px-4 sm:px-8 py-4 flex justify-between items-center">
             <div className="flex items-center gap-10">
-              <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-2.5 shrink-0">
                 <div className="bg-fbNavy p-2 rounded-xl shadow-sm">
                   <Terminal size={18} className="text-white" />
                 </div>
-                <h1 className="text-xl font-bold tracking-tight text-fbNavy">
+                <h1 className="text-xl font-bold tracking-tight text-fbNavy whitespace-nowrap">
                   PATHFiT<span className="text-fbOrange">LMS</span>
                 </h1>
               </div>
