@@ -98,8 +98,8 @@ export default function AdminDashboard() {
     <RoleGuard allowedRole="instructor">
       <div className="flex flex-col min-h-screen bg-[#F8FAFC] text-slate-900 font-sans selection:bg-fbNavy/10 w-full overflow-x-hidden">
         
-        {/* CORRECTED HEADER: Spans full width, ignoring side grid constraints */}
-        <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-xl border-b border-slate-200/60 shadow-sm">
+        {/* CORRECTED HEADER: removed sticky/top-0/z-50 so it no longer overlaps the sidebar layout */}
+        <header className="w-full bg-white/80 backdrop-blur-xl border-b border-slate-200/60 shadow-sm">
           <div className="w-full px-6 sm:px-10 py-4 flex justify-between items-center">
             <div className="flex items-center gap-10">
               {/* This branding block now aligns better with the left sidebar start */}
