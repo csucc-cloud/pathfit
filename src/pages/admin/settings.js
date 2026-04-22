@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 // IMPORT THE NEW COMPONENT
-import SecuritySettings from 'src/components/settings/SecuritySettings.jsx'; 
+import SecuritySettings from '../../components/settings/SecuritySettings';
 
 // Animation Variants for the whole page
 const containerVariants = {
