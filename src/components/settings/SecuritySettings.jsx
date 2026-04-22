@@ -26,16 +26,60 @@ export default function SecuritySettings({ user }) {
   ]);
 
   // Contextualized Academic Features States
-  const [gradePrivacy, setGradePrivacy] = useState(true); // Feature 1: Grade Privacy
-  const [sessionTimeout, setSessionTimeout] = useState('30'); // Feature 2: Academic Session Timeout
-  const [loginAlerts, setLoginAlerts] = useState(true); // Feature 3: Security Notifications
-  const [ferpaMode, setFerpaMode] = useState(false); // Feature 4: Student Data Privacy Mode
-  const [restrictIP, setRestrictIP] = useState(false); // Feature 5: IP Restriction (Campus Only)
-  const [examMode, setExamMode] = useState(false); // Feature 6: Proctoring/Exam Security
-  const [autoLock, setAutoLock] = useState(true); // Feature 7: Auto-lock on Inactivity
+  const [gradePrivacy, setGradePrivacy] = useState(true); 
+  const [sessionTimeout, setSessionTimeout] = useState('30'); 
+  const [loginAlerts, setLoginAlerts] = useState(true); 
+  const [ferpaMode, setFerpaMode] = useState(false); 
+  const [restrictIP, setRestrictIP] = useState(false); 
+  const [examMode, setExamMode] = useState(false); 
+  const [autoLock, setAutoLock] = useState(true); 
   const [recoveryCodes] = useState(['PATH-FIT-2026-X99', 'LMS-SEC-8821-Q12', 'ACAD-SAFE-4421-P01', 'PROF-LOG-9920-Z55']);
 
   const [passwords, setPasswords] = useState({ new: '', confirm: '' });
+
+  // --- NEW BACKEND LOGIC START ---
+  
+  // Fetch settings when the component mounts
+  useEffect(() => {
+    if (user?.id) {
+      fetchSecuritySettings();
+    }
+  }, [user?.id]);
+
+  const fetchSecuritySettings = async () => {
+    const { data, error } = await supabase
+      .from('instructors')
+      .select('grade_privacy, session_timeout, ferpa_mode, restrict_ip, exam_mode')
+      .eq('id', user.id)
+      .single();
+
+    if (data && !error) {
+      setGradePrivacy(data.grade_privacy);
+      setSessionTimeout(data.session_timeout);
+      setFerpaMode(data.ferpa_mode);
+      setRestrictIP(data.restrict_ip);
+      setExamMode(data.exam_mode);
+    }
+  };
+
+  // Generic function to update any toggle/setting in Supabase
+  const updateSetting = async (columnName, newValue, setterFunction) => {
+    setterFunction(newValue); // Optimistic UI update
+    try {
+      const { error } = await supabase
+        .from('instructors')
+        .update({ [columnName]: newValue })
+        .eq('id', user.id);
+
+      if (error) throw error;
+    } catch (err) {
+      console.error(err.message);
+      setterFunction(!newValue); // Revert UI if DB fails
+      setMessage({ type: 'error', text: 'Failed to sync with server.' });
+    }
+  };
+
+  // --- NEW BACKEND LOGIC END ---
 
   const handlePasswordUpdate = async (e) => {
     e.preventDefault();
@@ -128,7 +172,7 @@ export default function SecuritySettings({ user }) {
         </form>
       </section>
 
-      {/* 2. ACADEMIC PRIVACY & DATA (Contextualized Features) */}
+      {/* 2. ACADEMIC PRIVACY & DATA */}
       <section className="bg-white rounded-[2.5rem] p-8 border border-slate-200/60 shadow-sm">
         <div className="flex items-center gap-4 mb-8">
           <div className="p-3 bg-fbOrange/5 rounded-2xl text-fbOrange">
@@ -150,7 +194,7 @@ export default function SecuritySettings({ user }) {
                 <p className="text-xs text-slate-500">Prevent students from seeing class averages or peer rankings.</p>
               </div>
             </div>
-            <button onClick={() => setGradePrivacy(!gradePrivacy)} className={`w-12 h-6 rounded-full transition-colors relative ${gradePrivacy ? 'bg-fbNavy' : 'bg-slate-200'}`}>
+            <button onClick={() => updateSetting('grade_privacy', !gradePrivacy, setGradePrivacy)} className={`w-12 h-6 rounded-full transition-colors relative ${gradePrivacy ? 'bg-fbNavy' : 'bg-slate-200'}`}>
               <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${gradePrivacy ? 'left-7' : 'left-1'}`} />
             </button>
           </div>
@@ -164,7 +208,7 @@ export default function SecuritySettings({ user }) {
                 <p className="text-xs text-slate-500">Mask student PII (Personally Identifiable Information) in exports.</p>
               </div>
             </div>
-            <button onClick={() => setFerpaMode(!ferpaMode)} className={`w-12 h-6 rounded-full transition-colors relative ${ferpaMode ? 'bg-fbNavy' : 'bg-slate-200'}`}>
+            <button onClick={() => updateSetting('ferpa_mode', !ferpaMode, setFerpaMode)} className={`w-12 h-6 rounded-full transition-colors relative ${ferpaMode ? 'bg-fbNavy' : 'bg-slate-200'}`}>
               <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${ferpaMode ? 'left-7' : 'left-1'}`} />
             </button>
           </div>
@@ -180,7 +224,7 @@ export default function SecuritySettings({ user }) {
             </div>
             <select 
               value={sessionTimeout} 
-              onChange={(e) => setSessionTimeout(e.target.value)}
+              onChange={(e) => updateSetting('session_timeout', e.target.value, setSessionTimeout)}
               className="bg-white border border-slate-200 text-xs font-bold rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-fbNavy/10"
             >
               <option value="15">15 Minutes</option>
@@ -229,7 +273,7 @@ export default function SecuritySettings({ user }) {
         )}
       </section>
 
-      {/* 4. ADVANCED SYSTEM SECURITY (Additional Academic Features) */}
+      {/* 4. ADVANCED SYSTEM SECURITY */}
       <section className="bg-white rounded-[2.5rem] p-8 border border-slate-200/60 shadow-sm">
         <div className="flex items-center gap-4 mb-8">
           <div className="p-3 bg-fbNavy/5 rounded-2xl text-fbNavy">
@@ -242,15 +286,13 @@ export default function SecuritySettings({ user }) {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Feature 5: IP Restriction */}
-          <button onClick={() => setRestrictIP(!restrictIP)} className={`p-5 rounded-3xl border text-left transition-all ${restrictIP ? 'bg-fbNavy border-fbNavy text-white' : 'bg-white border-slate-100 text-slate-600 hover:border-slate-200'}`}>
+          <button onClick={() => updateSetting('restrict_ip', !restrictIP, setRestrictIP)} className={`p-5 rounded-3xl border text-left transition-all ${restrictIP ? 'bg-fbNavy border-fbNavy text-white' : 'bg-white border-slate-100 text-slate-600 hover:border-slate-200'}`}>
             <Network size={20} className={restrictIP ? 'text-fbOrange' : 'text-slate-400'}/>
             <p className="mt-3 text-sm font-bold">Campus IP Restriction</p>
             <p className={`text-[10px] mt-1 ${restrictIP ? 'text-white/70' : 'text-slate-400'}`}>Only allow logins from recognized Campus WiFi/Networks.</p>
           </button>
 
-          {/* Feature 6: Exam Mode Security */}
-          <button onClick={() => setExamMode(!examMode)} className={`p-5 rounded-3xl border text-left transition-all ${examMode ? 'bg-fbOrange border-fbOrange text-white' : 'bg-white border-slate-100 text-slate-600 hover:border-slate-200'}`}>
+          <button onClick={() => updateSetting('exam_mode', !examMode, setExamMode)} className={`p-5 rounded-3xl border text-left transition-all ${examMode ? 'bg-fbOrange border-fbOrange text-white' : 'bg-white border-slate-100 text-slate-600 hover:border-slate-200'}`}>
             <UserCheck size={20} className={examMode ? 'text-fbNavy' : 'text-slate-400'}/>
             <p className="mt-3 text-sm font-bold">Proctoring Enforcement</p>
             <p className={`text-[10px] mt-1 ${examMode ? 'text-white/70' : 'text-slate-400'}`}>Require students to enable 2FA before accessing Final Exams.</p>
